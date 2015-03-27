@@ -1,0 +1,13 @@
+
+Changes with auth request module 0.2 (2010-03-24):
+
+    *) Feature: auth_request_set directive.
+
+    *) Bugfix: segmentation fault happened on auth request handled by
+       proxy_pass or fastcgi_pass if initial request has non-empty body.
+
+
+Changes with auth request module 0.1 (2010-02-27):
+
+    *) The first public version.
+

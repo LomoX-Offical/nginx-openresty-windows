@@ -1,0 +1,10 @@
+# (C) Maxim Dounin
+# Configuration for ngx_http_auth_request_module.
+
+ngx_addon_name="ngx_http_auth_request_module"
+
+HTTP_MODULES="$HTTP_MODULES \
+		ngx_http_auth_request_module"
+
+NGX_ADDON_SRCS="$NGX_ADDON_SRCS \
+		$ngx_addon_dir/ngx_http_auth_request_module.c"
