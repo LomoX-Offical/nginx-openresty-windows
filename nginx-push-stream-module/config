@@ -1,0 +1,22 @@
+ngx_feature="http_push_stream_module"
+ngx_feature_name=
+ngx_feature_run=no
+ngx_feature_incs=
+ngx_feature_path=
+ngx_feature_libs=
+ngx_feature_test=
+
+ngx_addon_name=ngx_http_push_stream_module
+HTTP_MODULES="$HTTP_MODULES ngx_http_push_stream_module"
+CORE_INCS="$CORE_INCS \
+    $ngx_addon_dir/src \
+    $ngx_addon_dir/include"
+NGX_ADDON_SRCS="$NGX_ADDON_SRCS \
+    ${ngx_addon_dir}/src/ngx_http_push_stream_module.c"
+
+have=NGX_HTTP_HEADERS . auto/have
+. auto/feature
+
+#if not have sha1 or do not want to use WebSocket comment the lines bellow
+USE_SHA1=YES
+have=NGX_HAVE_SHA1 . auto/have

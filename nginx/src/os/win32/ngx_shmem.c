@@ -18,7 +18,12 @@ u_char* _get_address(uint64_t size) {
     u_char* retval = NULL;
 
 	if (nginx_hmodule == NULL) {
-		nginx_hmodule = (u_char*)0x20000000; //GetModuleHandle(NULL);
+
+#ifdef _WIN64
+    nginx_hmodule = (u_char*)0x200000000; //GetModuleHandle(NULL);
+#else
+    nginx_hmodule = (u_char*)0x20000000; //GetModuleHandle(NULL);
+#endif
 	}
     
     retval = nginx_hmodule;
@@ -46,13 +51,14 @@ ngx_shm_alloc(ngx_shm_t *shm)
 
     size = shm->size;
 
+    ngx_log_error(NGX_LOG_NOTICE, shm->log, ngx_errno, "Shared memory name is [%s]", name);
     shm->handle = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE,
                                     (u_long) (size >> 32),
                                     (u_long) (size & 0xffffffff),
                                     (char *) name);
 
     if (shm->handle == NULL) {
-        ngx_log_error(NGX_LOG_ALERT, shm->log, ngx_errno,
+        ngx_log_error(NGX_LOG_EMERG, shm->log, ngx_errno,
                       "CreateFileMapping(%uz, %s) failed",
                       shm->size, name);
         ngx_free(name);
@@ -73,23 +79,23 @@ ngx_shm_alloc(ngx_shm_t *shm)
 		MEM_RESERVE,
 		PAGE_NOACCESS);
 	VirtualFree(reserved_mem, 0, MEM_RELEASE);
-	ngx_log_error(NGX_LOG_ALERT, shm->log, ngx_errno, "VirtualAlloc MEM_RELEASE: %p, base_address: %p", reserved_mem, base_address);
+	ngx_log_error(NGX_LOG_NOTICE, shm->log, ngx_errno, "VirtualAlloc MEM_RELEASE: %p, base_address: %p", reserved_mem, base_address);
 
 	shm->addr = MapViewOfFileEx(shm->handle, FILE_MAP_WRITE, 0, 0, 0, reserved_mem);
 
     if (shm->addr != NULL) {
-		ngx_log_error(NGX_LOG_ALERT, shm->log, ngx_errno,
+		ngx_log_error(NGX_LOG_NOTICE, shm->log, ngx_errno,
 			"MapViewOfFile(%uz) of file mapping \"%V\" success: %p",
 			shm->size, &shm->name, shm->addr);
 		return NGX_OK;
     }
 
-    ngx_log_error(NGX_LOG_ALERT, shm->log, ngx_errno,
+    ngx_log_error(NGX_LOG_EMERG, shm->log, ngx_errno,
                   "MapViewOfFile(%uz) of file mapping \"%V\" failed",
                   shm->size, &shm->name);
 
     if (CloseHandle(shm->handle) == 0) {
-        ngx_log_error(NGX_LOG_ALERT, shm->log, ngx_errno,
+        ngx_log_error(NGX_LOG_EMERG, shm->log, ngx_errno,
                       "CloseHandle() of file mapping \"%V\" failed",
                       &shm->name);
     }

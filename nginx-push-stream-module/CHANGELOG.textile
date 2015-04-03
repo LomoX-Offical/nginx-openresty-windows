@@ -1,0 +1,156 @@
+h1(#changelog). Changelog
+
+* Fix memory leak which happens after a worker dies or the server receive the SIGHUP (reload) signal (Thanks _Rob Mueller_ , _Bron Gondwana_ , _Andrew Wansink_ and their team)
+* Fix status change notification when the server is stopped on long polling and jsonp modes (Thanks _nickiv_ for bug report on IE)
+* Fix domain set for xss on pushstream.js when domain has more than three parts (Thanks _Sebastien_)
+* Adding function to ensure dates with two digits days on long polling requests (Thanks _Dunaeth_ for bug report on IE)
+* Avoiding unescape of not string messages on pushstream.js (Thanks _karolciba_)
+
+h2. Version 0.3.4
+
+* Improvement on javascript cleanup objects
+* Fixing initial temp pool size
+* Fixing memory leak when recovering channel from trash, the workers_with_subscribers queue was wrongly reinitialized without free the memory on it
+* Changed default value of push_stream_message_ttl to 30 minutes to avoid memory leak of a message which is never discarded
+* Changed javascript configurations to be more flexible
+* Changed JSONP to receive old messages as array
+* Changed channels ids parser for a smarter version, using regular expression
+
+h2. Version 0.3.3
+
+* Adding JSONP support to pushstream.js and dynamically callback parameter
+* Adding event type feature to Event Source support
+* Adding tag and time available at message template, and make possible pass these values without set headers
+* Adding a reference count to the message to avoid discard it before be processed for all workers
+* Adding padding messages based on user agent to bypass some problems on android/safari browsers on long-polling
+* Improvement on memory usage to reuse chains and buffers
+* Improvement on javascript message parser regexp
+* Improvement on sending alert messages to workers only when necessary
+* Improvement on reset ping timer when a message is sent
+* Improvement on disconnect any subscriber which receives a non OK response when writing to its socket
+* Improvement on documentation organization
+* Improvement on preventing XSS when using pushstream.js
+* Fixing memory leak when saving channels on a rbtree with ids which collides, problem inherited from Nginx and reported by Lanshun Zhou
+* Fixing memory leak in javascript
+* Fixing read messages in high throughput using keepalive on
+* Fixing EventSourceWrapper class on pushstream.js to use native reconnection feature from EventSource
+
+h2. Version 0.3.2
+
+* Adding WebSocket support
+* Adding a default header template for EventSource to call _onopen_ callback quickly
+* Adding examples of use for PushStream javascript class
+* Refactor on PushStream javascript class adding support for new protocols
+* Changing etag for messages published in different channels to receive sequential values if they were published on same second
+* Improvement on delete channel removing unnecessary loop
+* Fixing bug on delete channel with long polling subscribers
+
+h2. Version 0.3.1
+
+* Adding _push_stream_longpolling_connection_ttl_ directive to be possible use different values for timeout of stream and long polling subscribers on the same location
+* Adding _push_stream_max_subscribers_per_channel_ directive to limit the number of subscribers per channel
+* Enabling some directives to be used on location context, now this works as expected
+** push_stream_ping_message_interval
+** push_stream_subscriber_connection_ttl
+* Replace ping and disconnect routines by individual timers in each request, it make disconnect timeout more accurate
+* Finalizing failed connections on sending messages or ping to subscribers, it prevent leak of writing connections using HTTPS
+* Fixing delivery message when etag from newer message is lower than an old message
+* Fixing cleanup messages when only use max_messages_stored_per_channel directive
+* Fixing bug on ping and disconnect timers behavior when working with long polling subscribers
+* Fixing bug on init and exit worker to execute module code only on SINGLE or WORKER process, to be possible use the module and proxy cache on the same nginx
+
+h2. Version 0.3.0
+
+* Adding Event Source support
+* Adding Polling support
+* Adding Long Polling support
+* Moving some directives to be used on http context instead of location
+** push_stream_min_message_buffer_timeout
+** push_stream_max_message_buffer_length
+** push_stream_max_channel_id_length
+** push_stream_ping_message_interval
+** push_stream_subscriber_connection_timeout
+** push_stream_broadcast_channel_prefix
+** push_stream_max_number_of_channels
+** push_stream_max_number_of_broadcast_channels
+* Renaming some directives
+** push_stream_max_reserved_memory -> push_stream_shared_memory_size
+** push_stream_memory_cleanup_timeout -> push_stream_shared_memory_cleanup_objects_ttl
+** push_stream_min_message_buffer_timeout -> push_stream_message_ttl
+** push_stream_max_message_buffer_length -> push_stream_max_messages_stored_per_channel
+** push_stream_subscriber_connection_timeout -> push_stream_subscriber_connection_ttl
+
+h2. Version 0.2.7
+
+* Adding uptime information for server and workers on statistics
+* Avoiding counters to overlap on decrement
+
+h2. Version 0.2.6
+
+* Adding directive push_stream_footer_template to send a text to subscriber before close connection (channel delete or subscriber timeout)
+* Adding support to retrieve old messages using If-Modified-Since header
+* Fixing bug on some points which does not check if alloc memory was done successful
+* Fixing bug on PushStream.js to work on Internet Explorer 9
+
+h2. Version 0.2.5
+
+* Adding directives to change text for channel deleted and ping messages
+* Adding feature to get channels statistics by prefix (Suggested by Alexey Vdovin)
+* Adding publisher administrator feature to delete channels (Suggested by Alexey Vdovin)
+* Fixing bug which removed default message template
+* Fixing messages sent to subscribers to be a truly transfer encoding chunked connection
+* Removing support for versions 0.7.x
+* Removing hack to keep connection open (Thanks _Maxim Dounin_)
+
+h2. Version 0.2.4
+
+* Adding keepalive support
+* Fixing bug when reloading nginx configuration file (Thanks _Rob Mueller_ for bug report)
+
+h2. Version 0.2.3
+
+* Fixing bug to accept different message templates on different subscriber locations (Now you CAN remove push_stream_message_template directive from publisher location, it will not be used there)
+* Fixing bug on publisher which let too many open connections with fast publishers on some nginx versions
+* Fixing bug of segfault when the module is part of nginx but not in use (Thanks _Rob Mueller_ for bug report)
+* Fixing bug when store message is off, memory of messages was not free after sent to subscribers
+
+h2. Version 0.2.2
+
+* Fixing bug when apply message and channel name to template with values containing the same template pattern, could result in 100% of memory and CPU consumption, by recursion
+* Fixing bug when manipulating a channel which was removed from tree for another worker (the 100% CPU bug)
+* Fixing memory allocation for channel id
+* Fixing response for detailed channels statistics when have a big number of channels
+* Creating different timers to clear the memory, one for expired messages and another for empty channels
+* Disable Nginx chuncked filter for module locations
+
+h2. Version 0.2.1
+
+* Fixing bug on return for publisher, was rejecting the message for some clients
+* Fixing bug on allocation memory of ngx_str_t variables to ensure that has a char \0 at the end of each of them
+* Adding instruction to discard body, to release the connection as soon as possible
+* Adding license information
+* Organizing test suite
+
+h2. Version 0.2.0
+
+* Fixing bugs on release shared memory
+* Fixing bug on receive POST with empty message
+* Adding a different location to get channels statistics *push_stream_channels_statistics*
+* Adding new directives push_stream_max_number_of_channels, push_stream_max_number_of_broadcast_channels and push_stream_memory_cleanup_timeout
+* Removed support to PUT and DELETE http methods on publisher location
+* Removed different types of return on publishing messages in case that was published on a empty channel or on one which has subscribers
+* Removed directive push_stream_subscriber_disconnect_interval, this interval is calculate based on push_stream_subscriber_connection_timeout
+* Removed directive push_stream_min_message_buffer_length
+* Change default values of some directives
+
+(head). | directive | old value | new value |
+|push_stream_min_message_buffer_timeout|7200 seconds|_unset_|
+|push_stream_max_message_buffer_length|10|_unset_|
+|push_stream_authorized_channels_only|on|off|
+|push_stream_store_messages|on|off|
+|push_stream_max_channel_id_length|1024 bytes|_unset_|
+|push_stream_broadcast_channel_max_qtd|1|_unset_|
+
+h2. Version 0.1.0
+
+Initial version of this module was based on "pushmodule":http://pushmodule.slact.net

@@ -1,0 +1,13 @@
+build/
+.cproject
+.project
+.settings/
+test/.bundle/
+test/tmp/
+misc/*.textile*
+misc/CHANGELOG.html
+misc/README.html
+misc/docs
+*.o
+misc/tools/publisher
+misc/tools/subscriber
