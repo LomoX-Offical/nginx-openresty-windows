@@ -8,9 +8,7 @@
 #include <ngx_config.h>
 #include <ngx_core.h>
 #include <nginx.h>
-#include <ngx_md5.h>
 
-static char *ngx_pid_file = NULL;
 
 static ngx_int_t ngx_add_inherited_sockets(ngx_cycle_t *cycle);
 static ngx_int_t ngx_get_options(int argc, char *const *argv);
@@ -980,8 +978,6 @@ static char *
 ngx_core_module_init_conf(ngx_cycle_t *cycle, void *conf)
 {
     ngx_core_conf_t  *ccf = conf;
-	ngx_md5_t         md5 = {0};
-	u_char            hash[16] = {0};
 
     ngx_conf_init_value(ccf->daemon, 1);
     ngx_conf_init_value(ccf->master, 1);
@@ -1014,27 +1010,9 @@ ngx_core_module_init_conf(ngx_cycle_t *cycle, void *conf)
 
 
     if (ccf->pid.len == 0) {
-		u_char* conf_file_lower = ngx_alloc(cycle->conf_file.len, cycle->log);
-		ngx_strlow(conf_file_lower, cycle->conf_file.data, cycle->conf_file.len);
+        ngx_str_set(&ccf->pid, NGX_PID_PATH);
+    }
 
-		ngx_md5_init(&md5);
-		ngx_md5_update(&md5, conf_file_lower, cycle->conf_file.len);
-		ngx_md5_final(hash, &md5);
-		ngx_free(conf_file_lower);
-		conf_file_lower = NULL;
-
-		if (ngx_pid_file != NULL) {
-			ngx_free(ngx_pid_file);
-			ngx_pid_file = NULL;
-		}
-
-		ngx_pid_file = ngx_alloc(strlen("logs/nginx..pid") + 33, cycle->log); // 32 md5 text + 1 '\0'
-		sprintf(ngx_pid_file, "logs/nginx.%08x%08x%08x%08x.pid", 
-			*(size_t*)&(hash[0]), *(size_t*)&(hash[4]), *(size_t*)&(hash[8]),*(size_t*)&(hash[12]));
-		ccf->pid.data = ngx_pid_file;
-		ccf->pid.len = strlen(ngx_pid_file);
-		//ngx_str_set(&ccf->pid, ngx_pid_file); // this macro does not work
-	}
     if (ngx_conf_full_name(cycle, &ccf->pid, 0) != NGX_OK) {
         return NGX_CONF_ERROR;
     }
@@ -1048,7 +1026,6 @@ ngx_core_module_init_conf(ngx_cycle_t *cycle, void *conf)
 
     ngx_memcpy(ngx_cpymem(ccf->oldpid.data, ccf->pid.data, ccf->pid.len),
                NGX_OLDPID_EXT, sizeof(NGX_OLDPID_EXT));
-
 
 
 #if !(NGX_WIN32)
