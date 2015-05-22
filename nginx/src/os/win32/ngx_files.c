@@ -753,12 +753,9 @@ ngx_win32_check_filename(u_char *name, u_short *u, size_t len)
         goto invalid;
     }
 
-	if (lu) {
-		ngx_free(lu);
-		lu = NULL;
-	}
+    ngx_free(lu);
 
-	return NGX_OK;
+    return NGX_OK;
 
 invalid:
 

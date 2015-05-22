@@ -110,8 +110,6 @@ static u_char *ngx_http_log_time(ngx_http_request_t *r, u_char *buf,
     ngx_http_log_op_t *op);
 static u_char *ngx_http_log_iso8601(ngx_http_request_t *r, u_char *buf,
     ngx_http_log_op_t *op);
-static u_char *ngx_http_log_num_time(ngx_http_request_t *r, u_char *buf,
-    ngx_http_log_op_t *op);
 static u_char *ngx_http_log_msec(ngx_http_request_t *r, u_char *buf,
     ngx_http_log_op_t *op);
 static u_char *ngx_http_log_request_time(ngx_http_request_t *r, u_char *buf,
@@ -223,8 +221,6 @@ static ngx_http_log_var_t  ngx_http_log_vars[] = {
                           ngx_http_log_time },
     { ngx_string("time_iso8601"), sizeof("1970-09-28T12:00:00+06:00") - 1,
                           ngx_http_log_iso8601 },
-    { ngx_string("time_num"), sizeof("28/12/1970:12:00:00 +0600") - 1,
-                          ngx_http_log_num_time },
     { ngx_string("msec"), NGX_TIME_T_LEN + 4, ngx_http_log_msec },
     { ngx_string("request_time"), NGX_TIME_T_LEN + 4,
                           ngx_http_log_request_time },
@@ -761,14 +757,6 @@ ngx_http_log_iso8601(ngx_http_request_t *r, u_char *buf, ngx_http_log_op_t *op)
 }
 
 static u_char *
-ngx_http_log_num_time(ngx_http_request_t *r, u_char *buf, ngx_http_log_op_t *op)
-{
-    return ngx_cpymem(buf, ngx_cached_http_log_num_time.data,
-        ngx_cached_http_log_num_time.len);
-}
-
-
-static u_char *
 ngx_http_log_msec(ngx_http_request_t *r, u_char *buf, ngx_http_log_op_t *op)
 {
     ngx_time_t  *tp;
@@ -785,18 +773,14 @@ ngx_http_log_request_time(ngx_http_request_t *r, u_char *buf,
 {
     ngx_time_t      *tp;
     ngx_msec_int_t   ms;
-    time_t           ms_sec;
-    ngx_msec_t       ms_msec;
 
     tp = ngx_timeofday();
 
     ms = (ngx_msec_int_t)
              ((tp->sec - r->start_sec) * 1000 + (tp->msec - r->start_msec));
     ms = ngx_max(ms, 0);
-    ms_sec = (ms / 1000);
-    ms_msec = (ms % 1000);
 
-    return ngx_sprintf(buf, "%T.%03M", ms_sec, ms_msec);
+    return ngx_sprintf(buf, "%T.%03M", (time_t) ms / 1000, ms % 1000);
 }
 
 
