@@ -37,14 +37,24 @@
 #include <shellapi.h>
 #include <stddef.h>    /* offsetof() */
 
-#ifdef __GNUC__
+#ifdef __MINGW64_VERSION_MAJOR
+
+/* GCC MinGW-w64 supports _FILE_OFFSET_BITS */
+#define _FILE_OFFSET_BITS 64
+
+#elif defined __GNUC__
+
 /* GCC MinGW's stdio.h includes sys/types.h */
 #define _OFF_T_
+
 #endif
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#ifdef __MINGW64_VERSION_MAJOR
+#include <stdint.h>
+#endif
 #include <ctype.h>
 #include <locale.h>
 
@@ -144,11 +154,16 @@ typedef u_int               uintptr_t;
 #endif
 
 #ifndef _OFF_T_DEFINED
+#ifndef __MINGW64_VERSION_MAJOR
+
 /* Windows defines off_t as long, which is 32-bit */
 typedef long             off_t;
 typedef long             _off_t;
 #define _OFF_T_DEFINED
 #endif
+
+#endif
+
 
 #ifdef __WATCOMC__
 
@@ -168,17 +183,37 @@ typedef unsigned int        ino_t;
 #endif
 
 
+#ifndef __MINGW64_VERSION_MAJOR
 typedef int                 ssize_t;
+#endif
+
+
 typedef uint32_t            in_addr_t;
 typedef u_short             in_port_t;
 typedef int                 sig_atomic_t;
 
+
+#ifdef _WIN64
+
+#define NGX_PTR_SIZE            8
+#define NGX_SIZE_T_LEN          (sizeof("-9223372036854775808") - 1)
+#define NGX_MAX_SIZE_T_VALUE    9223372036854775807
+#define NGX_TIME_T_LEN          (sizeof("-9223372036854775808") - 1)
+#define NGX_TIME_T_SIZE         8
+#define NGX_MAX_TIME_T_VALUE    9223372036854775807
+
+#else
 
 #define NGX_PTR_SIZE            4
 #define NGX_SIZE_T_LEN          (sizeof("-2147483648") - 1)
 #define NGX_MAX_SIZE_T_VALUE    2147483647
 #define NGX_TIME_T_LEN          (sizeof("-2147483648") - 1)
 #define NGX_TIME_T_SIZE         4
+#define NGX_MAX_TIME_T_VALUE    2147483647
+
+#endif
+
+
 #define NGX_OFF_T_LEN           (sizeof("-9223372036854775807") - 1)
 #define NGX_MAX_OFF_T_VALUE     9223372036854775807
 #define NGX_SIG_ATOMIC_T_SIZE   4
@@ -187,7 +222,7 @@ typedef int                 sig_atomic_t;
 #define NGX_HAVE_LITTLE_ENDIAN  1
 #define NGX_HAVE_NONALIGNED     1
 
-#define NGX_THREADS       1
+#define NGX_OLD_THREADS         1
 
 
 #define NGX_WIN_NT        200000

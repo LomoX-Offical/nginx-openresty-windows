@@ -899,6 +899,8 @@ ngx_worker_thread(void *data)
                 }
             }
 
+            ngx_event_cancel_timers();
+
             if (ngx_event_timer_rbtree.root
                 == ngx_event_timer_rbtree.sentinel)
             {

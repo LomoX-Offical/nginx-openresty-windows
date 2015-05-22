@@ -69,8 +69,9 @@ static ngx_int_t ngx_http_add_addrs6(ngx_conf_t *cf, ngx_http_port_t *hport,
 ngx_uint_t   ngx_http_max_module;
 
 
-ngx_int_t  (*ngx_http_top_header_filter) (ngx_http_request_t *r);
-ngx_int_t  (*ngx_http_top_body_filter) (ngx_http_request_t *r, ngx_chain_t *ch);
+ngx_http_output_header_filter_pt  ngx_http_top_header_filter;
+ngx_http_output_body_filter_pt    ngx_http_top_body_filter;
+ngx_http_request_body_filter_pt   ngx_http_top_request_body_filter;
 
 
 ngx_str_t  ngx_http_html_default_types[] = {
@@ -742,7 +743,7 @@ ngx_http_init_locations(ngx_conf_t *cf, ngx_http_core_srv_conf_t *cscf,
 
     if (named) {
         clcfp = ngx_palloc(cf->pool,
-                           (n + 1) * sizeof(ngx_http_core_loc_conf_t **));
+                           (n + 1) * sizeof(ngx_http_core_loc_conf_t *));
         if (clcfp == NULL) {
             return NGX_ERROR;
         }
@@ -768,7 +769,7 @@ ngx_http_init_locations(ngx_conf_t *cf, ngx_http_core_srv_conf_t *cscf,
     if (regex) {
 
         clcfp = ngx_palloc(cf->pool,
-                           (r + 1) * sizeof(ngx_http_core_loc_conf_t **));
+                           (r + 1) * sizeof(ngx_http_core_loc_conf_t *));
         if (clcfp == NULL) {
             return NGX_ERROR;
         }
@@ -2005,7 +2006,7 @@ ngx_http_types_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
             if (ngx_strcmp(value[i].data, type[n].key.data) == 0) {
                 ngx_conf_log_error(NGX_LOG_WARN, cf, 0,
                                    "duplicate MIME type \"%V\"", &value[i]);
-                continue;
+                goto next;
             }
         }
 
@@ -2017,6 +2018,10 @@ ngx_http_types_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         type->key = value[i];
         type->key_hash = hash;
         type->value = (void *) 4;
+
+    next:
+
+        continue;
     }
 
     return NGX_CONF_OK;
