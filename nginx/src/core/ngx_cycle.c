@@ -26,7 +26,7 @@ static ngx_event_t     ngx_cleaner_event;
 ngx_uint_t             ngx_test_config;
 ngx_uint_t             ngx_quiet_mode;
 
-#if (NGX_THREADS)
+#if (NGX_OLD_THREADS)
 ngx_tls_key_t          ngx_core_tls_key;
 #endif
 
@@ -1104,6 +1104,8 @@ ngx_reopen_files(ngx_cycle_t *cycle, ngx_uid_t user)
                                   ngx_close_file_n " \"%s\" failed",
                                   file[i].name.data);
                 }
+
+                continue;
             }
 
             if (fi.st_uid != user) {
@@ -1117,6 +1119,8 @@ ngx_reopen_files(ngx_cycle_t *cycle, ngx_uid_t user)
                                       ngx_close_file_n " \"%s\" failed",
                                       file[i].name.data);
                     }
+
+                    continue;
                 }
             }
 
@@ -1133,6 +1137,8 @@ ngx_reopen_files(ngx_cycle_t *cycle, ngx_uid_t user)
                                       ngx_close_file_n " \"%s\" failed",
                                       file[i].name.data);
                     }
+
+                    continue;
                 }
             }
         }

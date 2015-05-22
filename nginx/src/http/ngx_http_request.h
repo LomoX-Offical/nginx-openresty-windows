@@ -473,6 +473,7 @@ struct ngx_http_request_s {
     unsigned                          request_body_in_clean_file:1;
     unsigned                          request_body_file_group_access:1;
     unsigned                          request_body_file_log_level:3;
+    unsigned                          request_body_no_buffering:1;
 
     unsigned                          subrequest_in_memory:1;
     unsigned                          waited:1;
@@ -509,9 +510,9 @@ struct ngx_http_request_s {
     unsigned                          keepalive:1;
     unsigned                          lingering_close:1;
     unsigned                          discard_body:1;
+    unsigned                          reading_body:1;
     unsigned                          internal:1;
     unsigned                          error_page:1;
-    unsigned                          ignore_content_encoding:1;
     unsigned                          filter_finalize:1;
     unsigned                          post_action:1;
     unsigned                          request_complete:1;
@@ -529,6 +530,7 @@ struct ngx_http_request_s {
     unsigned                          filter_need_temporary:1;
     unsigned                          allow_ranges:1;
     unsigned                          single_range:1;
+    unsigned                          disable_not_modified:1;
 
 #if (NGX_STAT_STUB)
     unsigned                          stat_reading:1;
@@ -574,10 +576,10 @@ struct ngx_http_request_s {
 
 typedef struct {
     ngx_http_posted_request_t         terminal_posted_request;
-#if (NGX_HAVE_AIO_SENDFILE)
-    u_char                            aio_preload;
-#endif
 } ngx_http_ephemeral_t;
+
+
+#define ngx_http_ephemeral(r)  (void *) (&r->uri_start)
 
 
 extern ngx_http_header_t       ngx_http_headers_in[];
@@ -588,9 +590,15 @@ extern ngx_http_header_out_t   ngx_http_headers_out[];
                                                                               \
     c->log->file = l->file;                                                   \
     c->log->next = l->next;                                                   \
+    c->log->writer = l->writer;                                               \
+    c->log->wdata = l->wdata;                                                 \
     if (!(c->log->log_level & NGX_LOG_DEBUG_CONNECTION)) {                    \
         c->log->log_level = l->log_level;                                     \
     }
+
+
+#define ngx_http_set_log_request(log, r)                                      \
+    ((ngx_http_log_ctx_t *) log->data)->current_request = r
 
 
 #endif /* _NGX_HTTP_REQUEST_H_INCLUDED_ */

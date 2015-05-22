@@ -48,6 +48,11 @@ typedef struct {
 } ngx_resolver_an_t;
 
 
+#define ngx_resolver_node(n)                                                 \
+    (ngx_resolver_node_t *)                                                  \
+        ((u_char *) (n) - offsetof(ngx_resolver_node_t, node))
+
+
 ngx_int_t ngx_udp_connect(ngx_udp_connection_t *uc);
 
 
@@ -288,7 +293,7 @@ ngx_resolver_cleanup_tree(ngx_resolver_t *r, ngx_rbtree_t *tree)
 
     while (tree->root != tree->sentinel) {
 
-        rn = (ngx_resolver_node_t *) ngx_rbtree_min(tree->root, tree->sentinel);
+        rn = ngx_resolver_node(ngx_rbtree_min(tree->root, tree->sentinel));
 
         ngx_queue_remove(&rn->queue);
 
@@ -666,7 +671,7 @@ ngx_resolve_name_locked(ngx_resolver_t *r, ngx_resolver_ctx_t *ctx)
         ctx->event->handler = ngx_resolver_timeout_handler;
         ctx->event->data = rn;
         ctx->event->log = r->log;
-        ctx->ident = -1;
+        rn->ident = -1;
 
         ngx_add_timer(ctx->event, ctx->timeout);
     }
@@ -859,7 +864,7 @@ ngx_resolve_addr(ngx_resolver_ctx_t *ctx)
     ctx->event->handler = ngx_resolver_timeout_handler;
     ctx->event->data = rn;
     ctx->event->log = r->log;
-    ctx->ident = -1;
+    rn->ident = -1;
 
     ngx_add_timer(ctx->event, ctx->timeout);
 
@@ -1568,8 +1573,6 @@ ngx_resolver_process_a(ngx_resolver_t *r, u_char *buf, size_t last,
 
         ngx_rbtree_delete(&r->name_rbtree, &rn->node);
 
-        ngx_resolver_free_node(r, rn);
-
         /* unlock name mutex */
 
         while (next) {
@@ -1579,6 +1582,8 @@ ngx_resolver_process_a(ngx_resolver_t *r, u_char *buf, size_t last,
 
             ctx->handler(ctx);
         }
+
+        ngx_resolver_free_node(r, rn);
 
         return;
     }
@@ -2143,8 +2148,6 @@ valid:
 
         ngx_rbtree_delete(tree, &rn->node);
 
-        ngx_resolver_free_node(r, rn);
-
         /* unlock addr mutex */
 
         while (next) {
@@ -2154,6 +2157,8 @@ valid:
 
             ctx->handler(ctx);
         }
+
+        ngx_resolver_free_node(r, rn);
 
         return;
     }
@@ -2290,7 +2295,7 @@ ngx_resolver_lookup_name(ngx_resolver_t *r, ngx_str_t *name, uint32_t hash)
 
         /* hash == node->key */
 
-        rn = (ngx_resolver_node_t *) node;
+        rn = ngx_resolver_node(node);
 
         rc = ngx_memn2cmp(name->data, rn->name, name->len, rn->nlen);
 
@@ -2329,7 +2334,7 @@ ngx_resolver_lookup_addr(ngx_resolver_t *r, in_addr_t addr)
 
         /* addr == node->key */
 
-        return (ngx_resolver_node_t *) node;
+        return ngx_resolver_node(node);
     }
 
     /* not found */
@@ -2365,7 +2370,7 @@ ngx_resolver_lookup_addr6(ngx_resolver_t *r, struct in6_addr *addr,
 
         /* hash == node->key */
 
-        rn = (ngx_resolver_node_t *) node;
+        rn = ngx_resolver_node(node);
 
         rc = ngx_memcmp(addr, &rn->addr6, 16);
 
@@ -2403,8 +2408,8 @@ ngx_resolver_rbtree_insert_value(ngx_rbtree_node_t *temp,
 
         } else { /* node->key == temp->key */
 
-            rn = (ngx_resolver_node_t *) node;
-            rn_temp = (ngx_resolver_node_t *) temp;
+            rn = ngx_resolver_node(node);
+            rn_temp = ngx_resolver_node(temp);
 
             p = (ngx_memn2cmp(rn->name, rn_temp->name, rn->nlen, rn_temp->nlen)
                  < 0) ? &temp->left : &temp->right;
@@ -2446,8 +2451,8 @@ ngx_resolver_rbtree_insert_addr6_value(ngx_rbtree_node_t *temp,
 
         } else { /* node->key == temp->key */
 
-            rn = (ngx_resolver_node_t *) node;
-            rn_temp = (ngx_resolver_node_t *) temp;
+            rn = ngx_resolver_node(node);
+            rn_temp = ngx_resolver_node(temp);
 
             p = (ngx_memcmp(&rn->addr6, &rn_temp->addr6, 16)
                  < 0) ? &temp->left : &temp->right;
@@ -2747,8 +2752,7 @@ done:
     }
 
     if (len == -1) {
-        name->len = 0;
-        name->data = NULL;
+        ngx_str_null(name);
         return NGX_OK;
     }
 
@@ -3082,17 +3086,6 @@ ngx_udp_connect(ngx_udp_connection_t *uc)
     uc->connection = c;
 
     c->number = ngx_atomic_fetch_add(ngx_connection_counter, 1);
-
-#if (NGX_THREADS)
-
-    /* TODO: lock event when call completion handler */
-
-    rev->lock = &c->lock;
-    wev->lock = &c->lock;
-    rev->own_lock = &c->lock;
-    wev->own_lock = &c->lock;
-
-#endif
 
     ngx_log_debug3(NGX_LOG_DEBUG_EVENT, &uc->log, 0,
                    "connect to %V, fd:%d #%uA", &uc->server, s, c->number);

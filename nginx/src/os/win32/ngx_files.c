@@ -430,6 +430,8 @@ ngx_open_dir(ngx_str_t *name, ngx_dir_t *dir)
 
     dir->dir = FindFirstFile((const char *) name->data, &dir->finddata);
 
+    name->data[name->len] = '\0';
+
     if (dir->dir == INVALID_HANDLE_VALUE) {
         return NGX_ERROR;
     }
@@ -455,6 +457,17 @@ ngx_read_dir(ngx_dir_t *dir)
     }
 
     return NGX_ERROR;
+}
+
+
+ngx_int_t
+ngx_close_dir(ngx_dir_t *dir)
+{
+    if (FindClose(dir->dir) == 0) {
+        return NGX_ERROR;
+    }
+
+    return NGX_OK;
 }
 
 
@@ -851,7 +864,7 @@ ngx_utf8_to_utf16(u_short *utf16, u_char *utf8, size_t *len)
         n = ngx_utf8_decode(&p, 4);
 
         if (n > 0x10ffff) {
-            free(utf16);
+            ngx_free(utf16);
             ngx_set_errno(NGX_EILSEQ);
             return NULL;
         }

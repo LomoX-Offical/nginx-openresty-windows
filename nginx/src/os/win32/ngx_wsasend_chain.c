@@ -19,7 +19,6 @@ ngx_wsasend_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
     int           rc;
     u_char       *prev;
     u_long        size, sent, send, prev_send;
-    ngx_uint_t    complete;
     ngx_err_t     err;
     ngx_event_t  *wev;
     ngx_array_t   vec;
@@ -35,12 +34,11 @@ ngx_wsasend_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
 
     /* the maximum limit size is the maximum u_long value - the page size */
 
-    if (limit == 0 || limit > NGX_MAX_UINT32_VALUE - ngx_pagesize) {
+    if (limit == 0 || limit > (off_t) (NGX_MAX_UINT32_VALUE - ngx_pagesize)) {
         limit = NGX_MAX_UINT32_VALUE - ngx_pagesize;
     }
 
     send = 0;
-    complete = 0;
 
     /*
      * WSABUFs must be 4-byte aligned otherwise
@@ -113,46 +111,18 @@ ngx_wsasend_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
         ngx_log_debug2(NGX_LOG_DEBUG_EVENT, c->log, 0,
                        "WSASend: fd:%d, s:%ul", c->fd, sent);
 
-        if (send - prev_send == sent) {
-            complete = 1;
-        }
-
         c->sent += sent;
 
-        for (cl = in; cl; cl = cl->next) {
+        in = ngx_chain_update_sent(in, sent);
 
-            if (ngx_buf_special(cl->buf)) {
-                continue;
-            }
-
-            if (sent == 0) {
-                break;
-            }
-
-            size = cl->buf->last - cl->buf->pos;
-
-            if (sent >= size) {
-                sent -= size;
-                cl->buf->pos = cl->buf->last;
-
-                continue;
-            }
-
-            cl->buf->pos += sent;
-
-            break;
-        }
-
-        if (!complete) {
+        if (send - prev_send != sent) {
             wev->ready = 0;
-            return cl;
+            return in;
         }
 
-        if (send >= limit || cl == NULL) {
-            return cl;
+        if (send >= limit || in == NULL) {
+            return in;
         }
-
-        in = cl;
     }
 }
 
@@ -186,7 +156,8 @@ ngx_overlapped_wsasend_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
 
         /* the maximum limit size is the maximum u_long value - the page size */
 
-        if (limit == 0 || limit > NGX_MAX_UINT32_VALUE - ngx_pagesize) {
+        if (limit == 0 || limit > (off_t) (NGX_MAX_UINT32_VALUE - ngx_pagesize))
+        {
             limit = NGX_MAX_UINT32_VALUE - ngx_pagesize;
         }
 
@@ -308,35 +279,14 @@ ngx_overlapped_wsasend_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
 
     c->sent += sent;
 
-    for (cl = in; cl && sent > 0; cl = cl->next) {
-        if (ngx_buf_special(cl->buf)) {
-            continue;
-        }
+    in = ngx_chain_update_sent(in, sent);
 
-        if (sent == 0) {
-            break;
-        }
-
-        size = cl->buf->last - cl->buf->pos;
-
-        if (sent >= size) {
-            sent -= size;
-            cl->buf->pos = cl->buf->last;
-
-            continue;
-        }
-
-        cl->buf->pos += sent;
-
-        break;
-    }
-
-    if (cl) {
+    if (in) {
         wev->ready = 0;
 
     } else {
         wev->ready = 1;
     }
 
-    return cl;
+    return in;
 }

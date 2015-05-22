@@ -64,7 +64,7 @@ ngx_event_module_t  ngx_iocp_module_ctx = {
         NULL,                              /* disable an event */
         NULL,                              /* add an connection */
         ngx_iocp_del_connection,           /* delete an connection */
-        NULL,                              /* process the changes */
+        NULL,                              /* trigger a notify */
         ngx_iocp_process_events,           /* process the events */
         ngx_iocp_init,                     /* init the events */
         ngx_iocp_done                      /* done the events */
@@ -247,7 +247,7 @@ ngx_int_t ngx_iocp_process_events(ngx_cycle_t *cycle, ngx_msec_t timer,
 
     ngx_log_debug1(NGX_LOG_DEBUG_EVENT, cycle->log, 0, "iocp timer: %M", timer);
 
-    rc = GetQueuedCompletionStatus(iocp, &bytes, (LPDWORD) &key,
+    rc = GetQueuedCompletionStatus(iocp, &bytes, (PULONG_PTR) &key,
                                    (LPOVERLAPPED *) &ovlp, (u_long) timer);
 
     if (rc == 0) {
