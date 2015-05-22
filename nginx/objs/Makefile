@@ -28,6 +28,7 @@ CORE_DEPS = src/core/nginx.h \
 	src/core/ngx_config.h \
 	src/core/ngx_core.h \
 	src/core/ngx_log.h \
+	src/core/ngx_syslog.h \
 	src/core/ngx_palloc.h \
 	src/core/ngx_array.h \
 	src/core/ngx_list.h \
@@ -58,7 +59,6 @@ CORE_DEPS = src/core/nginx.h \
 	src/event/ngx_event.h \
 	src/event/ngx_event_timer.h \
 	src/event/ngx_event_posted.h \
-	src/event/ngx_event_busy_lock.h \
 	src/event/ngx_event_connect.h \
 	src/event/ngx_event_pipe.h \
 	src/os/win32/ngx_win32_config.h \
@@ -105,7 +105,6 @@ HTTP_DEPS = src/http/ngx_http.h \
 	src/http/ngx_http_script.h \
 	src/http/ngx_http_upstream.h \
 	src/http/ngx_http_upstream_round_robin.h \
-	src/http/ngx_http_busy_lock.h \
 	src/http/modules/ngx_http_ssi_filter_module.h \
 	src/http/modules/ngx_http_ssl_module.h
 
@@ -120,6 +119,7 @@ ADDON_DEPS = $(CORE_DEPS)  ../echo-nginx-module-0.57/src/ngx_http_echo_module.h 
 
 objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/core/ngx_log.obj \
+	objs/src/core/ngx_syslog.obj \
 	objs/src/core/ngx_palloc.obj \
 	objs/src/core/ngx_array.obj \
 	objs/src/core/ngx_list.obj \
@@ -151,7 +151,6 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/event/ngx_event.obj \
 	objs/src/event/ngx_event_timer.obj \
 	objs/src/event/ngx_event_posted.obj \
-	objs/src/event/ngx_event_busy_lock.obj \
 	objs/src/event/ngx_event_accept.obj \
 	objs/src/event/ngx_event_connect.obj \
 	objs/src/event/ngx_event_pipe.obj \
@@ -199,7 +198,6 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/http/modules/ngx_http_range_filter_module.obj \
 	objs/src/http/modules/ngx_http_headers_filter_module.obj \
 	objs/src/http/modules/ngx_http_not_modified_filter_module.obj \
-	objs/src/http/ngx_http_busy_lock.obj \
 	objs/src/http/ngx_http_file_cache.obj \
 	objs/src/http/modules/ngx_http_gzip_filter_module.obj \
 	objs/src/http/ngx_http_postpone_filter_module.obj \
@@ -226,6 +224,7 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/http/modules/ngx_http_empty_gif_module.obj \
 	objs/src/http/modules/ngx_http_browser_module.obj \
 	objs/src/http/modules/ngx_http_upstream_ip_hash_module.obj \
+	objs/src/http/modules/ngx_http_upstream_hash_module.obj \
 	objs/src/http/modules/ngx_http_upstream_least_conn_module.obj \
 	objs/src/http/modules/ngx_http_upstream_keepalive_module.obj \
 	objs/addon/src/ndk.obj \
@@ -335,6 +334,7 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	-Feobjs/nginx
 	objs/src/core/nginx.obj 
 	objs/src/core/ngx_log.obj 
+	objs/src/core/ngx_syslog.obj 
 	objs/src/core/ngx_palloc.obj 
 	objs/src/core/ngx_array.obj 
 	objs/src/core/ngx_list.obj 
@@ -366,7 +366,6 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/event/ngx_event.obj 
 	objs/src/event/ngx_event_timer.obj 
 	objs/src/event/ngx_event_posted.obj 
-	objs/src/event/ngx_event_busy_lock.obj 
 	objs/src/event/ngx_event_accept.obj 
 	objs/src/event/ngx_event_connect.obj 
 	objs/src/event/ngx_event_pipe.obj 
@@ -414,7 +413,6 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/http/modules/ngx_http_range_filter_module.obj 
 	objs/src/http/modules/ngx_http_headers_filter_module.obj 
 	objs/src/http/modules/ngx_http_not_modified_filter_module.obj 
-	objs/src/http/ngx_http_busy_lock.obj 
 	objs/src/http/ngx_http_file_cache.obj 
 	objs/src/http/modules/ngx_http_gzip_filter_module.obj 
 	objs/src/http/ngx_http_postpone_filter_module.obj 
@@ -441,6 +439,7 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/http/modules/ngx_http_empty_gif_module.obj 
 	objs/src/http/modules/ngx_http_browser_module.obj 
 	objs/src/http/modules/ngx_http_upstream_ip_hash_module.obj 
+	objs/src/http/modules/ngx_http_upstream_hash_module.obj 
 	objs/src/http/modules/ngx_http_upstream_least_conn_module.obj 
 	objs/src/http/modules/ngx_http_upstream_keepalive_module.obj 
 	objs/addon/src/ndk.obj 
@@ -567,6 +566,13 @@ objs/src/core/ngx_log.obj:	$(CORE_DEPS) \
 	$(CC) -c $(CFLAGS) $(ALL_INCS) \
 		-Foobjs/src/core/ngx_log.obj \
 		src/core/ngx_log.c
+
+
+objs/src/core/ngx_syslog.obj:	$(CORE_DEPS) \
+	src/core/ngx_syslog.c
+	$(CC) -c $(CFLAGS) $(ALL_INCS) \
+		-Foobjs/src/core/ngx_syslog.obj \
+		src/core/ngx_syslog.c
 
 
 objs/src/core/ngx_palloc.obj:	$(CORE_DEPS) \
@@ -785,12 +791,6 @@ objs/src/event/ngx_event_posted.obj:	$(CORE_DEPS) \
 		-Foobjs/src/event/ngx_event_posted.obj \
 		src/event/ngx_event_posted.c
 
-
-objs/src/event/ngx_event_busy_lock.obj:	$(CORE_DEPS) \
-	src/event/ngx_event_busy_lock.c
-	$(CC) -c $(CFLAGS) $(ALL_INCS) \
-		-Foobjs/src/event/ngx_event_busy_lock.obj \
-		src/event/ngx_event_busy_lock.c
 
 
 objs/src/event/ngx_event_accept.obj:	$(CORE_DEPS) \
@@ -1122,13 +1122,6 @@ objs/src/http/modules/ngx_http_not_modified_filter_module.obj:	$(CORE_DEPS) $(HT
 		src/http/modules/ngx_http_not_modified_filter_module.c
 
 
-objs/src/http/ngx_http_busy_lock.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
-	src/http/ngx_http_busy_lock.c
-	$(CC) -c $(CFLAGS) $(ALL_INCS) \
-		-Foobjs/src/http/ngx_http_busy_lock.obj \
-		src/http/ngx_http_busy_lock.c
-
-
 objs/src/http/ngx_http_file_cache.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
 	src/http/ngx_http_file_cache.c
 	$(CC) -c $(CFLAGS) $(ALL_INCS) \
@@ -1309,6 +1302,13 @@ objs/src/http/modules/ngx_http_upstream_ip_hash_module.obj:	$(CORE_DEPS) $(HTTP_
 	$(CC) -c $(CFLAGS) $(ALL_INCS) \
 		-Foobjs/src/http/modules/ngx_http_upstream_ip_hash_module.obj \
 		src/http/modules/ngx_http_upstream_ip_hash_module.c
+
+
+objs/src/http/modules/ngx_http_upstream_hash_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
+	src/http/modules/ngx_http_upstream_hash_module.c
+	$(CC) -c $(CFLAGS) $(ALL_INCS) \
+		-Foobjs/src/http/modules/ngx_http_upstream_hash_module.obj \
+		src/http/modules/ngx_http_upstream_hash_module.c
 
 
 objs/src/http/modules/ngx_http_upstream_least_conn_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
