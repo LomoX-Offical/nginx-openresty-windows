@@ -428,13 +428,12 @@ ngx_http_rds_csv_output_field(ngx_http_request_t *r,
                 last = (u_char *)
                        ngx_http_rds_csv_escape_csv_str(sep, last, data, len,
                                                        NULL);
-#if DDEBUG
+
                 dd("escaped value \"%.*s\" (len %d, escape %d, escape2 %d)",
                    (int) (len + val_escape),
                    p, (int) (len + val_escape),
                    (int) val_escape,
                    (int) ((last - p) - len));
-#endif
             }
 
             if (need_quotes && ctx->field_data_rest == 0) {
@@ -544,13 +543,12 @@ ngx_http_rds_csv_output_more_field_data(ngx_http_request_t *r,
 
             last = (u_char *) ngx_http_rds_csv_escape_csv_str(sep, last, data,
                                                               len, NULL);
-#if DDEBUG
+
             dd("escaped value \"%.*s\" (len %d, escape %d, escape2 %d)",
                (int) (len + escape),
                p, (int) (len + escape),
                (int) escape,
                (int) ((last - p) - len));
-#endif
         }
 
         if (ctx->field_data_rest == 0) {

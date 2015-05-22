@@ -1314,7 +1314,43 @@ ngx_http_lua_socket_tcp_sslhandshake(lua_State *L)
         }
     }
 
-    u->ssl_name = name;
+    dd("found sni name: %.*s %p", (int) name.len, name.data, name.data);
+
+    if (name.len == 0) {
+        u->ssl_name.len = 0;
+
+    } else {
+        if (u->ssl_name.data) {
+            /* buffer already allocated */
+
+            if (u->ssl_name.len >= name.len) {
+                /* reuse it */
+                ngx_memcpy(u->ssl_name.data, name.data, name.len);
+                u->ssl_name.len = name.len;
+
+            } else {
+                ngx_free(u->ssl_name.data);
+                goto new_ssl_name;
+            }
+
+        } else {
+
+new_ssl_name:
+
+            u->ssl_name.data = ngx_alloc(name.len, ngx_cycle->log);
+            if (u->ssl_name.data == NULL) {
+                u->ssl_name.len = 0;
+
+                lua_pushnil(L);
+                lua_pushliteral(L, "no memory");
+                return 2;
+            }
+
+            ngx_memcpy(u->ssl_name.data, name.data, name.len);
+            u->ssl_name.len = name.len;
+        }
+    }
+
     u->write_co_ctx = coctx;
 
     rc = ngx_ssl_handshake(c);
@@ -2651,8 +2687,10 @@ ngx_http_lua_socket_tcp_handler(ngx_event_t *ev)
     r = u->request;
     c = r->connection;
 
-    ctx = c->log->data;
-    ctx->current_request = r;
+    if (c->fd != -1) {  /* not a fake connection */
+        ctx = c->log->data;
+        ctx->current_request = r;
+    }
 
     ngx_log_debug3(NGX_LOG_DEBUG_HTTP, c->log, 0,
                    "lua tcp socket handler for \"%V?%V\", wev %d", &r->uri,
@@ -3212,7 +3250,11 @@ ngx_http_lua_socket_tcp_finalize_read_part(ngx_http_request_t *r,
             ngx_del_event(c->read, NGX_READ_EVENT, NGX_CLOSE_EVENT);
         }
 
+#if defined(nginx_version) && nginx_version >= 1007005
+        if (c->read->posted) {
+#else
         if (c->read->prev) {
+#endif
             ngx_delete_posted_event(c->read);
         }
 
@@ -3261,7 +3303,11 @@ ngx_http_lua_socket_tcp_finalize_write_part(ngx_http_request_t *r,
             ngx_del_event(c->write, NGX_WRITE_EVENT, NGX_CLOSE_EVENT);
         }
 
+#if defined(nginx_version) && nginx_version >= 1007005
+        if (c->write->posted) {
+#else
         if (c->write->prev) {
+#endif
             ngx_delete_posted_event(c->write);
         }
 
@@ -3305,6 +3351,14 @@ ngx_http_lua_socket_tcp_finalize(ngx_http_request_t *r,
     if (u->peer.free) {
         u->peer.free(&u->peer, u->peer.data, 0);
     }
+
+#if (NGX_HTTP_SSL)
+    if (u->ssl_name.data) {
+        ngx_free(u->ssl_name.data);
+        u->ssl_name.data = NULL;
+        u->ssl_name.len = 0;
+    }
+#endif
 
     c = u->peer.connection;
     if (c) {
@@ -4281,7 +4335,8 @@ ngx_http_lua_socket_tcp_getreusedtimes(lua_State *L)
 }
 
 
-static int ngx_http_lua_socket_tcp_setkeepalive(lua_State *L)
+static int
+ngx_http_lua_socket_tcp_setkeepalive(lua_State *L)
 {
     ngx_http_lua_loc_conf_t             *llcf;
     ngx_http_lua_socket_tcp_upstream_t  *u;
@@ -4326,12 +4381,18 @@ static int ngx_http_lua_socket_tcp_setkeepalive(lua_State *L)
     u = lua_touserdata(L, -1);
     lua_pop(L, 1);
 
+    if (u == NULL) {
+        lua_pushnil(L);
+        lua_pushliteral(L, "closed");
+        return 2;
+    }
+
     /* stack: obj cache key */
 
     pc = &u->peer;
     c = pc->connection;
 
-    if (u == NULL || pc == NULL || u->read_closed || u->write_closed) {
+    if (c == NULL || u->read_closed || u->write_closed) {
         lua_pushnil(L);
         lua_pushliteral(L, "closed");
         return 2;

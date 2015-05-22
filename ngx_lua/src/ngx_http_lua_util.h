@@ -20,6 +20,7 @@
 #ifndef NGX_LUA_NO_FFI_API
 typedef struct {
     int          len;
+    /* this padding hole on 64-bit systems is expected */
     u_char      *data;
 } ngx_http_lua_ffi_str_t;
 
@@ -220,7 +221,7 @@ void ngx_http_lua_release_ngx_ctx_table(ngx_log_t *log, lua_State *L,
 
 void ngx_http_lua_cleanup_vm(void *data);
 
-ngx_connection_t * ngx_http_lua_create_fake_connection(void);
+ngx_connection_t * ngx_http_lua_create_fake_connection(ngx_pool_t *pool);
 
 ngx_http_request_t * ngx_http_lua_create_fake_request(ngx_connection_t *c);
 
@@ -393,6 +394,23 @@ ngx_http_lua_cleanup_pending_operation(ngx_http_lua_co_ctx_t *coctx)
         coctx->cleanup(coctx);
         coctx->cleanup = NULL;
     }
+}
+
+
+static ngx_inline ngx_chain_t *
+ngx_http_lua_get_flush_chain(ngx_http_request_t *r, ngx_http_lua_ctx_t *ctx)
+{
+    ngx_chain_t  *cl;
+
+    cl = ngx_http_lua_chain_get_free_buf(r->connection->log, r->pool,
+                                         &ctx->free_bufs, 0);
+    if (cl == NULL) {
+        return NULL;
+    }
+
+    cl->buf->flush = 1;
+
+    return cl;
 }
 
 
