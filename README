@@ -1,11 +1,17 @@
 
- 
+nginx windows high-performance version，Concurrent more than twenty thousand links
+Multi-process support, various bug fixes transplant
+pg translated into
+
+
+
  
  多进程支持，各种移植bug修复
  pg编译进去
  
+
  
- 编译好的：
+ 编译好的 binary：
 http://pan.baidu.com/s/175WAy
  
 
