@@ -156,16 +156,12 @@ typedef u_int               uintptr_t;
 #ifndef _OFF_T_DEFINED
 #ifndef __MINGW64_VERSION_MAJOR
 
-#ifndef _WIN64
-/* Windows defines off_t as long, which is 32-bit */
-typedef long             off_t;
-typedef long             _off_t;
-#else
-typedef __int64          off_t;
-typedef __int64          _off_t;
-#endif
-#define _OFF_T_DEFINED
+typedef __int64    off_t;
+typedef __int64    _off_t;
 
+
+#define _OFF_T_DEFINED
+#endif
 #endif
 
 
@@ -217,14 +213,9 @@ typedef int                 sig_atomic_t;
 
 #endif
 
-#ifndef _WIN64
-#define NGX_OFF_T_LEN           (sizeof("-2147483648") - 1)
-#define NGX_MAX_OFF_T_VALUE     2147483647
-#else 
+
 #define NGX_OFF_T_LEN           (sizeof("-9223372036854775808") - 1)
 #define NGX_MAX_OFF_T_VALUE     9223372036854775807
-#endif
-
 #define NGX_SIG_ATOMIC_T_SIZE   4
 
 
