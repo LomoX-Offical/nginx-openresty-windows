@@ -15,7 +15,7 @@ ALL_INCS = -I src/core \
 	-I ../luajit-root/luajit/include/luajit-2.1 \
 	-I ../ngx_lua/src/api \
 	-I objs/lib/pcre-8.31 \
-	-I objs/lib/openssl-1.0.1g/openssl/include \
+	-I objs/lib/openssl-1.0.1m/openssl/include \
 	-I objs/lib/zlib-1.2.8 \
 	-I objs \
 	-I src/http \
@@ -77,7 +77,7 @@ CORE_DEPS = src/core/nginx.h \
 	src/event/ngx_event_openssl.h \
 	src/core/ngx_regex.h \
 	objs/lib/pcre-8.31/pcre.h \
-	objs/lib/openssl-1.0.1g/openssl/include/openssl/ssl.h \
+	objs/lib/openssl-1.0.1m/openssl/include/openssl/ssl.h \
 	objs/ngx_auto_config.h
 
 
@@ -91,7 +91,7 @@ CORE_INCS = -I src/core \
 	-I ../luajit-root/luajit/include/luajit-2.1 \
 	-I ../ngx_lua/src/api \
 	-I objs/lib/pcre-8.31 \
-	-I objs/lib/openssl-1.0.1g/openssl/include \
+	-I objs/lib/openssl-1.0.1m/openssl/include \
 	-I objs/lib/zlib-1.2.8 \
 	-I objs
 
@@ -542,7 +542,7 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/addon/src/ngx_http_rds_json_output.obj 
 	objs/addon/src/ngx_http_rds_json_handler.obj 
 	objs/ngx_modules.obj 
-	kernel32.lib user32.lib advapi32.lib ws2_32.lib ../luajit-root/luajit/lib/lua51.lib ../ngx_postgres-1.0rc5/lib/libpq.lib objs/lib/pcre-8.31/pcre.lib objs/lib/openssl-1.0.1g/openssl/lib/ssleay32.lib objs/lib/openssl-1.0.1g/openssl/lib/libeay32.lib gdi32.lib crypt32.lib objs/lib/zlib-1.2.8/zlib.lib 
+	kernel32.lib user32.lib advapi32.lib ws2_32.lib ../luajit-root/luajit/lib/lua51.lib ../ngx_postgres-1.0rc5/lib/libpq.lib objs/lib/pcre-8.31/pcre.lib objs/lib/openssl-1.0.1m/openssl/lib/ssleay32.lib objs/lib/openssl-1.0.1m/openssl/lib/libeay32.lib gdi32.lib crypt32.lib objs/lib/zlib-1.2.8/zlib.lib 
 	objs/nginx.res -link -verbose:lib -debug
 	
 <<
@@ -2026,8 +2026,8 @@ objs/lib/pcre-8.31/pcre.h:
 	$(MAKE) -f auto/lib/pcre/makefile.msvc PCRE="objs/lib/pcre-8.31" pcre.h
 
 
-objs/lib/openssl-1.0.1g/openssl/include/openssl/ssl.h:	objs/Makefile
-	$(MAKE) -f auto/lib/openssl/makefile.msvc					OPENSSL="objs/lib/openssl-1.0.1g/openssl" OPENSSL_OPT=""
+objs/lib/openssl-1.0.1m/openssl/include/openssl/ssl.h:	objs/Makefile
+	$(MAKE) -f auto/lib/openssl/makefile.msvc					OPENSSL="objs/lib/openssl-1.0.1m/openssl" OPENSSL_OPT=""
 
 
 objs/lib/zlib-1.2.8/zlib.lib:	objs/Makefile
