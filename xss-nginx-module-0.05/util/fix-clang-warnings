@@ -1,0 +1,46 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use File::Temp 'tempfile';
+
+my $infile = "src/ngx_http_xss_util.c";
+my ($out, $outfile) = tempfile();
+open my $in, $infile
+    or die "Cannot open $infile for reading: $!\n";
+
+my $hits = 0;
+while (<$in>) {
+    if (/ \b javascript_ (?: en_main | error | first_final ) \b /x)
+     {
+        #warn "HIT!";
+        $hits++;
+        next;
+    }
+    print $out $_;
+}
+
+close $in;
+close $out;
+
+if ($hits) {
+    my $cmd = "cp $outfile $infile";
+    system($cmd) == 0
+        or die "Cannot run command \"$cmd\": $!";
+}
+#die;
+
+__END__
+
+This script is to fix the following clang warnings when using Ragel 6.8/6.9/etc:
+
+rc/ngx_http_xss_util.c:22:18: error: unused variable 'javascript_first_final' [-Werror,-Wunused-const-variable]
+static const int javascript_first_final = 6;
+                 ^
+src/ngx_http_xss_util.c:23:18: error: unused variable 'javascript_error' [-Werror,-Wunused-const-variable]
+static const int javascript_error = 0;
+                 ^
+src/ngx_http_xss_util.c:25:18: error: unused variable 'javascript_en_main' [-Werror,-Wunused-const-variable]
+static const int javascript_en_main = 1;
+                 ^
+3 errors generated.

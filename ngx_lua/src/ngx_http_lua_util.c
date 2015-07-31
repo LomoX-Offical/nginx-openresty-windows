@@ -117,7 +117,7 @@ static ngx_int_t ngx_http_lua_flush_pending_output(ngx_http_request_t *r,
 static ngx_int_t
     ngx_http_lua_process_flushing_coroutines(ngx_http_request_t *r,
     ngx_http_lua_ctx_t *ctx);
-static lua_State * ngx_http_lua_new_state(lua_State *parent_vm,
+static lua_State *ngx_http_lua_new_state(lua_State *parent_vm,
     ngx_cycle_t *cycle, ngx_http_lua_main_conf_t *lmcf, ngx_log_t *log);
 static int ngx_http_lua_get_raw_phase_context(lua_State *L);
 
@@ -410,7 +410,9 @@ ngx_http_lua_send_header_if_needed(ngx_http_request_t *r,
 {
     ngx_int_t            rc;
 
-    if (!r->header_sent) {
+    dd("send header if needed: %d", r->header_sent || ctx->header_sent);
+
+    if (!r->header_sent && !ctx->header_sent) {
         if (r->headers_out.status == 0) {
             r->headers_out.status = NGX_HTTP_OK;
         }
@@ -427,6 +429,7 @@ ngx_http_lua_send_header_if_needed(ngx_http_request_t *r,
         if (!ctx->buffering) {
             dd("sending headers");
             rc = ngx_http_send_header(r);
+            ctx->header_sent = 1;
             return rc;
         }
     }
@@ -460,6 +463,7 @@ ngx_http_lua_send_chain_link(ngx_http_request_t *r, ngx_http_lua_ctx_t *ctx,
     if (llcf->http10_buffering
         && !ctx->buffering
         && !r->header_sent
+        && !ctx->header_sent
         && r->http_version < NGX_HTTP_VERSION_11
         && r->headers_out.content_length_n < 0)
     {
@@ -483,6 +487,16 @@ ngx_http_lua_send_chain_link(ngx_http_request_t *r, ngx_http_lua_ctx_t *ctx,
     }
 
     if (in == NULL) {
+        dd("last buf to be sent");
+
+#if 1
+        if (!r->request_body && r == r->main) {
+            if (ngx_http_discard_request_body(r) != NGX_OK) {
+                return NGX_ERROR;
+            }
+        }
+#endif
+
         if (ctx->buffering) {
             rc = ngx_http_lua_send_http10_headers(r, ctx);
             if (rc == NGX_ERROR || rc >= NGX_HTTP_SPECIAL_RESPONSE) {
@@ -613,7 +627,7 @@ ngx_http_lua_send_http10_headers(ngx_http_request_t *r,
     ngx_chain_t         *cl;
     ngx_int_t            rc;
 
-    if (r->header_sent) {
+    if (r->header_sent || ctx->header_sent) {
         return NGX_OK;
     }
 
@@ -639,6 +653,7 @@ ngx_http_lua_send_http10_headers(ngx_http_request_t *r,
 send:
 
     rc = ngx_http_send_header(r);
+    ctx->header_sent = 1;
     return rc;
 }
 
@@ -1398,14 +1413,14 @@ user_co_done:
 
                 ngx_http_lua_request_cleanup(ctx, 0);
 
-                dd("headers sent? %d", r->header_sent ? 1 : 0);
+                dd("headers sent? %d", r->header_sent || ctx->header_sent);
 
                 if (ctx->no_abort) {
                     ctx->no_abort = 0;
                     return NGX_ERROR;
                 }
 
-                return r->header_sent ? NGX_ERROR :
+                return (r->header_sent || ctx->header_sent) ? NGX_ERROR :
                        NGX_HTTP_INTERNAL_SERVER_ERROR;
             }
 
@@ -1460,7 +1475,8 @@ no_parent:
     ngx_log_error(NGX_LOG_ERR, r->connection->log, 0, "lua handler aborted: "
                   "user coroutine has no parent");
 
-    return r->header_sent ? NGX_ERROR : NGX_HTTP_INTERNAL_SERVER_ERROR;
+    return (r->header_sent || ctx->header_sent) ?
+                NGX_ERROR : NGX_HTTP_INTERNAL_SERVER_ERROR;
 
 done:
 
@@ -1484,7 +1500,6 @@ ngx_http_lua_wev_handler(ngx_http_request_t *r)
     ngx_event_t                 *wev;
     ngx_connection_t            *c;
     ngx_http_lua_ctx_t          *ctx;
-    ngx_http_lua_co_ctx_t       *coctx;
     ngx_http_core_loc_conf_t    *clcf;
 
     ngx_http_lua_socket_tcp_upstream_t *u;
@@ -1535,12 +1550,7 @@ ngx_http_lua_wev_handler(ngx_http_request_t *r)
     if (ctx->writing_raw_req_socket) {
         ctx->writing_raw_req_socket = 0;
 
-        coctx = ctx->downstream_co_ctx;
-        if (coctx == NULL) {
-            return NGX_ERROR;
-        }
-
-        u = coctx->data;
+        u = ctx->downstream;
         if (u == NULL) {
             return NGX_ERROR;
         }
@@ -2204,6 +2214,7 @@ ngx_http_lua_handle_exit(lua_State *L, ngx_http_request_t *r,
 
 #if 1
     if (!r->header_sent
+        && !ctx->header_sent
         && r->headers_out.status == 0
         && ctx->exit_code >= NGX_HTTP_OK)
     {
@@ -2257,7 +2268,7 @@ ngx_http_lua_handle_exit(lua_State *L, ngx_http_request_t *r,
     }
 
 #if 1
-    if (r->header_sent
+    if ((r->header_sent || ctx->header_sent)
         && ctx->exit_code > NGX_OK
         && ctx->exit_code != NGX_HTTP_REQUEST_TIME_OUT
         && ctx->exit_code != NGX_HTTP_CLIENT_CLOSED_REQUEST

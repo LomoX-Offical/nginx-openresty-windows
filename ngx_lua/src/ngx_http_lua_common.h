@@ -194,7 +194,7 @@ typedef struct {
                                                 inline script/script
                                                 file path */
 
-    u_char                 *rewrite_src_key; /* cached key for rewrite_src */
+    u_char                  *rewrite_src_key; /* cached key for rewrite_src */
 
     u_char                  *access_chunkname;
     ngx_http_complex_value_t access_src;     /*  access_by_lua
@@ -382,8 +382,9 @@ typedef struct ngx_http_lua_ctx_s {
 
     ngx_int_t                exit_code;
 
-    ngx_http_lua_co_ctx_t   *downstream_co_ctx; /* co ctx for the coroutine
-                                                   reading the request body */
+    void                    *downstream;  /* can be either
+                                             ngx_http_lua_socket_tcp_upstream_t
+                                             or ngx_http_lua_co_ctx_t */
 
     ngx_uint_t               index;              /* index of the current
                                                     subrequest in its parent
@@ -433,6 +434,13 @@ typedef struct ngx_http_lua_ctx_s {
 
     unsigned         no_abort:1; /* prohibit "world abortion" via ngx.exit()
                                     and etc */
+
+    unsigned         header_sent:1; /* r->header_sent is not sufficient for
+                                     * this because special header filters
+                                     * like ngx_image_filter may intercept
+                                     * the header. so we should always test
+                                     * both flags. see the test case in
+                                     * t/020-subrequest.t */
 
     unsigned         seen_last_in_filter:1;  /* used by body_filter_by_lua* */
     unsigned         seen_last_for_subreq:1; /* used by body capture filter */
