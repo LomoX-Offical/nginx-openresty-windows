@@ -488,7 +488,7 @@ ngx_http_lua_ngx_resp_get_headers(lua_State *L)
 
 #if 1
     if (r->headers_out.content_type.len) {
-        lua_pushliteral(L, "Content-Type");
+        lua_pushliteral(L, "content-type");
         lua_pushlstring(L, (char *) r->headers_out.content_type.data,
                         r->headers_out.content_type.len);
         lua_rawset(L, -3);
@@ -497,12 +497,12 @@ ngx_http_lua_ngx_resp_get_headers(lua_State *L)
     if (r->headers_out.content_length == NULL
         && r->headers_out.content_length_n >= 0)
     {
-        lua_pushliteral(L, "Content-Length");
+        lua_pushliteral(L, "content-length");
         lua_pushfstring(L, "%d", (int) r->headers_out.content_length_n);
         lua_rawset(L, -3);
     }
 
-    lua_pushliteral(L, "Connection");
+    lua_pushliteral(L, "connection");
     if (r->headers_out.status == NGX_HTTP_SWITCHING_PROTOCOLS) {
         lua_pushliteral(L, "upgrade");
 
@@ -515,7 +515,7 @@ ngx_http_lua_ngx_resp_get_headers(lua_State *L)
     lua_rawset(L, -3);
 
     if (r->chunked) {
-        lua_pushliteral(L, "Transfer-Encoding");
+        lua_pushliteral(L, "transfer-encoding");
         lua_pushliteral(L, "chunked");
         lua_rawset(L, -3);
     }
@@ -658,7 +658,7 @@ ngx_http_lua_ngx_header_set(lua_State *L)
 
     ngx_http_lua_check_fake_request(L, r);
 
-    if (r->header_sent) {
+    if (r->header_sent || ctx->header_sent) {
         ngx_log_error(NGX_LOG_ERR, r->connection->log, 0, "attempt to "
                       "set ngx.header.HEADER after sending out "
                       "response headers");
@@ -1086,7 +1086,7 @@ ngx_http_lua_ffi_set_resp_header(ngx_http_request_t *r, const u_char *key_data,
         return NGX_HTTP_LUA_FFI_BAD_CONTEXT;
     }
 
-    if (r->header_sent) {
+    if (r->header_sent || ctx->header_sent) {
         ngx_log_error(NGX_LOG_ERR, r->connection->log, 0, "attempt to "
                       "set ngx.header.HEADER after sending out "
                       "response headers");

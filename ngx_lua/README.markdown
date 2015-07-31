@@ -13,6 +13,7 @@ ngx_lua - Embed the power of Lua into Nginx
 Table of Contents
 =================
 
+* [Name](#name)
 * [Status](#status)
 * [Version](#version)
 * [Synopsis](#synopsis)
@@ -38,9 +39,10 @@ Table of Contents
     * [Lua Variable Scope](#lua-variable-scope)
     * [Locations Configured by Subrequest Directives of Other Modules](#locations-configured-by-subrequest-directives-of-other-modules)
     * [Cosockets Not Available Everywhere](#cosockets-not-available-everywhere)
-    * [Special PCRE Sequences](#special-pcre-sequences)
+    * [Special Escaping Sequences](#special-escaping-sequences)
     * [Mixing with SSI Not Supported](#mixing-with-ssi-not-supported)
     * [SPDY Mode Not Fully Supported](#spdy-mode-not-fully-supported)
+    * [Missing data on short circuited requests](#missing-data-on-short-circuited-requests)
 * [TODO](#todo)
 * [Changes](#changes)
 * [Test Suite](#test-suite)
@@ -48,6 +50,8 @@ Table of Contents
 * [See Also](#see-also)
 * [Directives](#directives)
 * [Nginx API for Lua](#nginx-api-for-lua)
+* [Obsolete Sections](#obsolete-sections)
+    * [Special PCRE Sequences](#special-pcre-sequences)
 
 Status
 ======
@@ -57,7 +61,7 @@ Production ready.
 Version
 =======
 
-This document describes ngx_lua [v0.9.15](https://github.com/openresty/lua-nginx-module/tags) released on 18 February 2015.
+This document describes ngx_lua [v0.9.16](https://github.com/openresty/lua-nginx-module/tags) released on 22 June 2015.
 
 Synopsis
 ========
@@ -108,7 +112,7 @@ Synopsis
          content_by_lua "ngx.say('Hello,world!')";
      }
 
-      location /nginx_var {
+     location /nginx_var {
          # MIME type determined by default_type:
          default_type 'text/plain';
 
@@ -710,7 +714,7 @@ This tool will guarantee that local variables in the Lua module functions are al
 
 Locations Configured by Subrequest Directives of Other Modules
 --------------------------------------------------------------
-The [ngx.location.capture](#ngxlocationcapture) and [ngx.location.capture_multi](#ngxlocationcapture_multi) directives cannot capture locations that include the [echo_location](http://github.com/openresty/echo-nginx-module#echo_location), [echo_location_async](http://github.com/openresty/echo-nginx-module#echo_location_async), [echo_subrequest](http://github.com/openresty/echo-nginx-module#echo_subrequest), or [echo_subrequest_async](http://github.com/openresty/echo-nginx-module#echo_subrequest_async) directives.
+The [ngx.location.capture](#ngxlocationcapture) and [ngx.location.capture_multi](#ngxlocationcapture_multi) directives cannot capture locations that include the [add_before_body](http://nginx.org/en/docs/http/ngx_http_addition_module.html#add_before_body), [add_after_body](http://nginx.org/en/docs/http/ngx_http_addition_module.html#add_after_body), [auth_request](http://nginx.org/en/docs/http/ngx_http_auth_request_module.html#auth_request), [echo_location](http://github.com/openresty/echo-nginx-module#echo_location), [echo_location_async](http://github.com/openresty/echo-nginx-module#echo_location_async), [echo_subrequest](http://github.com/openresty/echo-nginx-module#echo_subrequest), or [echo_subrequest_async](http://github.com/openresty/echo-nginx-module#echo_subrequest_async) directives.
 
 ```nginx
 
@@ -747,8 +751,8 @@ There exists a work-around, however, when the original context does *not* need t
 
 [Back to TOC](#table-of-contents)
 
-Special PCRE Sequences
-----------------------
+Special Escaping Sequences
+--------------------------
 PCRE sequences such as `\d`, `\s`, or `\w`, require special attention because in string literals, the backslash character, `\`, is stripped out by both the Lua language parser and by the Nginx config file parser before processing. So the following snippet will not work as expected:
 
 ```nginx
@@ -850,6 +854,27 @@ SPDY Mode Not Fully Supported
 -----------------------------
 
 Certain Lua APIs provided by ngx_lua do not work in Nginx's SPDY mode yet: [ngx.location.capture](#ngxlocationcapture), [ngx.location.capture_multi](#ngxlocationcapture_multi), and [ngx.req.socket](#ngxreqsocket).
+
+[Back to TOC](#table-of-contents)
+
+Missing data on short circuited requests
+----------------------------------------
+
+Nginx may terminate a request early with (at least):
+
+* 400 (Bad Request)
+* 405 (Not Allowed)
+* 408 (Request Timeout)
+* 414 (Request URI Too Large)
+* 494 (Request Headers Too Large)
+* 499 (Client Closed Request)
+* 500 (Internal Server Error)
+* 501 (Not Implemented)
+
+This means that phases that normally run are skipped, such as the rewrite or
+access phase. This also means that later phases that are run regardless, e.g.
+[log_by_lua](#log_by_lua), will not have access to information that is normally set in those
+phases.
 
 [Back to TOC](#table-of-contents)
 
@@ -1976,7 +2001,7 @@ lua_need_request_body
 
 **default:** *off*
 
-**context:** *main | server | location*
+**context:** *http, server, location, location if*
 
 **phase:** *depends on usage*
 
@@ -2766,7 +2791,6 @@ Consider the following example,
 
  location /test {
      rewrite_by_lua '
-         ngx.say("foo = ", ngx.ctx.foo)
          ngx.ctx.foo = 76
      ';
      access_by_lua '
@@ -2782,7 +2806,6 @@ Then `GET /test` will yield the output
 
 ```bash
 
- foo = nil
  79
 ```
 
@@ -4276,7 +4299,7 @@ which is equivalent to
 
 ```lua
 
- return ngx.redirect("http://localhost:1984/foo", ngx.HTTP_MOVED_TEMPORARILY)
+ return ngx.redirect("/foo", ngx.HTTP_MOVED_TEMPORARILY)
 ```
 
 Redirecting arbitrary external URLs is also supported, for example:
@@ -4669,11 +4692,13 @@ This method was introduced in the `v0.5.0rc29`.
 
 ngx.encode_base64
 -----------------
-**syntax:** *newstr = ngx.encode_base64(str)*
+**syntax:** *newstr = ngx.encode_base64(str, no_padding?)*
 
 **context:** *set_by_lua*, rewrite_by_lua*, access_by_lua*, content_by_lua*, header_filter_by_lua*, body_filter_by_lua*, log_by_lua*, ngx.timer.**
 
-Encode `str` to a base64 digest.
+Encodes `str` to a base64 digest.
+
+Since the `0.9.16` release, an optional boolean-typed `no_padding` argument can be specified to control whether the base64 padding should be appended to the resulting digest (default to `false`, i.e., with padding enabled). This enables streaming base64 digest calculation by (data chunks) though it would be the caller's responsibility to append an appropriate padding at the end of data stream.
 
 [Back to TOC](#nginx-api-for-lua)
 
@@ -5092,7 +5117,7 @@ The `ctx` table argument combined with the `a` regex modifier can be used to con
 
 Note that, the `options` argument is not optional when the `ctx` argument is specified and that the empty Lua string (`""`) must be used as placeholder for `options` if no meaningful regex options are required.
 
-This method requires the PCRE library enabled in Nginx.  ([Known Issue With Special PCRE Sequences](#special-pcre-sequences)).
+This method requires the PCRE library enabled in Nginx.  ([Known Issue With Special Escaping Sequences](#special-escaping-sequences)).
 
 To confirm that PCRE JIT is enabled, activate the Nginx debug log by adding the `--with-debug` option to Nginx or ngx_openresty's `./configure` script. Then, enable the "debug" error log level in `error_log` directive. The following message will be generated if PCRE JIT is enabled:
 
@@ -5232,7 +5257,7 @@ The optional `options` argument takes exactly the same semantics as the [ngx.re.
 
 The current implementation requires that the iterator returned should only be used in a single request. That is, one should *not* assign it to a variable belonging to persistent namespace like a Lua package.
 
-This method requires the PCRE library enabled in Nginx.  ([Known Issue With Special PCRE Sequences](#special-pcre-sequences)).
+This method requires the PCRE library enabled in Nginx.  ([Known Issue With Special Escaping Sequences](#special-escaping-sequences)).
 
 This feature was first introduced in the `v0.2.1rc12` release.
 
@@ -5298,7 +5323,7 @@ When the `replace` argument is of type "function", then it will be invoked with 
 
 The dollar sign characters in the return value of the `replace` function argument are not special at all.
 
-This method requires the PCRE library enabled in Nginx.  ([Known Issue With Special PCRE Sequences](#special-pcre-sequences)).
+This method requires the PCRE library enabled in Nginx.  ([Known Issue With Special Escaping Sequences](#special-escaping-sequences)).
 
 This feature was first introduced in the `v0.2.1rc13` release.
 
@@ -5336,7 +5361,7 @@ Here is some examples:
      -- n == 2
 ```
 
-This method requires the PCRE library enabled in Nginx.  ([Known Issue With Special PCRE Sequences](#special-pcre-sequences)).
+This method requires the PCRE library enabled in Nginx.  ([Known Issue With Special Escaping Sequences](#special-escaping-sequences)).
 
 This feature was first introduced in the `v0.2.1rc15` release.
 
@@ -6950,5 +6975,17 @@ This API was first usable in the context of [init_by_lua*](#init_by_lua) since t
 
 This API was first enabled in the `v0.6.0` release.
 
-
 [Back to TOC](#nginx-api-for-lua)
+
+Obsolete Sections
+=================
+
+This section is just holding obsolete documentation sections that have been either renamed or removed so that existing links over the web are still valid.
+
+[Back to TOC](#table-of-contents)
+
+Special PCRE Sequences
+----------------------
+
+This section has been renamed to [Special Escaping Sequences](#special-escaping-sequences).
+
