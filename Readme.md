@@ -1,6 +1,13 @@
 ## Nginx Openresty For Windows ##
 
-### About ###
+### lastest release ###
+
+Version:1.7.10.2  ([http://pan.baidu.com/s/1i3ITTFv](http://pan.baidu.com/s/1i3ITTFv))
+
+    Release time: 2015-8-7
+    Changelog: update openresty to version:1.7.10.2
+
+### about ###
 
 OpenResty is a fast web app server by extending nginx.
 
@@ -31,13 +38,6 @@ Documentation of Nginx at [http://www.nginx.org](http://www.nginx.org)
 
 Documentation of Openresty at [http://www.openresty.org](http://www.openresty.org)
 
-
-### lastest release ###
-
-Version:1.7.10.2  ([http://pan.baidu.com/s/1pJN1n8B](http://pan.baidu.com/s/1pJN1n8B))
-
-    Release time: 2015-8-5
-    Changelog: update openresty to version:1.7.10.2
 
 ### history ###
 
