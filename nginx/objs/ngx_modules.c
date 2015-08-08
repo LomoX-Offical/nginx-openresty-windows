@@ -57,6 +57,8 @@ extern ngx_module_t  ngx_http_userid_filter_module;
 extern ngx_module_t  ngx_http_headers_filter_module;
 extern ngx_module_t  ngx_http_echo_module;
 extern ngx_module_t  ngx_http_set_misc_module;
+extern ngx_module_t  ngx_http_concat_module;
+extern ngx_module_t  ngx_http_redis2_module;
 extern ngx_module_t  ngx_http_lua_module;
 extern ngx_module_t  ngx_http_headers_more_filter_module;
 extern ngx_module_t  ngx_http_rds_json_filter_module;
@@ -118,6 +120,8 @@ ngx_module_t *ngx_modules[] = {
     &ngx_http_headers_filter_module,
     &ngx_http_echo_module,
     &ngx_http_set_misc_module,
+    &ngx_http_concat_module,
+    &ngx_http_redis2_module,
     &ngx_http_lua_module,
     &ngx_http_headers_more_filter_module,
     &ngx_http_rds_json_filter_module,

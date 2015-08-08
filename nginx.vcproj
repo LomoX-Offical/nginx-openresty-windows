@@ -1984,6 +1984,14 @@
 					</File>
 				</Filter>
 			</Filter>
+			<Filter
+				Name="concat"
+				>
+				<File
+					RelativePath=".\nginx-http-concat-module\ngx_http_concat_module.c"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="config"
