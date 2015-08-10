@@ -33,6 +33,10 @@
 #include <assert.h>
 #include <string.h>
 
+#if defined _MSC_VER
+#include "config_win32.h"
+#endif
+
 #include "fpconv.h"
 
 /* Lua CJSON assumes the locale is the same for all threads within a

@@ -1,0 +1,17 @@
+LIBRARY	"cjson"
+EXPORTS
+	fpconv_g_fmt							@1
+	fpconv_init								@2
+	fpconv_strtod							@3
+	json_verify_invalid_number_setting		@4
+	luaopen_cjson							@5
+	luaopen_cjson_safe						@6
+	strbuf_append_fmt						@7
+	strbuf_append_fmt_retry					@8
+	strbuf_append_string					@9
+	strbuf_free								@10
+	strbuf_free_to_string					@11
+	strbuf_init								@12
+	strbuf_new								@13
+	strbuf_resize							@14
+	strbuf_set_increment					@15

@@ -25,6 +25,10 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
+#if defined _MSC_VER
+#include "config_win32.h"
+#endif
+
 /* Size: Total bytes allocated to *buf
  * Length: String length, excluding optional NULL terminator.
  * Increment: Allocation increments when resizing the string buffer.
