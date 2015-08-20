@@ -11,7 +11,7 @@ Version:1.7.10.2
     1、add concat module to 32 & 64 bit respectively
     2、add redis2 module to 32 & 64 bit respectively
     3、add cjson  module to 32 & 64 bit respectively
-    4、add luau1.dll runtime for luajit for 32 & 64 bit respectively
+    4、add lua51.dll runtime for luajit for 32 & 64 bit respectively
 
 ### about ###
 
