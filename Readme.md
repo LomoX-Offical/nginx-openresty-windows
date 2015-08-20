@@ -2,10 +2,16 @@
 
 ### lastest release ###
 
-Version:1.7.10.2  ([http://pan.baidu.com/s/1i3ITTFv](http://pan.baidu.com/s/1i3ITTFv))
+Version:1.7.10.2
+32 bit: http://pan.baidu.com/s/1pJ5l1s3
+64 bit: http://pan.baidu.com/s/1kTxmfmJ
 
-    Release time: 2015-8-7
-    Changelog: update openresty to version:1.7.10.2
+    Release time: 2015-8-20
+    Changelog: 
+    1、add concat module to 32 & 64 bit respectively
+    2、add redis2 module to 32 & 64 bit respectively
+    3、add cjson  module to 32 & 64 bit respectively
+    4、add luau1.dll runtime for luajit for 32 & 64 bit respectively
 
 ### about ###
 
