@@ -8,9 +8,12 @@ Version:1.7.10.2002
 64 bit: http://pan.baidu.com/s/1dDAVQq1
 
 changelog：
-1、fix the incompatible  directive of ngx_lua module, eg..
+
+1、fix the incompatible  directive of ngx_lua module, eg. lua_shared_dict dogs 10m;
+        cause the error below:
+        
         nginx: [emerg] invalid lua shared dict size "10m" in e:\nginx/conf/nginx.conf
-        lua_shared_dict dogs 10m;
+        
 
 
 
