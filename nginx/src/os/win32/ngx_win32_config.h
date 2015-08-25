@@ -184,7 +184,11 @@ typedef unsigned int        ino_t;
 
 
 #ifndef __MINGW64_VERSION_MAJOR
+#ifdef _WIN64
+typedef __int64             ssize_t;
+#else
 typedef int                 ssize_t;
+#endif
 #endif
 
 
