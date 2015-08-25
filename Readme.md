@@ -1,20 +1,19 @@
 ## Nginx Openresty For Windows ##
 
 ### lastest release ###
-
-Version:1.7.10.2001
+Version:1.7.10.2002
 
 32 bit: http://pan.baidu.com/s/1pJ5l1s3
 
-64 bit: http://pan.baidu.com/s/1kTxmfmJ
+64 bit: http://pan.baidu.com/s/1dDAVQq1
 
-    Release time: 2015-8-20
+changelog：
+1、fix the incompatible  directive of ngx_lua module, eg..
+        nginx: [emerg] invalid lua shared dict size "10m" in e:\nginx/conf/nginx.conf
+        lua_shared_dict dogs 10m;
 
-    Changelog: 
-    1、add concat module to 32 & 64 bit respectively
-    2、add redis2 module to 32 & 64 bit respectively
-    3、add cjson  module to 32 & 64 bit respectively
-    4、add lua51.dll runtime for luajit for 32 & 64 bit respectively
+
+
 
 ### about ###
 
@@ -57,4 +56,18 @@ Version:1.7.10.2  ([http://pan.baidu.com/s/1i3ITTFv](http://pan.baidu.com/s/1i3I
 
     Release time: 2015-8-7
     Changelog: update openresty to version:1.7.10.2
+
+Version:1.7.10.2001
+
+32 bit: http://pan.baidu.com/s/1pJ5l1s3
+
+64 bit: http://pan.baidu.com/s/1kTxmfmJ
+
+    Release time: 2015-8-20
+
+    Changelog: 
+    1、add concat module to 32 & 64 bit respectively
+    2、add redis2 module to 32 & 64 bit respectively
+    3、add cjson  module to 32 & 64 bit respectively
+    4、add lua51.dll runtime for luajit for 32 & 64 bit respectively
 
