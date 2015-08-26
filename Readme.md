@@ -11,11 +11,10 @@ Version:1.7.10.2002
 
     changelog：
 
-    *  fix the incompatible  directive of ngx_lua module, eg. lua_shared_dict dogs 10m; cause the error below:
+    *  fix the incompatible lua_shared_dict directive of ngx_lua module, cause the error below:
 
-        nginx: [emerg] invalid lua shared dict size "10m" in e:\nginx/conf/nginx.conf
+        nginx: [emerg] invalid lua shared dict size "10m"
         
-
 
 
 
