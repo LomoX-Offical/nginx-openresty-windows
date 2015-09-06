@@ -1,20 +1,21 @@
 ## Nginx Openresty For Windows ##
 
 ### lastest release ###
-Version:1.7.10.2002
+Version:1.9.3.1001
 
-32 bit: http://pan.baidu.com/s/1pJ5l1s3
+32 bit: http://pan.baidu.com/s/1jGiwonk
 
-64 bit: http://pan.baidu.com/s/1dDAVQq1
+64 bit: http://pan.baidu.com/s/1jGIUbI2
 
-    Release time: 2015-8-25
+    Release time: 2015-09-06
 
     changelog：
 
-    *  fix the incompatible lua_shared_dict directive of ngx_lua module, cause the error below:
-
-        nginx: [emerg] invalid lua shared dict size "10m"
-        
+    * upgrade the modules of openresty_for_windows to version 1.9.3.1
+		actually, only ngx_postgres_module has upgraded from ngx_postgres-1.0rc6 to ngx_postgres-1.0rc7
+	
+	* pdb file include in the binary cab
+	       
 
 
 
@@ -73,4 +74,18 @@ Version:1.7.10.2001
     2、add redis2 module to 32 & 64 bit respectively
     3、add cjson  module to 32 & 64 bit respectively
     4、add lua51.dll runtime for luajit for 32 & 64 bit respectively
+	
+Version:1.7.10.2002
+
+32 bit: http://pan.baidu.com/s/1pJ5l1s3
+
+64 bit: http://pan.baidu.com/s/1dDAVQq1
+
+    Release time: 2015-8-25
+
+    changelog：
+
+    *  fix the incompatible lua_shared_dict directive of ngx_lua module, cause the error below:
+
+        nginx: [emerg] invalid lua shared dict size "10m"
 
