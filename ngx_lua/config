@@ -42,6 +42,23 @@ if [ -n "$LUAJIT_INC" -o -n "$LUAJIT_LIB" ]; then
         . auto/feature
     fi
 
+    if [ "$NGX_PLATFORM" = win32 ]; then
+        if [ $ngx_found = no ]; then
+            # retry without -ldl
+
+            ngx_feature_path="$LUAJIT_INC"
+            ngx_lua_opt_I="-I$LUAJIT_INC"
+            ngx_lua_opt_L="-L$LUAJIT_LIB"
+            if [ $NGX_RPATH = YES ]; then
+                ngx_feature_libs="-R$LUAJIT_LIB $ngx_lua_opt_L $LUAJIT_LIB/lua51.lib"
+            else
+                ngx_feature_libs="$ngx_lua_opt_L $LUAJIT_LIB/lua51.lib"
+            fi
+
+            . auto/feature
+        fi
+    fi
+
     if [ $ngx_found = no ]; then
         cat << END
         $0: error: ngx_http_lua_module requires the Lua or LuaJIT library and LUAJIT_LIB is defined as $LUAJIT_LIB and LUAJIT_INC (path for lua.h) $LUAJIT_INC, but we cannot find LuaJIT there.
