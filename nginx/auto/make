@@ -194,6 +194,18 @@ $NGX_OBJS${ngx_dirsep}nginx${ngx_binext}:	$ngx_deps$ngx_spacer
 ${ngx_long_end}
 END
 
+if [ "$NGX_PLATFORM" = win32 ]; then
+
+cat << END                                                    >> $NGX_MAKEFILE
+
+	mt -manifest objs/crt.xml -outputresource:\$@;1
+
+END
+
+fi
+
+
+
 
 # ngx_modules.c
 
