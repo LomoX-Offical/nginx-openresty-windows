@@ -2386,7 +2386,7 @@ objs/lib/pcre-8.31/pcre.h:
 
 
 objs/lib/openssl-1.0.1p/openssl/include/openssl/ssl.h:	objs/Makefile
-	$(MAKE) -f auto/lib/openssl/makefile.msvc					OPENSSL="objs/lib/openssl-1.0.1p" OPENSSL_OPT="no-asm"
+	$(MAKE) -f auto/lib/openssl/makefile.msvc					OPENSSL="objs/lib/openssl-1.0.1p" OPENSSL_OPT=""
 
 
 objs/lib/zlib-1.2.8/zlib.lib:	objs/Makefile
