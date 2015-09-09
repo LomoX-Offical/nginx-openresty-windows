@@ -51,6 +51,8 @@ struct ngx_listening_s {
     ngx_listening_t    *previous;
     ngx_connection_t   *connection;
 
+    ngx_uint_t          worker;
+
     unsigned            open:1;
     unsigned            remain:1;
     unsigned            ignore:1;
@@ -65,6 +67,10 @@ struct ngx_listening_s {
 
 #if (NGX_HAVE_INET6 && defined IPV6_V6ONLY)
     unsigned            ipv6only:1;
+#endif
+#if (NGX_HAVE_REUSEPORT)
+    unsigned            reuseport:1;
+    unsigned            add_reuseport:1;
 #endif
     unsigned            keepalive:2;
 
@@ -190,13 +196,26 @@ struct ngx_connection_s {
 };
 
 
+#define ngx_set_connection_log(c, l)                                         \
+                                                                             \
+    c->log->file = l->file;                                                  \
+    c->log->next = l->next;                                                  \
+    c->log->writer = l->writer;                                              \
+    c->log->wdata = l->wdata;                                                \
+    if (!(c->log->log_level & NGX_LOG_DEBUG_CONNECTION)) {                   \
+        c->log->log_level = l->log_level;                                    \
+    }
+
+
 ngx_listening_t *ngx_create_listening(ngx_conf_t *cf, void *sockaddr,
     socklen_t socklen);
+ngx_int_t ngx_clone_listening(ngx_conf_t *cf, ngx_listening_t *ls);
 ngx_int_t ngx_set_inherited_sockets(ngx_cycle_t *cycle);
 ngx_int_t ngx_open_listening_sockets(ngx_cycle_t *cycle);
 void ngx_configure_listening_sockets(ngx_cycle_t *cycle);
 void ngx_close_listening_sockets(ngx_cycle_t *cycle);
 void ngx_close_connection(ngx_connection_t *c);
+void ngx_close_idle_connections(ngx_cycle_t *cycle);
 ngx_int_t ngx_connection_local_sockaddr(ngx_connection_t *c, ngx_str_t *s,
     ngx_uint_t port);
 ngx_int_t ngx_connection_error(ngx_connection_t *c, ngx_err_t err, char *text);

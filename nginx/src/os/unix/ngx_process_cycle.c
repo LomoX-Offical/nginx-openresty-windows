@@ -29,6 +29,7 @@ static void ngx_cache_loader_process_handler(ngx_event_t *ev);
 
 
 ngx_uint_t    ngx_process;
+ngx_uint_t    ngx_worker;
 ngx_pid_t     ngx_pid;
 
 sig_atomic_t  ngx_reap;
@@ -727,10 +728,8 @@ ngx_worker_process_cycle(ngx_cycle_t *cycle, void *data)
 {
     ngx_int_t worker = (intptr_t) data;
 
-    ngx_uint_t         i;
-    ngx_connection_t  *c;
-
     ngx_process = NGX_PROCESS_WORKER;
+    ngx_worker = worker;
 
     ngx_worker_process_init(cycle, worker);
 
@@ -739,19 +738,6 @@ ngx_worker_process_cycle(ngx_cycle_t *cycle, void *data)
     for ( ;; ) {
 
         if (ngx_exiting) {
-
-            c = cycle->connections;
-
-            for (i = 0; i < cycle->connection_n; i++) {
-
-                /* THREAD: lock */
-
-                if (c[i].fd != -1 && c[i].idle) {
-                    c[i].close = 1;
-                    c[i].read->handler(c[i].read);
-                }
-            }
-
             ngx_event_cancel_timers();
 
             if (ngx_event_timer_rbtree.root == ngx_event_timer_rbtree.sentinel)
@@ -779,8 +765,9 @@ ngx_worker_process_cycle(ngx_cycle_t *cycle, void *data)
             ngx_setproctitle("worker process is shutting down");
 
             if (!ngx_exiting) {
-                ngx_close_listening_sockets(cycle);
                 ngx_exiting = 1;
+                ngx_close_listening_sockets(cycle);
+                ngx_close_idle_connections(cycle);
             }
         }
 
@@ -839,19 +826,6 @@ ngx_worker_process_init(ngx_cycle_t *cycle, ngx_int_t worker)
                           ccf->rlimit_core);
         }
     }
-
-#ifdef RLIMIT_SIGPENDING
-    if (ccf->rlimit_sigpending != NGX_CONF_UNSET) {
-        rlmt.rlim_cur = (rlim_t) ccf->rlimit_sigpending;
-        rlmt.rlim_max = (rlim_t) ccf->rlimit_sigpending;
-
-        if (setrlimit(RLIMIT_SIGPENDING, &rlmt) == -1) {
-            ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
-                          "setrlimit(RLIMIT_SIGPENDING, %i) failed",
-                          ccf->rlimit_sigpending);
-        }
-    }
-#endif
 
     if (geteuid() == 0) {
         if (setgid(ccf->group) == -1) {
