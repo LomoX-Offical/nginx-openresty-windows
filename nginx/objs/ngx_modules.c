@@ -50,6 +50,7 @@ extern ngx_module_t  ngx_http_upstream_hash_module;
 extern ngx_module_t  ngx_http_upstream_ip_hash_module;
 extern ngx_module_t  ngx_http_upstream_least_conn_module;
 extern ngx_module_t  ngx_http_upstream_keepalive_module;
+extern ngx_module_t  ngx_http_upstream_zone_module;
 extern ngx_module_t  ngx_http_stub_status_module;
 extern ngx_module_t  ndk_http_module;
 extern ngx_module_t  ngx_coolkit_module;
@@ -90,6 +91,16 @@ extern ngx_module_t  ngx_mail_imap_module;
 extern ngx_module_t  ngx_mail_smtp_module;
 extern ngx_module_t  ngx_mail_auth_http_module;
 extern ngx_module_t  ngx_mail_proxy_module;
+extern ngx_module_t  ngx_stream_module;
+extern ngx_module_t  ngx_stream_core_module;
+extern ngx_module_t  ngx_stream_proxy_module;
+extern ngx_module_t  ngx_stream_upstream_module;
+extern ngx_module_t  ngx_stream_ssl_module;
+extern ngx_module_t  ngx_stream_limit_conn_module;
+extern ngx_module_t  ngx_stream_access_module;
+extern ngx_module_t  ngx_stream_upstream_hash_module;
+extern ngx_module_t  ngx_stream_upstream_least_conn_module;
+extern ngx_module_t  ngx_stream_upstream_zone_module;
 
 ngx_module_t *ngx_modules[] = {
     &ngx_core_module,
@@ -138,6 +149,7 @@ ngx_module_t *ngx_modules[] = {
     &ngx_http_upstream_ip_hash_module,
     &ngx_http_upstream_least_conn_module,
     &ngx_http_upstream_keepalive_module,
+    &ngx_http_upstream_zone_module,
     &ngx_http_stub_status_module,
     &ndk_http_module,
     &ngx_coolkit_module,
@@ -178,6 +190,16 @@ ngx_module_t *ngx_modules[] = {
     &ngx_mail_smtp_module,
     &ngx_mail_auth_http_module,
     &ngx_mail_proxy_module,
+    &ngx_stream_module,
+    &ngx_stream_core_module,
+    &ngx_stream_proxy_module,
+    &ngx_stream_upstream_module,
+    &ngx_stream_ssl_module,
+    &ngx_stream_limit_conn_module,
+    &ngx_stream_access_module,
+    &ngx_stream_upstream_hash_module,
+    &ngx_stream_upstream_least_conn_module,
+    &ngx_stream_upstream_zone_module,
     NULL
 };
 

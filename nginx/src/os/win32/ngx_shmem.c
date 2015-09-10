@@ -36,33 +36,14 @@ typedef	u_char *	caddr_t;
 
 
 #ifdef _WIN64
-#define NGX_SHMEM_BASE  0x0000047047e00000
+#define NGX_SHMEM_BASE  0x000000200000000
 #else
-#define NGX_SHMEM_BASE  0x2efe0000
+#define NGX_SHMEM_BASE  0x20000000
 #endif
 
 
 ngx_uint_t  ngx_allocation_granularity;
 
-
-u_char* _get_address(uint64_t size) {
-    static u_char* nginx_hmodule = NULL;
-    u_char* retval = NULL;
-
-	if (nginx_hmodule == NULL) {
-
-#ifdef _WIN64
-    nginx_hmodule = (u_char*)0x200000000; //GetModuleHandle(NULL);
-#else
-    nginx_hmodule = (u_char*)0x20000000; //GetModuleHandle(NULL);
-#endif
-	}
-    
-    retval = nginx_hmodule;
-	nginx_hmodule = off_addr(nginx_hmodule, size);
-
-	return retval;
-}
 
 ngx_int_t
 ngx_shm_alloc(ngx_shm_t *shm)
@@ -70,7 +51,6 @@ ngx_shm_alloc(ngx_shm_t *shm)
     u_char    *name;
     uint64_t   size;
 	u_char    *reserved_mem;
-	u_char    *base_address;
     static u_char  *base = (u_char *) NGX_SHMEM_BASE;
 
     name = ngx_alloc(shm->name.len + 9 + NGX_INT32_LEN, shm->log); // 9 = "Global\\" + "_" + \0
@@ -105,6 +85,14 @@ ngx_shm_alloc(ngx_shm_t *shm)
         shm->exists = 1;
     }
 
+    reserved_mem = (u_char*)VirtualAlloc(
+        base,
+        shm->size,
+        MEM_RESERVE,
+        PAGE_NOACCESS);
+    VirtualFree(reserved_mem, 0, MEM_RELEASE);
+    ngx_log_error(NGX_LOG_NOTICE, shm->log, ngx_errno, "VirtualAlloc MEM_RELEASE: %p, base_address: %p", reserved_mem, base);
+
     shm->addr = MapViewOfFileEx(shm->handle, FILE_MAP_WRITE, 0, 0, 0, base);
 
     if (shm->addr != NULL) {
@@ -127,9 +115,6 @@ ngx_shm_alloc(ngx_shm_t *shm)
      */
 
     shm->addr = MapViewOfFile(shm->handle, FILE_MAP_WRITE, 0, 0, 0);
-
-	shm->addr = MapViewOfFileEx(shm->handle, FILE_MAP_WRITE, 0, 0, 0, reserved_mem);
-
     if (shm->addr != NULL) {
 		ngx_log_error(NGX_LOG_NOTICE, shm->log, ngx_errno,
 			"MapViewOfFile(%uz) of file mapping \"%V\" success: %p",
@@ -149,22 +134,6 @@ ngx_shm_alloc(ngx_shm_t *shm)
 
     return NGX_ERROR;
 }
-/*
-allocate:
-size = shm->size;
-shm->addr = ngx_alloc(size, shm->log);
-
-if (shm->addr != NULL) {
-	return NGX_OK;
-}
-return NGX_ERROR;
-
-
-release:
-ngx_free(shm->addr);
-
-*/
-
 
 ngx_int_t
 ngx_shm_remap(ngx_shm_t *shm, u_char *addr)
