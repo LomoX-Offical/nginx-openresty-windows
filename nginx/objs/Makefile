@@ -14,8 +14,8 @@ ALL_INCS = -I src/core \
 	-I ../ngx_postgres-1.0rc7/include \
 	-I ../luajit-root/luajit/include/luajit-2.1 \
 	-I ../ngx_lua/src/api \
-	-I objs/lib/pcre-8.31 \
-	-I objs/lib/openssl-1.0.1p/openssl/include \
+	-I objs/lib/pcre-8.37 \
+	-I objs/lib/openssl-1.0.2d/openssl/include \
 	-I objs/lib/zlib-1.2.8 \
 	-I objs \
 	-I src/http \
@@ -79,8 +79,8 @@ CORE_DEPS = src/core/nginx.h \
 	src/os/win32/ngx_process_cycle.h \
 	src/event/ngx_event_openssl.h \
 	src/core/ngx_regex.h \
-	objs/lib/pcre-8.31/pcre.h \
-	objs/lib/openssl-1.0.1p/openssl/include/openssl/ssl.h \
+	objs/lib/pcre-8.37/pcre.h \
+	objs/lib/openssl-1.0.2d/openssl/include/openssl/ssl.h \
 	objs/ngx_auto_config.h
 
 
@@ -93,8 +93,8 @@ CORE_INCS = -I src/core \
 	-I ../ngx_postgres-1.0rc7/include \
 	-I ../luajit-root/luajit/include/luajit-2.1 \
 	-I ../ngx_lua/src/api \
-	-I objs/lib/pcre-8.31 \
-	-I objs/lib/openssl-1.0.1p/openssl/include \
+	-I objs/lib/pcre-8.37 \
+	-I objs/lib/openssl-1.0.2d/openssl/include \
 	-I objs/lib/zlib-1.2.8 \
 	-I objs
 
@@ -404,7 +404,7 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/addon/src/ngx_http_redis2_util.obj \
 	objs/ngx_modules.obj \
 	objs/nginx.res \
-	objs/lib/pcre-8.31/pcre.lib \
+	objs/lib/pcre-8.37/pcre.lib \
 	objs/lib/zlib-1.2.8/zlib.lib
 	$(LINK) @<<
 	-Feobjs/nginx
@@ -670,7 +670,7 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/addon/src/ngx_http_redis2_reply.obj 
 	objs/addon/src/ngx_http_redis2_util.obj 
 	objs/ngx_modules.obj 
-	-L../luajit-root/luajit/lib kernel32.lib user32.lib advapi32.lib ws2_32.lib ../ngx_postgres-1.0rc7/lib/libpq.lib -L../luajit-root/luajit/lib ../luajit-root/luajit/lib/lua51.lib objs/lib/pcre-8.31/pcre.lib objs/lib/openssl-1.0.1p/openssl/lib/ssleay32.lib objs/lib/openssl-1.0.1p/openssl/lib/libeay32.lib gdi32.lib crypt32.lib objs/lib/zlib-1.2.8/zlib.lib 
+	-L../luajit-root/luajit/lib kernel32.lib user32.lib advapi32.lib ws2_32.lib ../ngx_postgres-1.0rc7/lib/libpq.lib -L../luajit-root/luajit/lib ../luajit-root/luajit/lib/lua51.lib objs/lib/pcre-8.37/pcre.lib objs/lib/openssl-1.0.2d/openssl/lib/ssleay32.lib objs/lib/openssl-1.0.2d/openssl/lib/libeay32.lib gdi32.lib crypt32.lib objs/lib/zlib-1.2.8/zlib.lib 
 	objs/nginx.res -link -verbose:lib -debug
 	
 <<
@@ -2516,15 +2516,15 @@ objs/nginx.res:	 src/os/win32/nginx.ico
 	rc -foobjs/nginx.res $(CORE_INCS) src/os/win32/nginx.rc
 
 
-objs/lib/pcre-8.31/pcre.lib:	objs/lib/pcre-8.31/pcre.h objs/Makefile
-	$(MAKE) -f auto/lib/pcre/makefile.msvc PCRE="objs/lib/pcre-8.31" CPU_OPT="" LIBC=-MT
+objs/lib/pcre-8.37/pcre.lib:	objs/lib/pcre-8.37/pcre.h objs/Makefile
+	$(MAKE) -f auto/lib/pcre/makefile.msvc PCRE="objs/lib/pcre-8.37" CPU_OPT="" LIBC=-MT
 
-objs/lib/pcre-8.31/pcre.h:
-	$(MAKE) -f auto/lib/pcre/makefile.msvc PCRE="objs/lib/pcre-8.31" pcre.h
+objs/lib/pcre-8.37/pcre.h:
+	$(MAKE) -f auto/lib/pcre/makefile.msvc PCRE="objs/lib/pcre-8.37" pcre.h
 
 
-objs/lib/openssl-1.0.1p/openssl/include/openssl/ssl.h:	objs/Makefile
-	$(MAKE) -f auto/lib/openssl/makefile.msvc					OPENSSL="objs/lib/openssl-1.0.1p" OPENSSL_OPT=""
+objs/lib/openssl-1.0.2d/openssl/include/openssl/ssl.h:	objs/Makefile
+	$(MAKE) -f auto/lib/openssl/makefile.msvc					OPENSSL="objs/lib/openssl-1.0.2d" OPENSSL_OPT=""
 
 
 objs/lib/zlib-1.2.8/zlib.lib:	objs/Makefile
