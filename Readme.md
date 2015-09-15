@@ -2,57 +2,85 @@
 
 ### lastest release ###
 
-Version:1.9.4.1001
+Version:1.9.4.1002
 
-32 bit: http://pan.baidu.com/s/1o6Kike2
+32 bit: http://pan.baidu.com/s/1mg1V5Ny
 
-64 bit: http://pan.baidu.com/s/1mgzn1Qo
+64 bit: http://pan.baidu.com/s/1i393jVJ
 
-Release time: 2015-09-12
+Release time: 2015-09-15
 
 Changelog: 
-big update :
-update nginx core to 1.9.4
-update openssl to 1.0.2d
-update pcre to 8.37
+when compile nginx export all the functions that resty needed, 
+now in total 49 functions have been exported:
+=============================================================
+EXPORTS
+	ngx_http_lua_ffi_encode_base64 @1
+	ngx_http_lua_ffi_decode_base64 @2
 
-now openresty for windows support these modules below:
-ipv6 mail stream
+	ngx_http_lua_ffi_get_ctx_ref @3
+	ngx_http_lua_ffi_set_ctx_ref @4
 
-nginx offical module:
-http_realip_module
-http_addition_module
-http_sub_module
-http_dav_module
-http_stub_status_module
-http_flv_module
-http_mp4_module
-http_gunzip_module
-http_gzip_static_module
-http_auth_request_module
-http_random_index_module
-http_secure_link_module
-mail
-http_ssl_module
-mail_ssl_module
-http_spdy_module
+	ngx_http_lua_ffi_exit @5
 
-addon module:
-ngx_devel_kit-0.2.19
-echo-nginx-module-0.58
-ngx_coolkit-0.2rc3
-set-misc-nginx-module-0.29
-ngx_postgres-1.0rc7
-form-input-nginx-module-0.11
-encrypted-session-nginx-module-0.04
-ngx_lua
-ngx_lua_upstream-0.03
-headers-more-nginx-module-0.26
-array-var-nginx-module-0.04
-nginx-http-concat-module
-rds-json-nginx-module-0.14
-redis2-nginx-module-0.12
-        
+	ngx_http_lua_ffi_md5_bin @6
+	ngx_http_lua_ffi_md5 @7
+	ngx_http_lua_ffi_sha1_bin @8
+
+    ngx_http_lua_ffi_get_resp_status @9
+    ngx_http_lua_ffi_set_resp_status @10
+    ngx_http_lua_ffi_is_subrequest @11
+    ngx_http_lua_ffi_headers_sent @12
+
+    ngx_http_lua_ffi_compile_regex @13
+    ngx_http_lua_ffi_exec_regex @14
+    ngx_http_lua_ffi_destroy_regex @15
+    ngx_http_lua_ffi_compile_replace_template @16
+
+    ngx_http_lua_ffi_create_script_engine @17
+    ngx_http_lua_ffi_init_script_engine @18
+    ngx_http_lua_ffi_destroy_script_engine @19
+    ngx_http_lua_ffi_script_eval_len @20
+    ngx_http_lua_ffi_script_eval_data @21
+    ngx_http_lua_ffi_max_regex_cache_size @22
+
+
+    ngx_http_lua_ffi_req_get_headers_count @23
+    ngx_http_lua_ffi_req_get_headers @24
+    ngx_http_lua_ffi_req_get_uri_args_count @25
+    ngx_http_lua_ffi_req_get_querystring_len @26
+    ngx_http_lua_ffi_req_get_uri_args @27
+    ngx_http_lua_ffi_req_start_time @28
+    ngx_http_lua_ffi_req_get_method @29
+    ngx_http_lua_ffi_req_get_method_name @30
+    ngx_http_lua_ffi_req_set_method @31
+    ngx_http_lua_ffi_req_header_set_single_value @32
+    ngx_http_lua_ffi_set_resp_header @33
+    ngx_http_lua_ffi_get_resp_header @34
+		
+
+
+    ngx_http_lua_ffi_shdict_get @35
+    ngx_http_lua_ffi_shdict_incr @36
+    ngx_http_lua_ffi_shdict_store @37
+    ngx_http_lua_ffi_shdict_flush_all @38
+
+	ngx_http_lua_ffi_now @39
+	ngx_http_lua_ffi_time @40
+
+    ngx_http_lua_ffi_uri_escaped_length @41
+    ngx_http_lua_ffi_escape_uri @42
+    ngx_http_lua_ffi_unescape_uri @43
+ 
+	ngx_http_lua_ffi_var_get @44
+    ngx_http_lua_ffi_var_set @45
+
+	ngx_http_lua_ffi_worker_pid @46
+	ngx_http_lua_ffi_worker_exiting @47
+
+	ngx_hex_dump @48
+	ngx_atoi @49
+	
 
 ### about ###
 
@@ -139,4 +167,55 @@ changelog：
     actually, only ngx_postgres_module has upgraded from ngx_postgres-1.0rc6 to ngx_postgres-1.0rc7
 
 * pdb file include in the binary cab
+
+Version:1.9.4.1001
+
+32 bit: http://pan.baidu.com/s/1o6Kike2
+
+64 bit: http://pan.baidu.com/s/1mgzn1Qo
+
+Release time: 2015-09-12
+
+Changelog: 
+big update :
+update nginx core to 1.9.4
+update openssl to 1.0.2d
+update pcre to 8.37
+
+now openresty for windows support these modules below:
+ipv6 mail stream
+
+nginx offical module:
+http_realip_module
+http_addition_module
+http_sub_module
+http_dav_module
+http_stub_status_module
+http_flv_module
+http_mp4_module
+http_gunzip_module
+http_gzip_static_module
+http_auth_request_module
+http_random_index_module
+http_secure_link_module
+mail
+http_ssl_module
+mail_ssl_module
+http_spdy_module
+
+addon module:
+ngx_devel_kit-0.2.19
+echo-nginx-module-0.58
+ngx_coolkit-0.2rc3
+set-misc-nginx-module-0.29
+ngx_postgres-1.0rc7
+form-input-nginx-module-0.11
+encrypted-session-nginx-module-0.04
+ngx_lua
+ngx_lua_upstream-0.03
+headers-more-nginx-module-0.26
+array-var-nginx-module-0.04
+nginx-http-concat-module
+rds-json-nginx-module-0.14
+redis2-nginx-module-0.12
 
