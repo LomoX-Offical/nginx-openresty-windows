@@ -671,7 +671,7 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/addon/src/ngx_http_redis2_util.obj 
 	objs/ngx_modules.obj 
 	-L../luajit-root-x64/luajit/lib kernel32.lib user32.lib advapi32.lib ws2_32.lib ../ngx_postgres-1.0rc7/lib_x64/libpq.lib -L../luajit-root-x64/luajit/lib ../luajit-root-x64/luajit/lib/lua51.lib objs/lib_x64/pcre-8.37/pcre.lib objs/lib_x64/openssl-1.0.2d/openssl/lib/ssleay32.lib objs/lib_x64/openssl-1.0.2d/openssl/lib/libeay32.lib gdi32.lib crypt32.lib objs/lib_x64/zlib-1.2.8/zlib.lib 
-	objs/nginx.res -link -verbose:lib -debug -base:0x190000000 -DYNAMICBASE:NO
+	objs/nginx.res -link -verbose:lib -debug -def:nginx.def -base:0x190000000 -DYNAMICBASE:NO
 	
 <<
 
