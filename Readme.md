@@ -177,8 +177,9 @@ Release time: 2015-09-06
 
 changelog：
 
-* upgrade the modules of openresty_for_windows to version 1.9.3.1
-    actually, only ngx_postgres_module has upgraded from ngx_postgres-1.0rc6 to ngx_postgres-1.0rc7
+* upgrade the modules of Openresty to version 1.9.3.1
+    actually, only ngx_postgres_module has upgraded from 
+    ngx_postgres-1.0rc6 to ngx_postgres-1.0rc7
 
 * pdb file include in the binary cab
 
@@ -191,45 +192,48 @@ Version:1.9.4.1001
 Release time: 2015-09-12
 
 Changelog: 
+
 big update :
-update nginx core to 1.9.4
-update openssl to 1.0.2d
-update pcre to 8.37
+-  update nginx core to 1.9.4
+-  update openssl to 1.0.2d
+-  update pcre to 8.37
 
-now openresty for windows support these modules below:
-ipv6 mail stream
+build with new configures:
+- ipv6
+- mail
+- stream
 
-nginx offical module:
-http_realip_module
-http_addition_module
-http_sub_module
-http_dav_module
-http_stub_status_module
-http_flv_module
-http_mp4_module
-http_gunzip_module
-http_gzip_static_module
-http_auth_request_module
-http_random_index_module
-http_secure_link_module
-mail
-http_ssl_module
-mail_ssl_module
-http_spdy_module
+build with these modules below:
+- nginx offical module:
+- http_realip_module
+- http_addition_module
+- http_sub_module
+- http_dav_module
+- http_stub_status_module
+- http_flv_module
+- http_mp4_module
+- http_gunzip_module
+- http_gzip_static_module
+- http_auth_request_module
+- http_random_index_module
+- http_secure_link_module
+- http_ssl_module
+- mail_ssl_module
+- http_spdy_module
 
 addon module:
-ngx_devel_kit-0.2.19
-echo-nginx-module-0.58
-ngx_coolkit-0.2rc3
-set-misc-nginx-module-0.29
-ngx_postgres-1.0rc7
-form-input-nginx-module-0.11
-encrypted-session-nginx-module-0.04
-ngx_lua
-ngx_lua_upstream-0.03
-headers-more-nginx-module-0.26
-array-var-nginx-module-0.04
-nginx-http-concat-module
-rds-json-nginx-module-0.14
-redis2-nginx-module-0.12
+- ngx_devel_kit-0.2.19
+- echo-nginx-module-0.58
+- ngx_coolkit-0.2rc3
+- set-misc-nginx-module-0.29
+- ngx_postgres-1.0rc7
+- form-input-nginx-module-0.11
+- encrypted-session-nginx-module-0.04
+- ngx_lua
+- ngx_lua_upstream-0.03
+- headers-more-nginx-module-0.26
+- array-var-nginx-module-0.04
+- nginx-http-concat-module
+- rds-json-nginx-module-0.14
+- redis2-nginx-module-0.12
 
