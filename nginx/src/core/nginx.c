@@ -118,13 +118,6 @@ static ngx_command_t  ngx_core_commands[] = {
       offsetof(ngx_core_conf_t, rlimit_core),
       NULL },
 
-    { ngx_string("worker_rlimit_sigpending"),
-      NGX_MAIN_CONF|NGX_DIRECT_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_num_slot,
-      0,
-      offsetof(ngx_core_conf_t, rlimit_sigpending),
-      NULL },
-
     { ngx_string("working_directory"),
       NGX_MAIN_CONF|NGX_DIRECT_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_str_slot,
@@ -138,24 +131,6 @@ static ngx_command_t  ngx_core_commands[] = {
       0,
       0,
       NULL },
-
-#if (NGX_OLD_THREADS)
-
-    { ngx_string("worker_threads"),
-      NGX_MAIN_CONF|NGX_DIRECT_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_num_slot,
-      0,
-      offsetof(ngx_core_conf_t, worker_threads),
-      NULL },
-
-    { ngx_string("thread_stack_size"),
-      NGX_MAIN_CONF|NGX_DIRECT_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_size_slot,
-      0,
-      offsetof(ngx_core_conf_t, thread_stack_size),
-      NULL },
-
-#endif
 
       ngx_null_command
 };
@@ -201,9 +176,11 @@ static char **ngx_os_environ;
 int ngx_cdecl
 main(int argc, char *const *argv)
 {
-    ngx_int_t         i;
+    ngx_buf_t        *b;
     ngx_log_t        *log;
+    ngx_uint_t        i;
     ngx_cycle_t      *cycle, init_cycle;
+    ngx_conf_dump_t  *cd;
     ngx_core_conf_t  *ccf;
 
     ngx_debug_init();
@@ -221,7 +198,7 @@ main(int argc, char *const *argv)
 
         if (ngx_show_help) {
             ngx_write_stderr(
-                "Usage: nginx [-?hvVtq] [-s signal] [-c filename] "
+                "Usage: nginx [-?hvVtTq] [-s signal] [-c filename] "
                              "[-p prefix] [-g directives]" NGX_LINEFEED
                              NGX_LINEFEED
                 "Options:" NGX_LINEFEED
@@ -230,6 +207,8 @@ main(int argc, char *const *argv)
                 "  -V            : show version and configure options then exit"
                                    NGX_LINEFEED
                 "  -t            : test configuration and exit" NGX_LINEFEED
+                "  -T            : test configuration, dump it and exit"
+                                   NGX_LINEFEED
                 "  -q            : suppress non-error messages "
                                    "during configuration testing" NGX_LINEFEED
                 "  -s signal     : send signal to a master process: "
@@ -356,6 +335,23 @@ main(int argc, char *const *argv)
         if (!ngx_quiet_mode) {
             ngx_log_stderr(0, "configuration file %s test is successful",
                            cycle->conf_file.data);
+        }
+
+        if (ngx_dump_config) {
+            cd = cycle->config_dump.elts;
+
+            for (i = 0; i < cycle->config_dump.nelts; i++) {
+
+                ngx_write_stdout("# configuration file ");
+                (void) ngx_write_fd(ngx_stdout, cd[i].name.data,
+                                    cd[i].name.len);
+                ngx_write_stdout(":" NGX_LINEFEED);
+
+                b = cd[i].buffer;
+
+                (void) ngx_write_fd(ngx_stdout, b->pos, b->last - b->pos);
+                ngx_write_stdout(NGX_LINEFEED);
+            }
         }
 
         return 0;
@@ -714,6 +710,11 @@ ngx_get_options(int argc, char *const *argv)
                 ngx_test_config = 1;
                 break;
 
+            case 'T':
+                ngx_test_config = 1;
+                ngx_dump_config = 1;
+                break;
+
             case 'q':
                 ngx_quiet_mode = 1;
                 break;
@@ -966,15 +967,9 @@ ngx_core_module_create_conf(ngx_cycle_t *cycle)
 
     ccf->rlimit_nofile = NGX_CONF_UNSET;
     ccf->rlimit_core = NGX_CONF_UNSET;
-    ccf->rlimit_sigpending = NGX_CONF_UNSET;
 
     ccf->user = (ngx_uid_t) NGX_CONF_UNSET_UINT;
     ccf->group = (ngx_gid_t) NGX_CONF_UNSET_UINT;
-
-#if (NGX_OLD_THREADS)
-    ccf->worker_threads = NGX_CONF_UNSET;
-    ccf->thread_stack_size = NGX_CONF_UNSET_SIZE;
-#endif
 
     if (ngx_array_init(&ccf->env, cycle->pool, 1, sizeof(ngx_str_t))
         != NGX_OK)
@@ -1009,14 +1004,6 @@ ngx_core_module_init_conf(ngx_cycle_t *cycle, void *conf)
                       "the number of \"worker_cpu_affinity\" masks, "
                       "using last mask for remaining worker processes");
     }
-
-#endif
-
-#if (NGX_OLD_THREADS)
-
-    ngx_conf_init_value(ccf->worker_threads, 0);
-    ngx_threads_n = ccf->worker_threads;
-    ngx_conf_init_size_value(ccf->thread_stack_size, 2 * 1024 * 1024);
 
 #endif
 

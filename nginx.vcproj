@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="nginx_1_8_0"
+	Name="nginx_1_9_4"
 	ProjectGUID="{1C469FB4-7E6E-4AB3-8440-FB6E4C9B510A}"
 	RootNamespace="nginx"
 	Keyword="Win32Proj"
@@ -340,6 +340,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\nginx\src\core\ngx_parse_time.c"
+					>
+				</File>
+				<File
+					RelativePath=".\nginx\src\core\ngx_parse_time.h"
+					>
+				</File>
+				<File
 					RelativePath=".\nginx\src\core\ngx_proxy_protocol.c"
 					>
 				</File>
@@ -388,6 +396,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\nginx\src\core\ngx_rwlock.c"
+					>
+				</File>
+				<File
+					RelativePath=".\nginx\src\core\ngx_rwlock.h"
+					>
+				</File>
+				<File
 					RelativePath=".\nginx\src\core\ngx_sha1.h"
 					>
 				</File>
@@ -420,6 +436,22 @@
 					>
 				</File>
 				<File
+					RelativePath=".\nginx\src\core\ngx_syslog.c"
+					>
+				</File>
+				<File
+					RelativePath=".\nginx\src\core\ngx_syslog.h"
+					>
+				</File>
+				<File
+					RelativePath=".\nginx\src\core\ngx_thread_pool.c"
+					>
+				</File>
+				<File
+					RelativePath=".\nginx\src\core\ngx_thread_pool.h"
+					>
+				</File>
+				<File
 					RelativePath=".\nginx\src\core\ngx_times.c"
 					>
 				</File>
@@ -448,14 +480,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\nginx\src\event\ngx_event_busy_lock.c"
-					>
-				</File>
-				<File
-					RelativePath=".\nginx\src\event\ngx_event_busy_lock.h"
-					>
-				</File>
-				<File
 					RelativePath=".\nginx\src\event\ngx_event_connect.c"
 					>
 				</File>
@@ -465,10 +489,6 @@
 				</File>
 				<File
 					RelativePath=".\nginx\src\event\ngx_event_connectex.c"
-					>
-				</File>
-				<File
-					RelativePath=".\nginx\src\event\ngx_event_mutex.c"
 					>
 				</File>
 				<File
@@ -511,13 +531,13 @@
 					RelativePath=".\nginx\src\event\ngx_event_timer.h"
 					>
 				</File>
+				<File
+					RelativePath=".\nginx\src\event\ngx_event_udp_recv.c"
+					>
+				</File>
 				<Filter
 					Name="modules"
 					>
-					<File
-						RelativePath=".\nginx\src\event\modules\ngx_aio_module.c"
-						>
-					</File>
 					<File
 						RelativePath=".\nginx\src\event\modules\ngx_devpoll_module.c"
 						>
@@ -547,10 +567,6 @@
 						>
 					</File>
 					<File
-						RelativePath=".\nginx\src\event\modules\ngx_rtsig_module.c"
-						>
-					</File>
-					<File
 						RelativePath=".\nginx\src\event\modules\ngx_select_module.c"
 						>
 					</File>
@@ -569,14 +585,6 @@
 				</File>
 				<File
 					RelativePath=".\nginx\src\http\ngx_http.h"
-					>
-				</File>
-				<File
-					RelativePath=".\nginx\src\http\ngx_http_busy_lock.c"
-					>
-				</File>
-				<File
-					RelativePath=".\nginx\src\http\ngx_http_busy_lock.h"
 					>
 				</File>
 				<File
@@ -612,11 +620,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\nginx\src\http\ngx_http_parse_time.c"
+					RelativePath=".\nginx\src\http\ngx_http_postpone_filter_module.c"
 					>
 				</File>
 				<File
-					RelativePath=".\nginx\src\http\ngx_http_postpone_filter_module.c"
+					RelativePath=".\nginx\src\http\ngx_http_probe.h"
 					>
 				</File>
 				<File
@@ -871,6 +879,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\nginx\src\http\modules\ngx_http_upstream_hash_module.c"
+						>
+					</File>
+					<File
 						RelativePath=".\nginx\src\http\modules\ngx_http_upstream_ip_hash_module.c"
 						>
 					</File>
@@ -880,6 +892,10 @@
 					</File>
 					<File
 						RelativePath=".\nginx\src\http\modules\ngx_http_upstream_least_conn_module.c"
+						>
+					</File>
+					<File
+						RelativePath=".\nginx\src\http\modules\ngx_http_upstream_zone_module.c"
 						>
 					</File>
 					<File
@@ -1039,22 +1055,6 @@
 					Name="unix"
 					>
 					<File
-						RelativePath=".\nginx\src\os\unix\ngx_aio_read.c"
-						>
-					</File>
-					<File
-						RelativePath=".\nginx\src\os\unix\ngx_aio_read_chain.c"
-						>
-					</File>
-					<File
-						RelativePath=".\nginx\src\os\unix\ngx_aio_write.c"
-						>
-					</File>
-					<File
-						RelativePath=".\nginx\src\os\unix\ngx_aio_write_chain.c"
-						>
-					</File>
-					<File
 						RelativePath=".\nginx\src\os\unix\ngx_alloc.c"
 						>
 					</File>
@@ -1127,14 +1127,6 @@
 						>
 					</File>
 					<File
-						RelativePath=".\nginx\src\os\unix\ngx_freebsd_rfork_thread.c"
-						>
-					</File>
-					<File
-						RelativePath=".\nginx\src\os\unix\ngx_freebsd_rfork_thread.h"
-						>
-					</File>
-					<File
 						RelativePath=".\nginx\src\os\unix\ngx_freebsd_sendfile_chain.c"
 						>
 					</File>
@@ -1160,6 +1152,10 @@
 					</File>
 					<File
 						RelativePath=".\nginx\src\os\unix\ngx_linux_aio_read.c"
+						>
+					</File>
+					<File
+						RelativePath=".\nginx\src\os\unix\ngx_linux_aio_write.c"
 						>
 					</File>
 					<File
@@ -1200,10 +1196,6 @@
 					</File>
 					<File
 						RelativePath=".\nginx\src\os\unix\ngx_process_cycle.h"
-						>
-					</File>
-					<File
-						RelativePath=".\nginx\src\os\unix\ngx_pthread_thread.c"
 						>
 					</File>
 					<File
@@ -1287,6 +1279,18 @@
 						>
 					</File>
 					<File
+						RelativePath=".\nginx\src\os\unix\ngx_thread_cond.c"
+						>
+					</File>
+					<File
+						RelativePath=".\nginx\src\os\unix\ngx_thread_id.c"
+						>
+					</File>
+					<File
+						RelativePath=".\nginx\src\os\unix\ngx_thread_mutex.c"
+						>
+					</File>
+					<File
 						RelativePath=".\nginx\src\os\unix\ngx_time.c"
 						>
 					</File>
@@ -1308,10 +1312,6 @@
 					</File>
 					<File
 						RelativePath=".\nginx\src\os\unix\ngx_writev_chain.c"
-						>
-					</File>
-					<File
-						RelativePath=".\nginx\src\os\unix\rfork_thread.S"
 						>
 					</File>
 				</Filter>
@@ -1431,6 +1431,14 @@
 						>
 					</File>
 					<File
+						RelativePath=".\nginx\src\os\win32\ngx_transmitfile_chain.c"
+						>
+					</File>
+					<File
+						RelativePath=".\nginx\src\os\win32\ngx_transmitpackets_chain.c"
+						>
+					</File>
+					<File
 						RelativePath=".\nginx\src\os\win32\ngx_udp_wsarecv.c"
 						>
 					</File>
@@ -1485,6 +1493,74 @@
 				</File>
 				<File
 					RelativePath=".\nginx\src\dtrace\stap-nginx"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="stream"
+				>
+				<File
+					RelativePath=".\nginx\src\stream\ngx_stream.c"
+					>
+				</File>
+				<File
+					RelativePath=".\nginx\src\stream\ngx_stream.h"
+					>
+				</File>
+				<File
+					RelativePath=".\nginx\src\stream\ngx_stream_access_module.c"
+					>
+				</File>
+				<File
+					RelativePath=".\nginx\src\stream\ngx_stream_core_module.c"
+					>
+				</File>
+				<File
+					RelativePath=".\nginx\src\stream\ngx_stream_handler.c"
+					>
+				</File>
+				<File
+					RelativePath=".\nginx\src\stream\ngx_stream_limit_conn_module.c"
+					>
+				</File>
+				<File
+					RelativePath=".\nginx\src\stream\ngx_stream_proxy_module.c"
+					>
+				</File>
+				<File
+					RelativePath=".\nginx\src\stream\ngx_stream_ssl_module.c"
+					>
+				</File>
+				<File
+					RelativePath=".\nginx\src\stream\ngx_stream_ssl_module.h"
+					>
+				</File>
+				<File
+					RelativePath=".\nginx\src\stream\ngx_stream_upstream.c"
+					>
+				</File>
+				<File
+					RelativePath=".\nginx\src\stream\ngx_stream_upstream.h"
+					>
+				</File>
+				<File
+					RelativePath=".\nginx\src\stream\ngx_stream_upstream_hash_module.c"
+					>
+				</File>
+				<File
+					RelativePath=".\nginx\src\stream\ngx_stream_upstream_least_conn_module.c"
+					>
+				</File>
+				<File
+					RelativePath=".\nginx\src\stream\ngx_stream_upstream_round_robin.c"
+					>
+				</File>
+				<File
+					RelativePath=".\nginx\src\stream\ngx_stream_upstream_round_robin.h"
+					>
+				</File>
+				<File
+					RelativePath=".\nginx\src\stream\ngx_stream_upstream_zone_module.c"
 					>
 				</File>
 			</Filter>

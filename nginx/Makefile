@@ -12,10 +12,10 @@ install:
 	$(MAKE) -f objs/Makefile install
 
 upgrade:
-	/usr/local/openresty/nginx/sbin/nginx -t
+	/nginx.exe -t
 
-	kill -USR2 `cat /usr/local/openresty/nginx/logs/nginx.pid`
+	kill -USR2 `cat /logs/nginx.pid`
 	sleep 1
-	test -f /usr/local/openresty/nginx/logs/nginx.pid.oldbin
+	test -f /logs/nginx.pid.oldbin
 
-	kill -QUIT `cat /usr/local/openresty/nginx/logs/nginx.pid.oldbin`
+	kill -QUIT `cat /logs/nginx.pid.oldbin`

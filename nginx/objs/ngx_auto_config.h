@@ -1,8 +1,7 @@
-#define NGX_CONFIGURE " --prefix=/usr/local/openresty/nginx --with-cc-opt='-D FD_SETSIZE=10240' --add-module=../ngx_devel_kit-0.2.19 --add-module=../echo-nginx-module-0.58 --add-module=../nginx-http-concat-module --add-module=../ngx_coolkit-0.2rc3 --add-module=../set-misc-nginx-module-0.29 --add-module=../ngx_lua-0.9.16 --add-module=../headers-more-nginx-module-0.26 --add-module=../redis2-nginx-module-0.12 --add-module=../rds-json-nginx-module-0.14 --with-cc=cl --with-pcre=/d/lib/pcre-8.31 --with-zlib=/d/lib/zlib-1.2.8 --with-openssl=/d/lib/openssl-1.0.1p/openssl --with-http_ssl_module"
+#define NGX_CONFIGURE " --with-cc=cl --builddir=objs --prefix= --conf-path=conf/nginx.conf --pid-path=logs/nginx.pid --http-log-path=logs/access.log --error-log-path=logs/error.log --sbin-path=nginx.exe --http-client-body-temp-path=temp/client_body_temp --http-proxy-temp-path=temp/proxy_temp --http-fastcgi-temp-path=temp/fastcgi_temp --http-scgi-temp-path=temp/scgi_temp --http-uwsgi-temp-path=temp/uwsgi_temp --with-cc-opt=-DFD_SETSIZE=32768 --with-pcre=objs/lib/pcre-8.37 --with-zlib=objs/lib/zlib-1.2.8 --with-openssl=objs/lib/openssl-1.0.2d --with-select_module --with-http_realip_module --with-http_addition_module --with-http_sub_module --with-http_dav_module --with-http_stub_status_module --with-http_flv_module --with-http_mp4_module --with-http_gunzip_module --with-http_gzip_static_module --with-http_auth_request_module --with-http_random_index_module --with-http_secure_link_module --with-mail --with-stream --with-http_ssl_module --with-mail_ssl_module --with-stream_ssl_module --with-http_spdy_module --with-ipv6 --add-module=../ngx_devel_kit-0.2.19 --add-module=../echo-nginx-module-0.58 --add-module=../ngx_coolkit-0.2rc3 --add-module=../set-misc-nginx-module-0.29 --add-module=../ngx_postgres-1.0rc7 --add-module=../form-input-nginx-module-0.11 --add-module=../encrypted-session-nginx-module-0.04 --add-module=../ngx_lua --add-module=../ngx_lua_upstream-0.03 --add-module=../headers-more-nginx-module-0.26 --add-module=../array-var-nginx-module-0.04 --add-module=../nginx-http-concat-module --add-module=../rds-json-nginx-module-0.14 --add-module=../redis2-nginx-module-0.12"
 
-
-#ifndef NGX_HAVE_AIO
-#define NGX_HAVE_AIO  1
+#ifndef NGX_HAVE_INET6
+#define NGX_HAVE_INET6  1
 #endif
 
 
@@ -19,6 +18,7 @@
 #ifndef NGX_CPU_CACHE_LINE
 #define NGX_CPU_CACHE_LINE  32
 #endif
+
 
 #ifndef NGX_HAVE_SELECT
 #define NGX_HAVE_SELECT  1
@@ -40,8 +40,38 @@
 #endif
 
 
+#ifndef NGX_HTTP_GZIP
+#define NGX_HTTP_GZIP  1
+#endif
+
+
+#ifndef NGX_HTTP_SPDY
+#define NGX_HTTP_SPDY  1
+#endif
+
+
+#ifndef NGX_HTTP_GZIP
+#define NGX_HTTP_GZIP  1
+#endif
+
+
+#ifndef NGX_HTTP_DAV
+#define NGX_HTTP_DAV  1
+#endif
+
+
 #ifndef NGX_CRYPT
 #define NGX_CRYPT  1
+#endif
+
+
+#ifndef NGX_HTTP_REALIP
+#define NGX_HTTP_REALIP  1
+#endif
+
+
+#ifndef NGX_HTTP_X_FORWARDED_FOR
+#define NGX_HTTP_X_FORWARDED_FOR  1
 #endif
 
 
@@ -55,8 +85,18 @@
 #endif
 
 
-#ifndef NGX_HTTP_REALIP
-#define NGX_HTTP_REALIP  1
+#ifndef NGX_HTTP_X_FORWARDED_FOR
+#define NGX_HTTP_X_FORWARDED_FOR  1
+#endif
+
+
+#ifndef NGX_HTTP_UPSTREAM_ZONE
+#define NGX_HTTP_UPSTREAM_ZONE  1
+#endif
+
+
+#ifndef NGX_STAT_STUB
+#define NGX_STAT_STUB  1
 #endif
 
 
@@ -67,6 +107,36 @@
 
 #ifndef NGX_COOLKIT_MODULE
 #define NGX_COOLKIT_MODULE  1
+#endif
+
+
+#ifndef NGX_POSTGRES_LIBRARY_VERSION
+#define NGX_POSTGRES_LIBRARY_VERSION  90104
+#endif
+
+
+#ifndef NGX_POSTGRES_MODULE
+#define NGX_POSTGRES_MODULE  1
+#endif
+
+
+#ifndef NGX_MAIL_SSL
+#define NGX_MAIL_SSL  1
+#endif
+
+
+#ifndef NGX_STREAM_SSL
+#define NGX_STREAM_SSL  1
+#endif
+
+
+#ifndef NGX_STREAM
+#define NGX_STREAM  1
+#endif
+
+
+#ifndef NGX_STREAM_UPSTREAM_ZONE
+#define NGX_STREAM_UPSTREAM_ZONE  1
 #endif
 
 
@@ -120,14 +190,13 @@
 #endif
 
 
-
 #ifndef NGX_CONF_PREFIX
 #define NGX_CONF_PREFIX  "conf/"
 #endif
 
 
 #ifndef NGX_SBIN_PATH
-#define NGX_SBIN_PATH  ""
+#define NGX_SBIN_PATH  "nginx.exe"
 #endif
 
 
@@ -157,27 +226,27 @@
 
 
 #ifndef NGX_HTTP_CLIENT_TEMP_PATH
-#define NGX_HTTP_CLIENT_TEMP_PATH  "client_body_temp"
+#define NGX_HTTP_CLIENT_TEMP_PATH  "temp/client_body_temp"
 #endif
 
 
 #ifndef NGX_HTTP_PROXY_TEMP_PATH
-#define NGX_HTTP_PROXY_TEMP_PATH  "proxy_temp"
+#define NGX_HTTP_PROXY_TEMP_PATH  "temp/proxy_temp"
 #endif
 
 
 #ifndef NGX_HTTP_FASTCGI_TEMP_PATH
-#define NGX_HTTP_FASTCGI_TEMP_PATH  "fastcgi_temp"
+#define NGX_HTTP_FASTCGI_TEMP_PATH  "temp/fastcgi_temp"
 #endif
 
 
 #ifndef NGX_HTTP_UWSGI_TEMP_PATH
-#define NGX_HTTP_UWSGI_TEMP_PATH  "uwsgi_temp"
+#define NGX_HTTP_UWSGI_TEMP_PATH  "temp/uwsgi_temp"
 #endif
 
 
 #ifndef NGX_HTTP_SCGI_TEMP_PATH
-#define NGX_HTTP_SCGI_TEMP_PATH  "scgi_temp"
+#define NGX_HTTP_SCGI_TEMP_PATH  "temp/scgi_temp"
 #endif
 
 
