@@ -8,64 +8,61 @@ Version:1.9.4.1002
 
 64 bit: http://pan.baidu.com/s/1i393jVJ
 
-    Release time: 2015-09-15
-    
-    Changelog: 
-    when compile nginx export all the functions that resty needed, 
-    now in total 49 functions have been exported:
-    
-    EXPORTS
-    
-    *   ngx_http_lua_ffi_encode_base64 @1
-    *   ngx_http_lua_ffi_decode_base64 @2
-    *   ngx_http_lua_ffi_get_ctx_ref @3
-    *   ngx_http_lua_ffi_set_ctx_ref @4
-    *   ngx_http_lua_ffi_exit @5
-    *   ngx_http_lua_ffi_md5_bin @6
-    *   ngx_http_lua_ffi_md5 @7
-    *   ngx_http_lua_ffi_sha1_bin @8
-    *   ngx_http_lua_ffi_get_resp_status @9
-    *   ngx_http_lua_ffi_set_resp_status @10
-    *   ngx_http_lua_ffi_is_subrequest @11
-    *   ngx_http_lua_ffi_headers_sent @12
-    *   ngx_http_lua_ffi_compile_regex @13
-    *   ngx_http_lua_ffi_exec_regex @14
-    *   ngx_http_lua_ffi_destroy_regex @15
-    *   ngx_http_lua_ffi_compile_replace_template @16
-    *   ngx_http_lua_ffi_create_script_engine @17
-    *   ngx_http_lua_ffi_init_script_engine @18
-    *   ngx_http_lua_ffi_destroy_script_engine @19
-    *   ngx_http_lua_ffi_script_eval_len @20
-    *   ngx_http_lua_ffi_script_eval_data @21
-    *   ngx_http_lua_ffi_max_regex_cache_size @22
-    *   ngx_http_lua_ffi_req_get_headers_count @23
-    *   ngx_http_lua_ffi_req_get_headers @24
-    *   ngx_http_lua_ffi_req_get_uri_args_count @25
-    *   ngx_http_lua_ffi_req_get_querystring_len @26
-    *   ngx_http_lua_ffi_req_get_uri_args @27
-    *   ngx_http_lua_ffi_req_start_time @28
-    *   ngx_http_lua_ffi_req_get_method @29
-    *   ngx_http_lua_ffi_req_get_method_name @30
-    *   ngx_http_lua_ffi_req_set_method @31
-    *   ngx_http_lua_ffi_req_header_set_single_value @32
-    *   ngx_http_lua_ffi_set_resp_header @33
-    *   ngx_http_lua_ffi_get_resp_header @34
-    *   ngx_http_lua_ffi_shdict_get @35
-    *   ngx_http_lua_ffi_shdict_incr @36
-    *   ngx_http_lua_ffi_shdict_store @37
-    *   ngx_http_lua_ffi_shdict_flush_all @38
-    *   ngx_http_lua_ffi_now @39
-    *   ngx_http_lua_ffi_time @40
-    *   ngx_http_lua_ffi_uri_escaped_length @41
-    *   ngx_http_lua_ffi_escape_uri @42
-    *   ngx_http_lua_ffi_unescape_uri @43
-    *   ngx_http_lua_ffi_var_get @44
-    *   ngx_http_lua_ffi_var_set @45
-    *   ngx_http_lua_ffi_worker_pid @46
-    *   ngx_http_lua_ffi_worker_exiting @47
-    *   ngx_hex_dump @48
-    *   ngx_atoi @49
-        
+>Release time: 2015-09-15
+
+>Changelog:   
+*  when compile nginx export all the functions that resty needed,   
+now in total 49 functions have been exported:  
+ *   ngx_http_lua_ffi_encode_base64 @1
+ *   ngx_http_lua_ffi_decode_base64 @2
+ *   ngx_http_lua_ffi_get_ctx_ref @3
+ *   ngx_http_lua_ffi_set_ctx_ref @4
+ *   ngx_http_lua_ffi_exit @5
+ *   ngx_http_lua_ffi_md5_bin @6
+ *   ngx_http_lua_ffi_md5 @7
+ *   ngx_http_lua_ffi_sha1_bin @8
+ *   ngx_http_lua_ffi_get_resp_status @9
+ *   ngx_http_lua_ffi_set_resp_status @10
+ *   ngx_http_lua_ffi_is_subrequest @11
+ *   ngx_http_lua_ffi_headers_sent @12
+ *   ngx_http_lua_ffi_compile_regex @13
+ *   ngx_http_lua_ffi_exec_regex @14
+ *   ngx_http_lua_ffi_destroy_regex @15
+ *   ngx_http_lua_ffi_compile_replace_template @16
+ *   ngx_http_lua_ffi_create_script_engine @17
+ *   ngx_http_lua_ffi_init_script_engine @18
+ *   ngx_http_lua_ffi_destroy_script_engine @19
+ *   ngx_http_lua_ffi_script_eval_len @20
+ *   ngx_http_lua_ffi_script_eval_data @21
+ *   ngx_http_lua_ffi_max_regex_cache_size @22
+ *   ngx_http_lua_ffi_req_get_headers_count @23
+ *   ngx_http_lua_ffi_req_get_headers @24
+ *   ngx_http_lua_ffi_req_get_uri_args_count @25
+ *   ngx_http_lua_ffi_req_get_querystring_len @26
+ *   ngx_http_lua_ffi_req_get_uri_args @27
+ *   ngx_http_lua_ffi_req_start_time @28
+ *   ngx_http_lua_ffi_req_get_method @29
+ *   ngx_http_lua_ffi_req_get_method_name @30
+ *   ngx_http_lua_ffi_req_set_method @31
+ *   ngx_http_lua_ffi_req_header_set_single_value @32
+ *   ngx_http_lua_ffi_set_resp_header @33
+ *   ngx_http_lua_ffi_get_resp_header @34
+ *   ngx_http_lua_ffi_shdict_get @35
+ *   ngx_http_lua_ffi_shdict_incr @36
+ *   ngx_http_lua_ffi_shdict_store @37
+ *   ngx_http_lua_ffi_shdict_flush_all @38
+ *   ngx_http_lua_ffi_now @39
+ *   ngx_http_lua_ffi_time @40
+ *   ngx_http_lua_ffi_uri_escaped_length @41
+ *   ngx_http_lua_ffi_escape_uri @42
+ *   ngx_http_lua_ffi_unescape_uri @43
+ *   ngx_http_lua_ffi_var_get @44
+ *   ngx_http_lua_ffi_var_set @45
+ *   ngx_http_lua_ffi_worker_pid @46
+ *   ngx_http_lua_ffi_worker_exiting @47
+ *   ngx_hex_dump @48
+ *   ngx_atoi @49
+
 
 ### about ###
 
@@ -135,8 +132,9 @@ Documentation of Openresty at [http://www.openresty.org](http://www.openresty.or
 
 Version:1.7.10.2  ([http://pan.baidu.com/s/1i3ITTFv](http://pan.baidu.com/s/1i3ITTFv))
 
-    Release time: 2015-8-7
-    Changelog: update openresty to version:1.7.10.2
+>Release time: 2015-8-7
+  
+>Changelog: update openresty to version:1.7.10.2
 
 Version:1.7.10.2001
 
@@ -144,28 +142,27 @@ Version:1.7.10.2001
 
 64 bit: http://pan.baidu.com/s/1kTxmfmJ
 
-    Release time: 2015-8-20
+>Release time: 2015-8-20
 
-    Changelog: 
-    1、add concat module to 32 & 64 bit respectively
-    2、add redis2 module to 32 & 64 bit respectively
-    3、add cjson  module to 32 & 64 bit respectively
-    4、add lua51.dll runtime for luajit for 32 & 64 bit respectively
-	
+>Changelog:  
+* add concat module to 32 & 64 bit respectively   
+* add redis2 module to 32 & 64 bit respectively  
+* add cjson  module to 32 & 64 bit respectively  
+* add lua51.dll runtime for luajit for 32 & 64 bit respectively 
+
 Version:1.7.10.2002
 
 32 bit: http://pan.baidu.com/s/1pJ5l1s3
 
 64 bit: http://pan.baidu.com/s/1dDAVQq1
 
-    Release time: 2015-8-25
+>Release time: 2015-8-25
 
-    changelog：
-
-    *  fix the incompatible lua_shared_dict directive of ngx_lua module, cause the error below:
-
-        nginx: [emerg] invalid lua shared dict size "10m"
-		
+>changelog：  
+*  fix the incompatible lua_shared_dict directive of ngx_lua module, cause the error below:  
+```nginx
+nginx: [emerg] invalid lua shared dict size "10m"
+```    
 		
 Version:1.9.3.1001
 
@@ -173,15 +170,13 @@ Version:1.9.3.1001
 
 64 bit: http://pan.baidu.com/s/1jGIUbI2
 
-    Release time: 2015-09-06
-    
-    changelog：
-    
-    * upgrade the modules of Openresty to version 1.9.3.1
-        actually, only ngx_postgres_module has upgraded from 
-        ngx_postgres-1.0rc6 to ngx_postgres-1.0rc7
-    
-    * pdb file include in the binary cab
+>Release time: 2015-09-06
+
+>changelog： 
+* upgrade the modules of Openresty to version 1.9.3.1  
+actually, only ngx_postgres_module has upgraded from  
+ngx_postgres-1.0rc6 to ngx_postgres-1.0rc7  
+* pdb file include in the binary cab
 
 Version:1.9.4.1001
 
@@ -189,51 +184,51 @@ Version:1.9.4.1001
 
 64 bit: http://pan.baidu.com/s/1mgzn1Qo
 
-    Release time: 2015-09-12
-    
-    Changelog: 
-    
-    big update :
-    -  update nginx core to 1.9.4
-    -  update openssl to 1.0.2d
-    -  update pcre to 8.37
-    
-    build with new configures:
-    - ipv6
-    - mail
-    - stream
-    
-    build with these modules below:
-    - nginx offical module:
-    - http_realip_module
-    - http_addition_module
-    - http_sub_module
-    - http_dav_module
-    - http_stub_status_module
-    - http_flv_module
-    - http_mp4_module
-    - http_gunzip_module
-    - http_gzip_static_module
-    - http_auth_request_module
-    - http_random_index_module
-    - http_secure_link_module
-    - http_ssl_module
-    - mail_ssl_module
-    - http_spdy_module
-    
-    addon module:
-    - ngx_devel_kit-0.2.19
-    - echo-nginx-module-0.58
-    - ngx_coolkit-0.2rc3
-    - set-misc-nginx-module-0.29
-    - ngx_postgres-1.0rc7
-    - form-input-nginx-module-0.11
-    - encrypted-session-nginx-module-0.04
-    - ngx_lua
-    - ngx_lua_upstream-0.03
-    - headers-more-nginx-module-0.26
-    - array-var-nginx-module-0.04
-    - nginx-http-concat-module
-    - rds-json-nginx-module-0.14
-    - redis2-nginx-module-0.12
-    
+>Release time: 2015-09-12
+
+>Changelog: 
+
+>big update :  
+-  update nginx core to 1.9.4  
+-  update openssl to 1.0.2d  
+-  update pcre to 8.37  
+
+>build with new configures:
+- ipv6
+- mail
+- stream
+
+>build with these modules below:
+- nginx offical module:
+- http_realip_module
+- http_addition_module
+- http_sub_module
+- http_dav_module
+- http_stub_status_module
+- http_flv_module
+- http_mp4_module
+- http_gunzip_module
+- http_gzip_static_module
+- http_auth_request_module
+- http_random_index_module
+- http_secure_link_module
+- http_ssl_module
+- mail_ssl_module
+- http_spdy_module
+
+>addon module:
+- ngx_devel_kit-0.2.19
+- echo-nginx-module-0.58
+- ngx_coolkit-0.2rc3
+- set-misc-nginx-module-0.29
+- ngx_postgres-1.0rc7
+- form-input-nginx-module-0.11
+- encrypted-session-nginx-module-0.04
+- ngx_lua
+- ngx_lua_upstream-0.03
+- headers-more-nginx-module-0.26
+- array-var-nginx-module-0.04
+- nginx-http-concat-module
+- rds-json-nginx-module-0.14
+- redis2-nginx-module-0.12
+
