@@ -84,13 +84,14 @@
 				LinkLibraryDependencies="false"
 				AdditionalOptions=" /machine:X86 /debug"
 				AdditionalDependencies="kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib lua51.lib $(NOINHERIT)"
-				OutputFile="$(OutDir)\redis-parser.dll"
+				OutputFile="$(OutDir)\redis_parser.dll"
 				Version="0.0"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;..\luajit-root\luajit\lib&quot;"
-				ModuleDefinitionFile="redis-parser.def"
+				ModuleDefinitionFile="redis_parser.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
+				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -112,7 +113,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine=""
+				CommandLine="mt.exe -manifest ..\nginx\objs\nocrt.xml -outputresource:$(OutDir)\rds_parser.dll;2"
 			/>
 		</Configuration>
 		<Configuration
@@ -275,12 +276,13 @@
 				LinkLibraryDependencies="false"
 				AdditionalOptions=" /machine:X86"
 				AdditionalDependencies="kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib lua51.lib $(NOINHERIT)"
-				OutputFile="$(OutDir)\redis-parser.dll"
+				OutputFile="$(OutDir)\redis_parser.dll"
 				Version="0.0"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;..\luajit-root\luajit\lib&quot;"
-				ModuleDefinitionFile="redis-parser.def"
+				ModuleDefinitionFile="redis_parser.def"
 				GenerateDebugInformation="true"
+				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -302,7 +304,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="mt.exe -manifest ../nginx/objs/nocrt.xml -outputresource:&quot;$(TargetPath)&quot;;2"
+				CommandLine="mt.exe -manifest ..\nginx\objs\nocrt.xml -outputresource:$(OutDir)\redis_parser.dll;2"
 			/>
 		</Configuration>
 		<Configuration
@@ -369,11 +371,11 @@
 				LinkLibraryDependencies="false"
 				AdditionalOptions=" /machine:X64"
 				AdditionalDependencies="kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib lua51.lib $(NOINHERIT)"
-				OutputFile="$(OutDir)\redis-parser.dll"
+				OutputFile="$(OutDir)\redis_parser.dll"
 				Version="0.0"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;..\luajit-root-x64\luajit\lib&quot;"
-				ModuleDefinitionFile="redis-parser.def"
+				ModuleDefinitionFile="redis_parser.def"
 				GenerateDebugInformation="true"
 				TargetMachine="17"
 			/>
@@ -397,7 +399,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="mt.exe -manifest ../nginx/objs/nocrt.xml -outputresource:&quot;$(TargetPath)&quot;;2"
+				CommandLine="mt.exe -manifest ..\nginx\objs\nocrt.xml -outputresource:$(OutDir)\redis_parser.dll;2"
 			/>
 		</Configuration>
 	</Configurations>
@@ -420,7 +422,7 @@
 			Name="def"
 			>
 			<File
-				RelativePath=".\redis-parser.def"
+				RelativePath=".\redis_parser.def"
 				>
 			</File>
 		</Filter>

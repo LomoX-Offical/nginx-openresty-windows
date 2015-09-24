@@ -8,9 +8,10 @@
 
 
 #include "resty_dbd_stream.h"
-#include "sys/types.h"
-#include <stdint.h>
+#include <sys/types.h>
+#include "stdint.h"
 
+typedef unsigned char     u_char;
 
 typedef struct {
     u_char      *data;
