@@ -20,6 +20,7 @@ ALL_INCS = -I src/core \
 	-I objs \
 	-I src/http \
 	-I src/http/modules \
+	-I src/http/v2 \
 	-I ../ngx_devel_kit-0.2.19/src \
 	-I src/mail \
 	-I src/stream
@@ -109,13 +110,14 @@ HTTP_DEPS = src/http/ngx_http.h \
 	src/http/ngx_http_upstream.h \
 	src/http/ngx_http_upstream_round_robin.h \
 	src/http/modules/ngx_http_ssi_filter_module.h \
-	src/http/ngx_http_spdy.h \
-	src/http/ngx_http_spdy_module.h \
+	src/http/v2/ngx_http_v2.h \
+	src/http/v2/ngx_http_v2_module.h \
 	src/http/modules/ngx_http_ssl_module.h
 
 
 HTTP_INCS = -I src/http \
 	-I src/http/modules \
+	-I src/http/v2 \
 	-I ../ngx_devel_kit-0.2.19/src
 
 
@@ -232,9 +234,12 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/http/modules/ngx_http_addition_filter_module.obj \
 	objs/src/http/modules/ngx_http_gunzip_filter_module.obj \
 	objs/src/http/modules/ngx_http_userid_filter_module.obj \
-	objs/src/http/ngx_http_spdy.obj \
-	objs/src/http/ngx_http_spdy_module.obj \
-	objs/src/http/ngx_http_spdy_filter_module.obj \
+	objs/src/http/v2/ngx_http_v2.obj \
+	objs/src/http/v2/ngx_http_v2_table.obj \
+	objs/src/http/v2/ngx_http_v2_huff_decode.obj \
+	objs/src/http/v2/ngx_http_v2_huff_encode.obj \
+	objs/src/http/v2/ngx_http_v2_module.obj \
+	objs/src/http/v2/ngx_http_v2_filter_module.obj \
 	objs/src/http/modules/ngx_http_gzip_static_module.obj \
 	objs/src/http/modules/ngx_http_dav_module.obj \
 	objs/src/http/modules/ngx_http_autoindex_module.obj \
@@ -499,9 +504,12 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/http/modules/ngx_http_addition_filter_module.obj 
 	objs/src/http/modules/ngx_http_gunzip_filter_module.obj 
 	objs/src/http/modules/ngx_http_userid_filter_module.obj 
-	objs/src/http/ngx_http_spdy.obj 
-	objs/src/http/ngx_http_spdy_module.obj 
-	objs/src/http/ngx_http_spdy_filter_module.obj 
+	objs/src/http/v2/ngx_http_v2.obj 
+	objs/src/http/v2/ngx_http_v2_table.obj 
+	objs/src/http/v2/ngx_http_v2_huff_decode.obj 
+	objs/src/http/v2/ngx_http_v2_huff_encode.obj 
+	objs/src/http/v2/ngx_http_v2_module.obj 
+	objs/src/http/v2/ngx_http_v2_filter_module.obj 
 	objs/src/http/modules/ngx_http_gzip_static_module.obj 
 	objs/src/http/modules/ngx_http_dav_module.obj 
 	objs/src/http/modules/ngx_http_autoindex_module.obj 
@@ -1322,25 +1330,46 @@ objs/src/http/modules/ngx_http_userid_filter_module.obj:	$(CORE_DEPS) $(HTTP_DEP
 		src/http/modules/ngx_http_userid_filter_module.c
 
 
-objs/src/http/ngx_http_spdy.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
-	src/http/ngx_http_spdy.c
+objs/src/http/v2/ngx_http_v2.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
+	src/http/v2/ngx_http_v2.c
 	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
-		-Foobjs/src/http/ngx_http_spdy.obj \
-		src/http/ngx_http_spdy.c
+		-Foobjs/src/http/v2/ngx_http_v2.obj \
+		src/http/v2/ngx_http_v2.c
 
 
-objs/src/http/ngx_http_spdy_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
-	src/http/ngx_http_spdy_module.c
+objs/src/http/v2/ngx_http_v2_table.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
+	src/http/v2/ngx_http_v2_table.c
 	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
-		-Foobjs/src/http/ngx_http_spdy_module.obj \
-		src/http/ngx_http_spdy_module.c
+		-Foobjs/src/http/v2/ngx_http_v2_table.obj \
+		src/http/v2/ngx_http_v2_table.c
 
 
-objs/src/http/ngx_http_spdy_filter_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
-	src/http/ngx_http_spdy_filter_module.c
+objs/src/http/v2/ngx_http_v2_huff_decode.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
+	src/http/v2/ngx_http_v2_huff_decode.c
 	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
-		-Foobjs/src/http/ngx_http_spdy_filter_module.obj \
-		src/http/ngx_http_spdy_filter_module.c
+		-Foobjs/src/http/v2/ngx_http_v2_huff_decode.obj \
+		src/http/v2/ngx_http_v2_huff_decode.c
+
+
+objs/src/http/v2/ngx_http_v2_huff_encode.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
+	src/http/v2/ngx_http_v2_huff_encode.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
+		-Foobjs/src/http/v2/ngx_http_v2_huff_encode.obj \
+		src/http/v2/ngx_http_v2_huff_encode.c
+
+
+objs/src/http/v2/ngx_http_v2_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
+	src/http/v2/ngx_http_v2_module.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
+		-Foobjs/src/http/v2/ngx_http_v2_module.obj \
+		src/http/v2/ngx_http_v2_module.c
+
+
+objs/src/http/v2/ngx_http_v2_filter_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
+	src/http/v2/ngx_http_v2_filter_module.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
+		-Foobjs/src/http/v2/ngx_http_v2_filter_module.obj \
+		src/http/v2/ngx_http_v2_filter_module.c
 
 
 objs/src/http/modules/ngx_http_gzip_static_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
