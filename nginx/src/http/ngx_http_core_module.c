@@ -2132,13 +2132,6 @@ ngx_http_gzip_ok(ngx_http_request_t *r)
         return NGX_DECLINED;
     }
 
-#if (NGX_HTTP_SPDY)
-    if (r->spdy_stream) {
-        r->gzip_ok = 1;
-        return NGX_OK;
-    }
-#endif
-
     ae = r->headers_in.accept_encoding;
     if (ae == NULL) {
         return NGX_DECLINED;
@@ -2427,12 +2420,19 @@ ngx_http_subrequest(ngx_http_request_t *r,
     ngx_http_core_srv_conf_t      *cscf;
     ngx_http_postponed_request_t  *pr, *p;
 
-    r->main->subrequests--;
-
-    if (r->main->subrequests == 0) {
+    if (r->subrequests == 0) {
         ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
                       "subrequests cycle while processing \"%V\"", uri);
-        r->main->subrequests = 1;
+        return NGX_ERROR;
+    }
+
+    /*
+     * 1000 is reserved for other purposes.
+     */
+    if (r->main->count >= 65535 - 1000) {
+        ngx_log_error(NGX_LOG_CRIT, r->connection->log, 0,
+                      "request reference counter overflow "
+                      "while processing \"%V\"", uri);
         return NGX_ERROR;
     }
 
@@ -2473,8 +2473,8 @@ ngx_http_subrequest(ngx_http_request_t *r,
 
     sr->request_body = r->request_body;
 
-#if (NGX_HTTP_SPDY)
-    sr->spdy_stream = r->spdy_stream;
+#if (NGX_HTTP_V2)
+    sr->stream = r->stream;
 #endif
 
     sr->method = NGX_HTTP_GET;
@@ -2537,6 +2537,7 @@ ngx_http_subrequest(ngx_http_request_t *r,
     sr->main_filter_need_in_memory = r->main_filter_need_in_memory;
 
     sr->uri_changes = NGX_HTTP_MAX_URI_CHANGES + 1;
+    sr->subrequests = r->subrequests - 1;
 
     tp = ngx_timeofday();
     sr->start_sec = tp->sec;
@@ -3188,7 +3189,7 @@ ngx_http_core_location(ngx_conf_t *cf, ngx_command_t *cmd, void *dummy)
 
     pclcf = pctx->loc_conf[ngx_http_core_module.ctx_index];
 
-    if (pclcf->name.len) {
+    if (cf->cmd_type == NGX_HTTP_LOC_CONF) {
 
         /* nested location */
 
@@ -4195,16 +4196,24 @@ ngx_http_core_listen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 #endif
         }
 
-        if (ngx_strcmp(value[n].data, "spdy") == 0) {
-#if (NGX_HTTP_SPDY)
-            lsopt.spdy = 1;
+        if (ngx_strcmp(value[n].data, "http2") == 0) {
+#if (NGX_HTTP_V2)
+            lsopt.http2 = 1;
             continue;
 #else
             ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                               "the \"spdy\" parameter requires "
-                               "ngx_http_spdy_module");
+                               "the \"http2\" parameter requires "
+                               "ngx_http_v2_module");
             return NGX_CONF_ERROR;
 #endif
+        }
+
+        if (ngx_strcmp(value[n].data, "spdy") == 0) {
+            ngx_conf_log_error(NGX_LOG_WARN, cf, 0,
+                               "invalid parameter \"spdy\": "
+                               "ngx_http_spdy_module was superseded "
+                               "by ngx_http_v2_module");
+            continue;
         }
 
         if (ngx_strncmp(value[n].data, "so_keepalive=", 13) == 0) {
