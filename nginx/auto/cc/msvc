@@ -74,7 +74,7 @@ CFLAGS="$CFLAGS -W4"
 CFLAGS="$CFLAGS -nologo"
 
 # the link flags
-CORE_LINK="$CORE_LINK -link -verbose:lib"
+CORE_LINK="$CORE_LINK -link -verbose:lib -def:nginx.def"
 
 # link with libcmt.lib, multithreaded
 LIBC="-MT"

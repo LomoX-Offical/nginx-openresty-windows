@@ -17,7 +17,7 @@ extern ngx_module_t  ngx_http_module;
 extern ngx_module_t  ngx_http_core_module;
 extern ngx_module_t  ngx_http_log_module;
 extern ngx_module_t  ngx_http_upstream_module;
-extern ngx_module_t  ngx_http_spdy_module;
+extern ngx_module_t  ngx_http_v2_module;
 extern ngx_module_t  ngx_http_static_module;
 extern ngx_module_t  ngx_http_gzip_static_module;
 extern ngx_module_t  ngx_http_dav_module;
@@ -61,7 +61,7 @@ extern ngx_module_t  ngx_http_redis2_module;
 extern ngx_module_t  ngx_http_write_filter_module;
 extern ngx_module_t  ngx_http_header_filter_module;
 extern ngx_module_t  ngx_http_chunked_filter_module;
-extern ngx_module_t  ngx_http_spdy_filter_module;
+extern ngx_module_t  ngx_http_v2_filter_module;
 extern ngx_module_t  ngx_http_range_header_filter_module;
 extern ngx_module_t  ngx_http_gzip_filter_module;
 extern ngx_module_t  ngx_http_postpone_filter_module;
@@ -116,7 +116,7 @@ ngx_module_t *ngx_modules[] = {
     &ngx_http_core_module,
     &ngx_http_log_module,
     &ngx_http_upstream_module,
-    &ngx_http_spdy_module,
+    &ngx_http_v2_module,
     &ngx_http_static_module,
     &ngx_http_gzip_static_module,
     &ngx_http_dav_module,
@@ -160,7 +160,7 @@ ngx_module_t *ngx_modules[] = {
     &ngx_http_write_filter_module,
     &ngx_http_header_filter_module,
     &ngx_http_chunked_filter_module,
-    &ngx_http_spdy_filter_module,
+    &ngx_http_v2_filter_module,
     &ngx_http_range_header_filter_module,
     &ngx_http_gzip_filter_module,
     &ngx_http_postpone_filter_module,
