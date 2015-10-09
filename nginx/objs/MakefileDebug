@@ -1,6 +1,6 @@
 
 CC =	cl
-CFLAGS = -I../luajit-root/luajit/include/luajit-2.1  -Od  -W4 -nologo -MTd -Zi -DNGX_DEBUG -DFD_SETSIZE=32768 -DNDK_SET_VAR -DNDK_UPSTREAM_LIST -DNDK_SET_VAR -DNDK_SET_VAR -DNDK_SET_VAR -DNDK_SET_VAR -DNO_SYS_TYPES_H 
+CFLAGS = -I../luajit-root-debug/luajit/include/luajit-2.1  -Od  -W4 -nologo -MTd -Zi -DNGX_DEBUG -DFD_SETSIZE=32768 -DNDK_SET_VAR -DNDK_UPSTREAM_LIST -DNDK_SET_VAR -DNDK_SET_VAR -DNDK_SET_VAR -DNDK_SET_VAR -DNO_SYS_TYPES_H 
 CPP =	
 LINK =	$(CC)
 
@@ -12,7 +12,7 @@ ALL_INCS = -I src/core \
 	-I ../ngx_devel_kit-0.2.19/objs \
 	-I objs/addon/ndk \
 	-I ../ngx_postgres-1.0rc7/include \
-	-I ../luajit-root/luajit/include/luajit-2.1 \
+	-I ../luajit-root-debug/luajit/include/luajit-2.1 \
 	-I ../ngx_lua/src/api \
 	-I objs/lib/pcre-8.37 \
 	-I objs/lib/openssl-1.0.2d/openssl/include \
@@ -91,7 +91,7 @@ CORE_INCS = -I src/core \
 	-I ../ngx_devel_kit-0.2.19/objs \
 	-I objs/addon/ndk \
 	-I ../ngx_postgres-1.0rc7/include \
-	-I ../luajit-root/luajit/include/luajit-2.1 \
+	-I ../luajit-root-debug/luajit/include/luajit-2.1 \
 	-I ../ngx_lua/src/api \
 	-I objs/lib/pcre-8.37 \
 	-I objs/lib/openssl-1.0.2d/openssl/include \
@@ -670,7 +670,7 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/addon/src/ngx_http_redis2_reply.obj 
 	objs/addon/src/ngx_http_redis2_util.obj 
 	objs/ngx_modules.obj 
-	-L../luajit-root/luajit/lib kernel32.lib user32.lib advapi32.lib ws2_32.lib ../ngx_postgres-1.0rc7/lib/libpq.lib -L../luajit-root/luajit/lib ../luajit-root/luajit/lib/lua51.lib objs/lib/pcre-8.37/pcre.lib objs/lib/openssl-1.0.2d/openssl/lib/ssleay32.lib objs/lib/openssl-1.0.2d/openssl/lib/libeay32.lib gdi32.lib crypt32.lib objs/lib/zlib-1.2.8/zlib.lib 
+	-L../luajit-root-debug/luajit/lib kernel32.lib user32.lib advapi32.lib ws2_32.lib ../ngx_postgres-1.0rc7/lib/libpq.lib -L../luajit-root-debug/luajit/lib ../luajit-root-debug/luajit/lib/lua51.lib objs/lib/pcre-8.37/pcre.lib objs/lib/openssl-1.0.2d/openssl/lib/ssleay32.lib objs/lib/openssl-1.0.2d/openssl/lib/libeay32.lib gdi32.lib crypt32.lib objs/lib/zlib-1.2.8/zlib.lib 
 	objs/nginx.res -link -verbose:lib -debug
 	
 <<
