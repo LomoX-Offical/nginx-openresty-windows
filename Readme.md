@@ -47,7 +47,7 @@ it has been complie with these offical modules:
 - mail
 - http_ssl_module
 - mail_ssl_module
-- http_spdy_module
+- http_v2_module
 
 and these addon module:
 
@@ -70,6 +70,7 @@ and these C module for Lua:
 
 - lua-cjson
 - lua-redis-parser
+- lua-rds-parser
 
 
 ### resource ###
