@@ -2,18 +2,19 @@
 
 ### lastest release ###
 
-Version:1.9.4.1003
+Version:1.9.5.1001
 
-32 bit: http://pan.baidu.com/s/1sjn8K9n
+32 bit: http://pan.baidu.com/s/1kT1tydx
 
-64 bit: http://pan.baidu.com/s/1gdHFtXx
+64 bit: http://pan.baidu.com/s/1ntlasC5
 
->Release time: 2015-09-24
+>Release time: 2015-10-10
 
 >Changelog:  
 
-- lua_redis_parser and lua_rds_parser module added  
-- bugfix - when * occured in include directive nginx crashed  
+- update nginx to 1.9.5 version.
+- The ngx_http_v2_module module (1.9.5) provides support for HTTP/2 and supersedes the ngx_http_spdy_module module.
+
 
 
 ### about ###
@@ -245,6 +246,19 @@ now in total 49 functions have been exported:
  *   ngx_http_lua_ffi_worker_exiting @47
  *   ngx_hex_dump @48
  *   ngx_atoi @49
+ 
+Version:1.9.4.1003
+
+32 bit: http://pan.baidu.com/s/1sjn8K9n
+
+64 bit: http://pan.baidu.com/s/1gdHFtXx
+
+>Release time: 2015-09-24
+
+>Changelog:  
+
+- lua_redis_parser and lua_rds_parser module added  
+- bugfix - when * occured in include directive nginx crashed  
 
 
 
