@@ -1,0 +1,3 @@
+LIBRARY	"rds_parser"
+EXPORTS
+    luaopen_rds_parser             @1

@@ -1,0 +1,21 @@
+
+default:	build
+
+clean:
+	rm -rf MakefileW64 objs
+
+build:
+	$(MAKE) -f objs/MakefileW64
+	$(MAKE) -f objs/MakefileW64 manpage
+
+install:
+	$(MAKE) -f objs/MakefileW64 install
+
+upgrade:
+	/nginx.exe -t
+
+	kill -USR2 `cat /logs/nginx.pid`
+	sleep 1
+	test -f /logs/nginx.pid.oldbin
+
+	kill -QUIT `cat /logs/nginx.pid.oldbin`

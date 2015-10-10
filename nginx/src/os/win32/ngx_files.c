@@ -512,8 +512,12 @@ ngx_open_glob(ngx_glob_t *gl)
     ngx_cpystrn(gl->name.data + gl->last, (u_char *) gl->finddata.cFileName,
                 len + 1);
 
-    gl->ready = 1;
+    if (gl->finddata.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+        gl->ready = 0;
+        return NGX_OK;
+    }
 
+    gl->ready = 1;
     return NGX_OK;
 }
 
@@ -523,6 +527,7 @@ ngx_read_glob(ngx_glob_t *gl, ngx_str_t *name)
 {
     size_t     len;
     ngx_err_t  err;
+    int        ret;
 
     if (gl->no_match) {
         return NGX_DONE;
@@ -538,7 +543,15 @@ ngx_read_glob(ngx_glob_t *gl, ngx_str_t *name)
     ngx_free(gl->name.data);
     gl->name.data = NULL;
 
-    if (FindNextFile(gl->dir, &gl->finddata) != 0) {
+
+    while (FindNextFile(gl->dir, &gl->finddata) != 0) {
+
+        if (gl->finddata.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+            continue;
+        }
+
+        ngx_free(gl->name.data);
+        gl->name.data = NULL;
 
         len = ngx_strlen(gl->finddata.cFileName);
         gl->name.len = gl->last + len;
@@ -550,11 +563,11 @@ ngx_read_glob(ngx_glob_t *gl, ngx_str_t *name)
 
         ngx_memcpy(gl->name.data, gl->pattern, gl->last);
         ngx_cpystrn(gl->name.data + gl->last, (u_char *) gl->finddata.cFileName,
-                    len + 1);
+            len + 1);
 
         *name = gl->name;
-
         return NGX_OK;
+
     }
 
     err = ngx_errno;

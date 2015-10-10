@@ -19,6 +19,7 @@ CORE_DEPS="src/core/nginx.h \
            src/core/ngx_queue.h \
            src/core/ngx_string.h \
            src/core/ngx_parse.h \
+           src/core/ngx_parse_time.h \
            src/core/ngx_inet.h \
            src/core/ngx_file.h \
            src/core/ngx_crc.h \
@@ -28,6 +29,7 @@ CORE_DEPS="src/core/nginx.h \
            src/core/ngx_sha1.h \
            src/core/ngx_rbtree.h \
            src/core/ngx_radix_tree.h \
+           src/core/ngx_rwlock.h \
            src/core/ngx_slab.h \
            src/core/ngx_times.h \
            src/core/ngx_shmtx.h \
@@ -52,6 +54,7 @@ CORE_SRCS="src/core/nginx.c \
            src/core/ngx_output_chain.c \
            src/core/ngx_string.c \
            src/core/ngx_parse.c \
+           src/core/ngx_parse_time.c \
            src/core/ngx_inet.c \
            src/core/ngx_file.c \
            src/core/ngx_crc32.c \
@@ -65,6 +68,7 @@ CORE_SRCS="src/core/nginx.c \
            src/core/ngx_connection.c \
            src/core/ngx_cycle.c \
            src/core/ngx_spinlock.c \
+           src/core/ngx_rwlock.c \
            src/core/ngx_cpuinfo.c \
            src/core/ngx_conf_file.c \
            src/core/ngx_resolver.c \
@@ -122,18 +126,8 @@ EVENTPORT_SRCS=src/event/modules/ngx_eventport_module.c
 EPOLL_MODULE=ngx_epoll_module
 EPOLL_SRCS=src/event/modules/ngx_epoll_module.c
 
-RTSIG_MODULE=ngx_rtsig_module
-RTSIG_SRCS=src/event/modules/ngx_rtsig_module.c
-
 IOCP_MODULE=ngx_iocp_module
 IOCP_SRCS=src/event/modules/ngx_iocp_module.c
-
-AIO_MODULE=ngx_aio_module
-AIO_SRCS="src/event/modules/ngx_aio_module.c \
-          src/os/unix/ngx_aio_read.c \
-          src/os/unix/ngx_aio_write.c \
-          src/os/unix/ngx_aio_read_chain.c \
-          src/os/unix/ngx_aio_write_chain.c"
 
 FILE_AIO_SRCS="src/os/unix/ngx_file_aio_read.c"
 LINUX_AIO_SRCS="src/os/unix/ngx_linux_aio_read.c"
@@ -311,7 +305,6 @@ HTTP_SRCS="src/http/ngx_http.c \
            src/http/ngx_http_script.c \
            src/http/ngx_http_upstream.c \
            src/http/ngx_http_upstream_round_robin.c \
-           src/http/ngx_http_parse_time.c \
            src/http/modules/ngx_http_static_module.c \
            src/http/modules/ngx_http_index_module.c \
            src/http/modules/ngx_http_chunked_filter_module.c \
@@ -324,13 +317,17 @@ HTTP_POSTPONE_FILTER_SRCS=src/http/ngx_http_postpone_filter_module.c
 HTTP_FILE_CACHE_SRCS=src/http/ngx_http_file_cache.c
 
 
-HTTP_SPDY_MODULE=ngx_http_spdy_module
-HTTP_SPDY_FILTER_MODULE=ngx_http_spdy_filter_module
-HTTP_SPDY_DEPS="src/http/ngx_http_spdy.h \
-                src/http/ngx_http_spdy_module.h"
-HTTP_SPDY_SRCS="src/http/ngx_http_spdy.c \
-                src/http/ngx_http_spdy_module.c \
-                src/http/ngx_http_spdy_filter_module.c"
+HTTP_V2_MODULE=ngx_http_v2_module
+HTTP_V2_FILTER_MODULE=ngx_http_v2_filter_module
+HTTP_V2_INCS="src/http/v2"
+HTTP_V2_DEPS="src/http/v2/ngx_http_v2.h \
+              src/http/v2/ngx_http_v2_module.h"
+HTTP_V2_SRCS="src/http/v2/ngx_http_v2.c \
+              src/http/v2/ngx_http_v2_table.c \
+              src/http/v2/ngx_http_v2_huff_decode.c \
+              src/http/v2/ngx_http_v2_huff_encode.c \
+              src/http/v2/ngx_http_v2_module.c \
+              src/http/v2/ngx_http_v2_filter_module.c"
 
 
 HTTP_CHARSET_FILTER_MODULE=ngx_http_charset_filter_module
@@ -511,6 +508,11 @@ HTTP_UPSTREAM_KEEPALIVE_SRCS=" \
     src/http/modules/ngx_http_upstream_keepalive_module.c"
 
 
+HTTP_UPSTREAM_ZONE_MODULE=ngx_http_upstream_zone_module
+HTTP_UPSTREAM_ZONE_SRCS=" \
+    src/http/modules/ngx_http_upstream_zone_module.c"
+
+
 MAIL_INCS="src/mail"
 
 MAIL_DEPS="src/mail/ngx_mail.h"
@@ -546,6 +548,46 @@ MAIL_AUTH_HTTP_SRCS="src/mail/ngx_mail_auth_http_module.c"
 
 MAIL_PROXY_MODULE="ngx_mail_proxy_module"
 MAIL_PROXY_SRCS="src/mail/ngx_mail_proxy_module.c"
+
+
+STREAM_INCS="src/stream"
+
+STREAM_DEPS="src/stream/ngx_stream.h \
+             src/stream/ngx_stream_upstream.h \
+             src/stream/ngx_stream_upstream_round_robin.h"
+
+STREAM_MODULES="ngx_stream_module \
+                ngx_stream_core_module \
+                ngx_stream_proxy_module \
+                ngx_stream_upstream_module"
+
+STREAM_SRCS="src/stream/ngx_stream.c \
+             src/stream/ngx_stream_handler.c \
+             src/stream/ngx_stream_core_module.c \
+             src/stream/ngx_stream_proxy_module.c \
+             src/stream/ngx_stream_upstream.c \
+             src/stream/ngx_stream_upstream_round_robin.c"
+
+STREAM_SSL_MODULE="ngx_stream_ssl_module"
+STREAM_SSL_DEPS="src/stream/ngx_stream_ssl_module.h"
+STREAM_SSL_SRCS="src/stream/ngx_stream_ssl_module.c"
+
+STREAM_LIMIT_CONN_MODULE=ngx_stream_limit_conn_module
+STREAM_LIMIT_CONN_SRCS=src/stream/ngx_stream_limit_conn_module.c
+
+STREAM_ACCESS_MODULE=ngx_stream_access_module
+STREAM_ACCESS_SRCS=src/stream/ngx_stream_access_module.c
+
+STREAM_UPSTREAM_HASH_MODULE=ngx_stream_upstream_hash_module
+STREAM_UPSTREAM_HASH_SRCS=src/stream/ngx_stream_upstream_hash_module.c
+
+STREAM_UPSTREAM_LEAST_CONN_MODULE=ngx_stream_upstream_least_conn_module
+STREAM_UPSTREAM_LEAST_CONN_SRCS=" \
+    src/stream/ngx_stream_upstream_least_conn_module.c"
+
+STREAM_UPSTREAM_ZONE_MODULE=ngx_stream_upstream_zone_module
+STREAM_UPSTREAM_ZONE_SRCS=src/stream/ngx_stream_upstream_zone_module.c
+
 
 NGX_GOOGLE_PERFTOOLS_MODULE=ngx_google_perftools_module
 NGX_GOOGLE_PERFTOOLS_SRCS=src/misc/ngx_google_perftools_module.c

@@ -31,6 +31,7 @@ struct ngx_shm_zone_s {
     ngx_shm_t                 shm;
     ngx_shm_zone_init_pt      init;
     void                     *tag;
+    ngx_uint_t                noreuse;  /* unsigned  noreuse:1; */
 };
 
 
@@ -51,6 +52,7 @@ struct ngx_cycle_s {
 
     ngx_array_t               listening;
     ngx_array_t               paths;
+    ngx_array_t               config_dump;
     ngx_list_t                open_files;
     ngx_list_t                shared_memory;
 
@@ -82,7 +84,6 @@ typedef struct {
      ngx_int_t                debug_points;
 
      ngx_int_t                rlimit_nofile;
-     ngx_int_t                rlimit_sigpending;
      off_t                    rlimit_core;
 
      int                      priority;
@@ -102,22 +103,7 @@ typedef struct {
 
      ngx_array_t              env;
      char                   **environment;
-
-#if (NGX_OLD_THREADS)
-     ngx_int_t                worker_threads;
-     size_t                   thread_stack_size;
-#endif
-
 } ngx_core_conf_t;
-
-
-#if (NGX_OLD_THREADS)
-
-typedef struct {
-     ngx_pool_t              *pool;   /* pcre's malloc() pool */
-} ngx_core_tls_t;
-
-#endif
 
 
 #define ngx_is_init_cycle(cycle)  (cycle->conf_ctx == NULL)
@@ -139,10 +125,8 @@ extern volatile ngx_cycle_t  *ngx_cycle;
 extern ngx_array_t            ngx_old_cycles;
 extern ngx_module_t           ngx_core_module;
 extern ngx_uint_t             ngx_test_config;
+extern ngx_uint_t             ngx_dump_config;
 extern ngx_uint_t             ngx_quiet_mode;
-#if (NGX_OLD_THREADS)
-extern ngx_tls_key_t          ngx_core_tls_key;
-#endif
 
 
 #endif /* _NGX_CYCLE_H_INCLUDED_ */

@@ -21,6 +21,11 @@
 #define _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_DEPRECATE
 
+/* enable gethostbyname() in msvc2015 */
+#if !(NGX_HAVE_INET6)
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+#endif
+
 /*
  * we need to include <windows.h> explicitly before <winsock2.h> because
  * the warning 4201 is enabled in <windows.h>
@@ -225,8 +230,6 @@ typedef int                 sig_atomic_t;
 
 #define NGX_HAVE_LITTLE_ENDIAN  1
 #define NGX_HAVE_NONALIGNED     1
-
-#define NGX_OLD_THREADS         1
 
 
 #define NGX_WIN_NT        200000

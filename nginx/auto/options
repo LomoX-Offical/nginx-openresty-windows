@@ -30,7 +30,6 @@ NGX_RPATH=NO
 NGX_TEST_BUILD_DEVPOLL=NO
 NGX_TEST_BUILD_EVENTPORT=NO
 NGX_TEST_BUILD_EPOLL=NO
-NGX_TEST_BUILD_RTSIG=NO
 NGX_TEST_BUILD_SOLARIS_SENDFILEV=NO
 
 NGX_PLATFORM=
@@ -38,10 +37,8 @@ NGX_WINE=
 
 EVENT_FOUND=NO
 
-EVENT_RTSIG=NO
 EVENT_SELECT=NO
 EVENT_POLL=NO
-EVENT_AIO=NO
 
 USE_THREADS=NO
 
@@ -61,7 +58,7 @@ HTTP_CACHE=YES
 HTTP_CHARSET=YES
 HTTP_GZIP=YES
 HTTP_SSL=NO
-HTTP_SPDY=NO
+HTTP_V2=NO
 HTTP_SSI=YES
 HTTP_POSTPONE=NO
 HTTP_REALIP=NO
@@ -103,6 +100,7 @@ HTTP_UPSTREAM_HASH=YES
 HTTP_UPSTREAM_IP_HASH=YES
 HTTP_UPSTREAM_LEAST_CONN=YES
 HTTP_UPSTREAM_KEEPALIVE=YES
+HTTP_UPSTREAM_ZONE=YES
 
 # STUB
 HTTP_STUB_STATUS=NO
@@ -112,6 +110,14 @@ MAIL_SSL=NO
 MAIL_POP3=YES
 MAIL_IMAP=YES
 MAIL_SMTP=YES
+
+STREAM=NO
+STREAM_SSL=NO
+STREAM_LIMIT_CONN=YES
+STREAM_ACCESS=YES
+STREAM_UPSTREAM_HASH=YES
+STREAM_UPSTREAM_LEAST_CONN=YES
+STREAM_UPSTREAM_ZONE=YES
 
 NGX_ADDONS=
 
@@ -183,12 +189,10 @@ do
         --build=*)                       NGX_BUILD="$value"         ;;
         --builddir=*)                    NGX_OBJS="$value"          ;;
 
-        --with-rtsig_module)             EVENT_RTSIG=YES            ;;
         --with-select_module)            EVENT_SELECT=YES           ;;
         --without-select_module)         EVENT_SELECT=NONE          ;;
         --with-poll_module)              EVENT_POLL=YES             ;;
         --without-poll_module)           EVENT_POLL=NONE            ;;
-        --with-aio_module)               EVENT_AIO=YES              ;;
 
         --with-threads)                  USE_THREADS=YES            ;;
 
@@ -206,7 +210,7 @@ do
         --http-scgi-temp-path=*)         NGX_HTTP_SCGI_TEMP_PATH="$value" ;;
 
         --with-http_ssl_module)          HTTP_SSL=YES               ;;
-        --with-http_spdy_module)         HTTP_SPDY=YES              ;;
+        --with-http_v2_module)           HTTP_V2=YES                ;;
         --with-http_realip_module)       HTTP_REALIP=YES            ;;
         --with-http_addition_module)     HTTP_ADDITION=YES          ;;
         --with-http_xslt_module)         HTTP_XSLT=YES              ;;
@@ -241,12 +245,6 @@ do
         --without-http_uwsgi_module)     HTTP_UWSGI=NO              ;;
         --without-http_scgi_module)      HTTP_SCGI=NO               ;;
         --without-http_memcached_module) HTTP_MEMCACHED=NO          ;;
-        --without-http_limit_zone_module)
-            HTTP_LIMIT_CONN=NO
-            NGX_POST_CONF_MSG="$NGX_POST_CONF_MSG
-$0: warning: the \"--without-http_limit_zone_module\" option is deprecated, \
-use the \"--without-http_limit_conn_module\" option instead"
-        ;;
         --without-http_limit_conn_module) HTTP_LIMIT_CONN=NO        ;;
         --without-http_limit_req_module) HTTP_LIMIT_REQ=NO         ;;
         --without-http_empty_gif_module) HTTP_EMPTY_GIF=NO          ;;
@@ -256,6 +254,7 @@ use the \"--without-http_limit_conn_module\" option instead"
         --without-http_upstream_least_conn_module)
                                          HTTP_UPSTREAM_LEAST_CONN=NO ;;
         --without-http_upstream_keepalive_module) HTTP_UPSTREAM_KEEPALIVE=NO ;;
+        --without-http_upstream_zone_module) HTTP_UPSTREAM_ZONE=NO  ;;
 
         --with-http_perl_module)         HTTP_PERL=YES              ;;
         --with-perl_modules_path=*)      NGX_PERL_MODULES="$value"  ;;
@@ -267,11 +266,33 @@ use the \"--without-http_limit_conn_module\" option instead"
         --with-mail)                     MAIL=YES                   ;;
         --with-mail_ssl_module)          MAIL_SSL=YES               ;;
         # STUB
-        --with-imap)                     MAIL=YES                   ;;
-        --with-imap_ssl_module)          MAIL_SSL=YES               ;;
+        --with-imap)
+            MAIL=YES
+            NGX_POST_CONF_MSG="$NGX_POST_CONF_MSG
+$0: warning: the \"--with-imap\" option is deprecated, \
+use the \"--with-mail\" option instead"
+        ;;
+        --with-imap_ssl_module)
+            MAIL_SSL=YES
+            NGX_POST_CONF_MSG="$NGX_POST_CONF_MSG
+$0: warning: the \"--with-imap_ssl_module\" option is deprecated, \
+use the \"--with-mail_ssl_module\" option instead"
+        ;;
         --without-mail_pop3_module)      MAIL_POP3=NO               ;;
         --without-mail_imap_module)      MAIL_IMAP=NO               ;;
         --without-mail_smtp_module)      MAIL_SMTP=NO               ;;
+
+        --with-stream)                   STREAM=YES                 ;;
+        --with-stream_ssl_module)        STREAM_SSL=YES             ;;
+        --without-stream_limit_conn_module)
+                                         STREAM_LIMIT_CONN=NO       ;;
+        --without-stream_access_module)  STREAM_ACCESS=NO           ;;
+        --without-stream_upstream_hash_module)
+                                         STREAM_UPSTREAM_HASH=NO    ;;
+        --without-stream_upstream_least_conn_module)
+                                         STREAM_UPSTREAM_LEAST_CONN=NO ;;
+        --without-stream_upstream_zone_module)
+                                         STREAM_UPSTREAM_ZONE=NO    ;;
 
         --with-google_perftools_module)  NGX_GOOGLE_PERFTOOLS=YES   ;;
         --with-cpp_test_module)          NGX_CPP_TEST=YES           ;;
@@ -312,7 +333,6 @@ use the \"--without-http_limit_conn_module\" option instead"
         --test-build-devpoll)            NGX_TEST_BUILD_DEVPOLL=YES ;;
         --test-build-eventport)          NGX_TEST_BUILD_EVENTPORT=YES ;;
         --test-build-epoll)              NGX_TEST_BUILD_EPOLL=YES   ;;
-        --test-build-rtsig)              NGX_TEST_BUILD_RTSIG=YES   ;;
         --test-build-solaris-sendfilev)  NGX_TEST_BUILD_SOLARIS_SENDFILEV=YES ;;
 
         *)
@@ -347,7 +367,6 @@ cat << END
   --build=NAME                       set build name
   --builddir=DIR                     set build directory
 
-  --with-rtsig_module                enable rtsig module
   --with-select_module               enable select module
   --without-select_module            disable select module
   --with-poll_module                 enable poll module
@@ -359,7 +378,7 @@ cat << END
   --with-ipv6                        enable IPv6 support
 
   --with-http_ssl_module             enable ngx_http_ssl_module
-  --with-http_spdy_module            enable ngx_http_spdy_module
+  --with-http_v2_module              enable ngx_http_v2_module
   --with-http_realip_module          enable ngx_http_realip_module
   --with-http_addition_module        enable ngx_http_addition_module
   --with-http_xslt_module            enable ngx_http_xslt_module
@@ -406,6 +425,8 @@ cat << END
                                      disable ngx_http_upstream_least_conn_module
   --without-http_upstream_keepalive_module
                                      disable ngx_http_upstream_keepalive_module
+  --without-http_upstream_zone_module
+                                     disable ngx_http_upstream_zone_module
 
   --with-http_perl_module            enable ngx_http_perl_module
   --with-perl_modules_path=PATH      set Perl modules path
@@ -431,6 +452,17 @@ cat << END
   --without-mail_pop3_module         disable ngx_mail_pop3_module
   --without-mail_imap_module         disable ngx_mail_imap_module
   --without-mail_smtp_module         disable ngx_mail_smtp_module
+
+  --with-stream                      enable TCP proxy module
+  --with-stream_ssl_module           enable ngx_stream_ssl_module
+  --without-stream_limit_conn_module disable ngx_stream_limit_conn_module
+  --without-stream_access_module     disable ngx_stream_access_module
+  --without-stream_upstream_hash_module
+                                     disable ngx_stream_upstream_hash_module
+  --without-stream_upstream_least_conn_module
+                                     disable ngx_stream_upstream_least_conn_module
+  --without-stream_upstream_zone_module
+                                     disable ngx_stream_upstream_zone_module
 
   --with-google_perftools_module     enable ngx_google_perftools_module
   --with-cpp_test_module             enable ngx_cpp_test_module
@@ -497,6 +529,7 @@ if [ ".$NGX_PLATFORM" = ".win32" ]; then
 fi
 
 
+NGX_SBIN_PATH=${NGX_SBIN_PATH:-sbin/nginx}
 NGX_CONF_PATH=${NGX_CONF_PATH:-conf/nginx.conf}
 NGX_CONF_PREFIX=`dirname $NGX_CONF_PATH`
 NGX_PID_PATH=${NGX_PID_PATH:-logs/nginx.pid}

@@ -1,0 +1,3 @@
+LIBRARY	"redis_parser"
+EXPORTS
+    luaopen_redis_parser             @1
