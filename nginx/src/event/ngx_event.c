@@ -18,6 +18,7 @@ extern ngx_module_t ngx_eventport_module;
 extern ngx_module_t ngx_devpoll_module;
 extern ngx_module_t ngx_epoll_module;
 extern ngx_module_t ngx_select_module;
+extern ngx_module_t ngx_poll_module;
 
 
 static char *ngx_event_init_conf(ngx_cycle_t *cycle, void *conf);
@@ -1211,6 +1212,14 @@ ngx_event_core_init_conf(ngx_cycle_t *cycle, void *conf)
 #if (NGX_HAVE_KQUEUE)
 
     module = &ngx_kqueue_module;
+
+#endif
+
+#if (NGX_HAVE_POLL)
+
+    if (module == NULL) {
+        module = &ngx_poll_module;
+    }
 
 #endif
 

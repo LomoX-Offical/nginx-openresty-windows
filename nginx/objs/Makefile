@@ -202,6 +202,7 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/event/ngx_event_acceptex.obj \
 	objs/src/event/modules/ngx_iocp_module.obj \
 	objs/src/event/modules/ngx_win32_select_module.obj \
+	objs/src/event/modules/ngx_win32_poll_module.obj \
 	objs/src/event/ngx_event_openssl.obj \
 	objs/src/event/ngx_event_openssl_stapling.obj \
 	objs/src/core/ngx_regex.obj \
@@ -472,6 +473,7 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/event/ngx_event_acceptex.obj 
 	objs/src/event/modules/ngx_iocp_module.obj 
 	objs/src/event/modules/ngx_win32_select_module.obj 
+	objs/src/event/modules/ngx_win32_poll_module.obj 
 	objs/src/event/ngx_event_openssl.obj 
 	objs/src/event/ngx_event_openssl_stapling.obj 
 	objs/src/core/ngx_regex.obj 
@@ -679,7 +681,7 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/addon/src/ngx_http_redis2_util.obj 
 	objs/ngx_modules.obj 
 	-L../luajit-root/luajit/lib kernel32.lib user32.lib advapi32.lib ws2_32.lib ../ngx_postgres-1.0rc7/lib/libpq.lib -L../luajit-root/luajit/lib ../luajit-root/luajit/lib/lua51.lib objs/lib/pcre-8.37/pcre.lib objs/lib/openssl-1.0.2d/openssl/lib/ssleay32.lib objs/lib/openssl-1.0.2d/openssl/lib/libeay32.lib gdi32.lib crypt32.lib objs/lib/zlib-1.2.8/zlib.lib 
-	objs/nginx.res -link -verbose:lib -debug -def:nginx.def
+	objs/nginx.res -link -verbose:lib -def:nginx.def -debug
 	
 <<
 
@@ -1104,6 +1106,13 @@ objs/src/event/modules/ngx_win32_select_module.obj:	$(CORE_DEPS) \
 	$(CC) -c $(CFLAGS) $(CORE_INCS) \
 		-Foobjs/src/event/modules/ngx_win32_select_module.obj \
 		src/event/modules/ngx_win32_select_module.c
+
+
+objs/src/event/modules/ngx_win32_poll_module.obj:	$(CORE_DEPS) \
+	src/event/modules/ngx_win32_poll_module.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) \
+		-Foobjs/src/event/modules/ngx_win32_poll_module.obj \
+		src/event/modules/ngx_win32_poll_module.c
 
 
 objs/src/event/ngx_event_openssl.obj:	$(CORE_DEPS) \
