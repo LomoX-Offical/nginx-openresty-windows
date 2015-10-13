@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="nginx_1_9_4"
+	Name="nginx_1_9_5"
 	ProjectGUID="{1C469FB4-7E6E-4AB3-8440-FB6E4C9B510A}"
 	RootNamespace="nginx"
 	Keyword="Win32Proj"
@@ -571,6 +571,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\nginx\src\event\modules\ngx_win32_poll_module.c"
+						>
+					</File>
+					<File
 						RelativePath=".\nginx\src\event\modules\ngx_win32_select_module.c"
 						>
 					</File>
@@ -645,26 +649,6 @@
 				</File>
 				<File
 					RelativePath=".\nginx\src\http\ngx_http_script.h"
-					>
-				</File>
-				<File
-					RelativePath=".\nginx\src\http\ngx_http_spdy.c"
-					>
-				</File>
-				<File
-					RelativePath=".\nginx\src\http\ngx_http_spdy.h"
-					>
-				</File>
-				<File
-					RelativePath=".\nginx\src\http\ngx_http_spdy_filter_module.c"
-					>
-				</File>
-				<File
-					RelativePath=".\nginx\src\http\ngx_http_spdy_module.c"
-					>
-				</File>
-				<File
-					RelativePath=".\nginx\src\http\ngx_http_spdy_module.h"
 					>
 				</File>
 				<File
@@ -938,6 +922,42 @@
 							>
 						</File>
 					</Filter>
+				</Filter>
+				<Filter
+					Name="v2"
+					>
+					<File
+						RelativePath=".\nginx\src\http\v2\ngx_http_v2.c"
+						>
+					</File>
+					<File
+						RelativePath=".\nginx\src\http\v2\ngx_http_v2.h"
+						>
+					</File>
+					<File
+						RelativePath=".\nginx\src\http\v2\ngx_http_v2_filter_module.c"
+						>
+					</File>
+					<File
+						RelativePath=".\nginx\src\http\v2\ngx_http_v2_huff_decode.c"
+						>
+					</File>
+					<File
+						RelativePath=".\nginx\src\http\v2\ngx_http_v2_huff_encode.c"
+						>
+					</File>
+					<File
+						RelativePath=".\nginx\src\http\v2\ngx_http_v2_module.c"
+						>
+					</File>
+					<File
+						RelativePath=".\nginx\src\http\v2\ngx_http_v2_module.h"
+						>
+					</File>
+					<File
+						RelativePath=".\nginx\src\http\v2\ngx_http_v2_table.c"
+						>
+					</File>
 				</Filter>
 			</Filter>
 			<Filter

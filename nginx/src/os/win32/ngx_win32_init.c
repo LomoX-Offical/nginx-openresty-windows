@@ -47,6 +47,7 @@ LPFN_TRANSMITFILE          ngx_transmitfile;
 LPFN_TRANSMITPACKETS       ngx_transmitpackets;
 LPFN_CONNECTEX             ngx_connectex;
 LPFN_DISCONNECTEX          ngx_disconnectex;
+LPFN_WSAPOLL               ngx_wsapoll;
 
 static GUID ax_guid = WSAID_ACCEPTEX;
 static GUID as_guid = WSAID_GETACCEPTEXSOCKADDRS;
@@ -54,6 +55,7 @@ static GUID tf_guid = WSAID_TRANSMITFILE;
 static GUID tp_guid = WSAID_TRANSMITPACKETS;
 static GUID cx_guid = WSAID_CONNECTEX;
 static GUID dx_guid = WSAID_DISCONNECTEX;
+static GUID pl_guid = WSAID_WSAPOLL;
 
 
 ngx_int_t
@@ -213,6 +215,13 @@ ngx_os_init(ngx_log_t *log)
         ngx_log_error(NGX_LOG_NOTICE, log, ngx_socket_errno,
                       "WSAIoctl(SIO_GET_EXTENSION_FUNCTION_POINTER, "
                                "WSAID_DISCONNECTEX) failed");
+    }
+    
+    ngx_wsapoll = (LPFN_WSAPOLL)GetProcAddress(GetModuleHandle("ws2_32"), "WSAPoll");
+    if (ngx_wsapoll == 0)
+    {
+        ngx_log_error(NGX_LOG_NOTICE, log, ngx_socket_errno,
+            "GetProcAddress(GetModuleHandle(\"ws2_32\"), \"WSAPoll\")");
     }
 
     if (ngx_close_socket(s) == -1) {

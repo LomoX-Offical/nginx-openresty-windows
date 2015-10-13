@@ -21,8 +21,10 @@ static ngx_int_t ngx_poll_process_events(ngx_cycle_t *cycle, ngx_msec_t timer,
 static char *ngx_poll_init_conf(ngx_cycle_t *cycle, void *conf);
 
 
-static struct pollfd  *event_list;
-static ngx_uint_t      nevents;
+static struct pollfd     *event_list;
+static ngx_connection_t **connection_list;
+static ngx_uint_t         nevents;
+static ngx_hash_t         event_hash;
 
 
 static ngx_str_t    poll_name = ngx_string("poll");
@@ -67,10 +69,16 @@ ngx_module_t  ngx_poll_module = {
 static ngx_int_t
 ngx_poll_init(ngx_cycle_t *cycle, ngx_msec_t timer)
 {
-    struct pollfd   *list;
+    struct pollfd     *list;
+    ngx_connection_t **clist;
 
     if (event_list == NULL) {
         nevents = 0;
+
+        if (connection_list != NULL) {
+            ngx_free(connection_list);
+            connection_list = NULL;
+        }
     }
 
     if (ngx_process >= NGX_PROCESS_WORKER
@@ -87,8 +95,19 @@ ngx_poll_init(ngx_cycle_t *cycle, ngx_msec_t timer)
             ngx_memcpy(list, event_list, sizeof(ngx_event_t *) * nevents);
             ngx_free(event_list);
         }
-
         event_list = list;
+
+        clist = ngx_alloc(sizeof(ngx_connection_t *) * cycle->connection_n,
+            cycle->log);
+        if (clist == NULL) {
+            return NGX_ERROR;
+        }
+
+        if (connection_list) {
+            ngx_memcpy(clist, connection_list, sizeof(ngx_connection_t *) * nevents);
+            ngx_free(connection_list);
+        }
+        connection_list = clist;
     }
 
     ngx_io = ngx_os_io;
@@ -105,8 +124,10 @@ static void
 ngx_poll_done(ngx_cycle_t *cycle)
 {
     ngx_free(event_list);
-
     event_list = NULL;
+
+    ngx_free(connection_list);
+    connection_list = NULL;
 }
 
 
@@ -146,6 +167,8 @@ ngx_poll_add_event(ngx_event_t *ev, ngx_int_t event, ngx_uint_t flags)
         event_list[nevents].fd = c->fd;
         event_list[nevents].events = (short) event;
         event_list[nevents].revents = 0;
+
+        connection_list[nevents] = c;
 
         ev->index = nevents;
         nevents++;
@@ -204,8 +227,10 @@ ngx_poll_del_event(ngx_event_t *ev, ngx_int_t event, ngx_uint_t flags)
                            "index: copy event %ui to %i", nevents, ev->index);
 
             event_list[ev->index] = event_list[nevents];
+            connection_list[ev->index] = connection_list[nevents];
 
-            c = ngx_cycle->files[event_list[nevents].fd];
+            //c = ngx_cycle->files[event_list[nevents].fd];
+            c = connection_list[ev->index];
 
             if (c->fd == -1) {
                 ngx_log_error(NGX_LOG_ALERT, ev->log, 0,
@@ -259,7 +284,7 @@ ngx_poll_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
 
     ngx_log_debug1(NGX_LOG_DEBUG_EVENT, cycle->log, 0, "poll timer: %M", timer);
 
-    ready = WSAPoll(event_list, (u_int) nevents, (int) timer);
+    ready = ngx_wsapoll(event_list, (u_int) nevents, (int) timer);
 
     err = (ready == -1) ? ngx_errno : 0;
 
@@ -271,19 +296,6 @@ ngx_poll_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
                    "poll ready %d of %ui", ready, nevents);
 
     if (err) {
-        if (err == NGX_EINTR) {
-
-            if (ngx_event_timer_alarm) {
-                ngx_event_timer_alarm = 0;
-                return NGX_OK;
-            }
-
-            level = NGX_LOG_INFO;
-
-        } else {
-            level = NGX_LOG_ALERT;
-        }
-
         ngx_log_error(level, cycle->log, err, "poll() failed");
         return NGX_ERROR;
     }
@@ -334,7 +346,8 @@ ngx_poll_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
             continue;
         }
 
-        c = ngx_cycle->files[event_list[i].fd];
+        c = connection_list[i];
+        //c = ngx_cycle->files[event_list[i].fd];
 
         if (c->fd == -1) {
             ngx_log_error(NGX_LOG_ALERT, cycle->log, 0, "unexpected event");

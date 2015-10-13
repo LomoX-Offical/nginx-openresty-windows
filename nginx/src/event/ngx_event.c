@@ -1215,9 +1215,9 @@ ngx_event_core_init_conf(ngx_cycle_t *cycle, void *conf)
 
 #endif
 
-#if (NGX_HAVE_POLL)
+#if (NGX_HAVE_POLL) && (NGX_WIN32)
 
-    if (module == NULL) {
+    if (ngx_wsapoll != 0 && module == NULL){
         module = &ngx_poll_module;
     }
 

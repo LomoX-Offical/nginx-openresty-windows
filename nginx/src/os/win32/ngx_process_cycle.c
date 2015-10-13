@@ -657,6 +657,8 @@ ngx_worker_process_cycle(ngx_cycle_t *cycle, char *mevn)
 
     log = cycle->log;
 
+    DebugBreak();
+
     ngx_log_debug0(NGX_LOG_DEBUG_CORE, log, 0, "worker started");
 
     ngx_sprintf((u_char *) wtevn, "ngx_worker_term_%ul%Z", ngx_pid);

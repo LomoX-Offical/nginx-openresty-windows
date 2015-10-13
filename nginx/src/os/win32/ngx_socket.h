@@ -198,6 +198,7 @@ extern LPFN_TRANSMITFILE          ngx_transmitfile;
 extern LPFN_TRANSMITPACKETS       ngx_transmitpackets;
 extern LPFN_CONNECTEX             ngx_connectex;
 extern LPFN_DISCONNECTEX          ngx_disconnectex;
+extern LPFN_WSAPOLL               ngx_wsapoll;
 
 
 int ngx_tcp_push(ngx_socket_t s);
