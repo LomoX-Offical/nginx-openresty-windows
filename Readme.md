@@ -70,6 +70,7 @@ and these C module for Lua:
 
 - lua-cjson
 - lua-redis-parser
+- lua-rds-parser
 
 
 ### resource ###
