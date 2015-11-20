@@ -21,7 +21,8 @@
 #define NGX_HTTP_V2_MAX_FRAME_SIZE       ((1 << 24) - 1)
 
 #define NGX_HTTP_V2_INT_OCTETS           4
-#define NGX_HTTP_V2_MAX_FIELD            ((1 << NGX_HTTP_V2_INT_OCTETS * 7) - 1)
+#define NGX_HTTP_V2_MAX_FIELD                                                 \
+    (127 + (1 << (NGX_HTTP_V2_INT_OCTETS - 1) * 7) - 1)
 
 #define NGX_HTTP_V2_DATA_DISCARD         1
 #define NGX_HTTP_V2_DATA_ERROR           2
@@ -79,7 +80,6 @@ typedef struct {
     unsigned                         index:1;
     ngx_http_v2_header_t             header;
     size_t                           header_limit;
-    size_t                           field_limit;
     u_char                           field_state;
     u_char                          *field_start;
     u_char                          *field_end;
@@ -178,7 +178,7 @@ struct ngx_http_v2_stream_s {
     size_t                           recv_window;
 
     ngx_http_v2_out_frame_t         *free_frames;
-    ngx_chain_t                     *free_data_headers;
+    ngx_chain_t                     *free_frame_headers;
     ngx_chain_t                     *free_bufs;
 
     ngx_queue_t                      queue;

@@ -1133,6 +1133,22 @@ ngx_http_v2_state_headers(ngx_http_v2_connection_t *h2c, u_char *pos,
 
     h2c->last_sid = h2c->state.sid;
 
+    if (depend == h2c->state.sid) {
+        ngx_log_error(NGX_LOG_INFO, h2c->connection->log, 0,
+                      "client sent HEADERS frame for stream %ui "
+                      "with incorrect dependency", h2c->state.sid);
+
+        if (ngx_http_v2_send_rst_stream(h2c, h2c->state.sid,
+                                        NGX_HTTP_V2_PROTOCOL_ERROR)
+            != NGX_OK)
+        {
+            return ngx_http_v2_connection_error(h2c,
+                                                NGX_HTTP_V2_INTERNAL_ERROR);
+        }
+
+        return ngx_http_v2_state_skip_headers(h2c, pos, end);
+    }
+
     h2scf = ngx_http_get_module_srv_conf(h2c->http_connection->conf_ctx,
                                          ngx_http_v2_module);
 
@@ -1190,10 +1206,9 @@ static u_char *
 ngx_http_v2_state_header_block(ngx_http_v2_connection_t *h2c, u_char *pos,
     u_char *end)
 {
-    u_char                   ch;
-    ngx_int_t                value;
-    ngx_uint_t               indexed, size_update, prefix;
-    ngx_http_v2_srv_conf_t  *h2scf;
+    u_char      ch;
+    ngx_int_t   value;
+    ngx_uint_t  indexed, size_update, prefix;
 
     if (end - pos < 1) {
         return ngx_http_v2_state_save(h2c, pos, end,
@@ -1233,7 +1248,7 @@ ngx_http_v2_state_header_block(ngx_http_v2_connection_t *h2c, u_char *pos,
 
     } else {
         /* literal header field without indexing */
-        prefix = ngx_http_v2_prefix(3);
+        prefix = ngx_http_v2_prefix(4);
     }
 
     value = ngx_http_v2_parse_int(h2c, &pos, end, prefix);
@@ -1274,20 +1289,11 @@ ngx_http_v2_state_header_block(ngx_http_v2_connection_t *h2c, u_char *pos,
         return ngx_http_v2_state_header_complete(h2c, pos, end);
     }
 
-    h2scf = ngx_http_get_module_srv_conf(h2c->http_connection->conf_ctx,
-                                         ngx_http_v2_module);
-
-    h2c->state.field_limit = h2scf->max_field_size;
-
     if (value == 0) {
         h2c->state.parse_name = 1;
 
-    } else {
-        if (ngx_http_v2_get_indexed_header(h2c, value, 1) != NGX_OK) {
-            return ngx_http_v2_connection_error(h2c, NGX_HTTP_V2_COMP_ERROR);
-        }
-
-        h2c->state.field_limit -= h2c->state.header.name.len;
+    } else if (ngx_http_v2_get_indexed_header(h2c, value, 1) != NGX_OK) {
+        return ngx_http_v2_connection_error(h2c, NGX_HTTP_V2_COMP_ERROR);
     }
 
     h2c->state.parse_value = 1;
@@ -1300,9 +1306,10 @@ static u_char *
 ngx_http_v2_state_field_len(ngx_http_v2_connection_t *h2c, u_char *pos,
     u_char *end)
 {
-    size_t      alloc;
-    ngx_int_t   len;
-    ngx_uint_t  huff;
+    size_t                   alloc;
+    ngx_int_t                len;
+    ngx_uint_t               huff;
+    ngx_http_v2_srv_conf_t  *h2scf;
 
     if (!(h2c->state.flags & NGX_HTTP_V2_END_HEADERS_FLAG)
         && h2c->state.length < NGX_HTTP_V2_INT_OCTETS)
@@ -1349,14 +1356,16 @@ ngx_http_v2_state_field_len(ngx_http_v2_connection_t *h2c, u_char *pos,
                    "http2 hpack %s string length: %i",
                    huff ? "encoded" : "raw", len);
 
-    if ((size_t) len > h2c->state.field_limit) {
+    h2scf = ngx_http_get_module_srv_conf(h2c->http_connection->conf_ctx,
+                                         ngx_http_v2_module);
+
+    if ((size_t) len > h2scf->max_field_size) {
         ngx_log_error(NGX_LOG_INFO, h2c->connection->log, 0,
                       "client exceeded http2_max_field_size limit");
 
         return ngx_http_v2_connection_error(h2c, NGX_HTTP_V2_ENHANCE_YOUR_CALM);
     }
 
-    h2c->state.field_limit -= len;
     h2c->state.field_rest = len;
 
     if (h2c->state.stream == NULL && !h2c->state.index) {
@@ -1650,7 +1659,7 @@ ngx_http_v2_state_process_header(ngx_http_v2_connection_t *h2c, u_char *pos,
     h->key.len = header->name.len;
     h->key.data = header->name.data;
 
-    /* TODO Optimization: precalculate hash and hadnler for indexed headers. */
+    /* TODO Optimization: precalculate hash and handler for indexed headers. */
     h->hash = ngx_hash_key(h->key.data, h->key.len);
 
     h->value.len = header->value.len;
@@ -1804,7 +1813,7 @@ ngx_http_v2_state_priority(ngx_http_v2_connection_t *h2c, u_char *pos,
     if (depend == h2c->state.sid) {
         ngx_log_error(NGX_LOG_INFO, h2c->connection->log, 0,
                       "client sent PRIORITY frame for stream %ui "
-                      "with incorrect dependancy", h2c->state.sid);
+                      "with incorrect dependency", h2c->state.sid);
 
         node = ngx_http_v2_get_node_by_id(h2c, h2c->state.sid, 0);
 
@@ -2361,12 +2370,6 @@ ngx_http_v2_connection_error(ngx_http_v2_connection_t *h2c,
         ngx_debug_point();
     }
 
-    if (h2c->state.stream) {
-        h2c->state.stream->out_closed = 1;
-        h2c->state.pool = NULL;
-        ngx_http_v2_close_stream(h2c->state.stream, NGX_HTTP_BAD_REQUEST);
-    }
-
     ngx_http_v2_finalize_connection(h2c, err);
 
     return NULL;
@@ -2396,8 +2399,8 @@ ngx_http_v2_parse_int(ngx_http_v2_connection_t *h2c, u_char **pos, u_char *end,
         return value;
     }
 
-    if (end - p > NGX_HTTP_V2_INT_OCTETS - 1) {
-        end = p + NGX_HTTP_V2_INT_OCTETS - 1;
+    if (end - start > NGX_HTTP_V2_INT_OCTETS) {
+        end = start + NGX_HTTP_V2_INT_OCTETS;
     }
 
     for (shift = 0; p != end; shift += 7) {
@@ -2417,12 +2420,12 @@ ngx_http_v2_parse_int(ngx_http_v2_connection_t *h2c, u_char **pos, u_char *end,
         }
     }
 
-    if ((size_t) (end - start) >= NGX_HTTP_V2_INT_OCTETS) {
-        return NGX_DECLINED;
-    }
-
     if ((size_t) (end - start) >= h2c->state.length) {
         return NGX_ERROR;
+    }
+
+    if (end == start + NGX_HTTP_V2_INT_OCTETS) {
+        return NGX_DECLINED;
     }
 
     return NGX_AGAIN;
@@ -2762,6 +2765,8 @@ ngx_http_v2_create_stream(ngx_http_v2_connection_t *h2c)
         return NULL;
     }
 
+    ngx_str_set(&r->http_protocol, "HTTP/2.0");
+
     r->http_version = NGX_HTTP_VERSION_20;
     r->valid_location = 1;
 
@@ -2896,19 +2901,20 @@ ngx_http_v2_get_closed_node(ngx_http_v2_connection_t *h2c)
         weight += child->weight;
     }
 
+    parent = node->parent;
+
     for (q = ngx_queue_head(&node->children);
          q != ngx_queue_sentinel(&node->children);
          q = ngx_queue_next(q))
     {
         child = ngx_queue_data(q, ngx_http_v2_node_t, queue);
+        child->parent = parent;
         child->weight = node->weight * child->weight / weight;
 
         if (child->weight == 0) {
             child->weight = 1;
         }
     }
-
-    parent = node->parent;
 
     if (parent == NGX_HTTP_V2_ROOT) {
         node->rank = 0;
@@ -2942,6 +2948,8 @@ ngx_http_v2_validate_header(ngx_http_request_t *r, ngx_http_v2_header_t *header)
     if (header->name.len == 0) {
         return NGX_ERROR;
     }
+
+    r->invalid_header = 0;
 
     cscf = ngx_http_get_module_srv_conf(r, ngx_http_core_module);
 
@@ -3795,6 +3803,12 @@ ngx_http_v2_finalize_connection(ngx_http_v2_connection_t *h2c,
 
     c = h2c->connection;
 
+    if (h2c->state.stream) {
+        h2c->state.stream->out_closed = 1;
+        h2c->state.pool = NULL;
+        ngx_http_v2_close_stream(h2c->state.stream, NGX_HTTP_BAD_REQUEST);
+    }
+
     h2c->blocked = 1;
 
     if (!c->error && ngx_http_v2_send_goaway(h2c, status) != NGX_ERROR) {
@@ -3922,8 +3936,8 @@ static void
 ngx_http_v2_set_dependency(ngx_http_v2_connection_t *h2c,
     ngx_http_v2_node_t *node, ngx_uint_t depend, ngx_uint_t exclusive)
 {
-    ngx_queue_t         *children;
-    ngx_http_v2_node_t  *parent, *next;
+    ngx_queue_t         *children, *q;
+    ngx_http_v2_node_t  *parent, *child, *next;
 
     parent = depend ? ngx_http_v2_get_node_by_id(h2c, depend, 0) : NULL;
 
@@ -3985,6 +3999,14 @@ ngx_http_v2_set_dependency(ngx_http_v2_connection_t *h2c,
     }
 
     if (exclusive) {
+        for (q = ngx_queue_head(children);
+             q != ngx_queue_sentinel(children);
+             q = ngx_queue_next(q))
+        {
+            child = ngx_queue_data(q, ngx_http_v2_node_t, queue);
+            child->parent = node;
+        }
+
         ngx_queue_add(&node->children, children);
         ngx_queue_init(children);
     }
