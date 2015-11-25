@@ -1572,91 +1572,91 @@
 				Name="postgres"
 				>
 				<File
-					RelativePath=".\ngx_postgres-1.0rc3\src\ngx_postgres_ddebug.h"
+					RelativePath=".\ngx_postgres-1.0rc7\src\ngx_postgres_ddebug.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ngx_postgres-1.0rc3\src\ngx_postgres_escape.c"
+					RelativePath=".\ngx_postgres-1.0rc7\src\ngx_postgres_escape.c"
 					>
 				</File>
 				<File
-					RelativePath=".\ngx_postgres-1.0rc3\src\ngx_postgres_escape.h"
+					RelativePath=".\ngx_postgres-1.0rc7\src\ngx_postgres_escape.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ngx_postgres-1.0rc3\src\ngx_postgres_handler.c"
+					RelativePath=".\ngx_postgres-1.0rc7\src\ngx_postgres_handler.c"
 					>
 				</File>
 				<File
-					RelativePath=".\ngx_postgres-1.0rc3\src\ngx_postgres_handler.h"
+					RelativePath=".\ngx_postgres-1.0rc7\src\ngx_postgres_handler.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ngx_postgres-1.0rc3\src\ngx_postgres_keepalive.c"
+					RelativePath=".\ngx_postgres-1.0rc7\src\ngx_postgres_keepalive.c"
 					>
 				</File>
 				<File
-					RelativePath=".\ngx_postgres-1.0rc3\src\ngx_postgres_keepalive.h"
+					RelativePath=".\ngx_postgres-1.0rc7\src\ngx_postgres_keepalive.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ngx_postgres-1.0rc3\src\ngx_postgres_module.c"
+					RelativePath=".\ngx_postgres-1.0rc7\src\ngx_postgres_module.c"
 					>
 				</File>
 				<File
-					RelativePath=".\ngx_postgres-1.0rc3\src\ngx_postgres_module.h"
+					RelativePath=".\ngx_postgres-1.0rc7\src\ngx_postgres_module.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ngx_postgres-1.0rc3\src\ngx_postgres_output.c"
+					RelativePath=".\ngx_postgres-1.0rc7\src\ngx_postgres_output.c"
 					>
 				</File>
 				<File
-					RelativePath=".\ngx_postgres-1.0rc3\src\ngx_postgres_output.h"
+					RelativePath=".\ngx_postgres-1.0rc7\src\ngx_postgres_output.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ngx_postgres-1.0rc3\src\ngx_postgres_processor.c"
+					RelativePath=".\ngx_postgres-1.0rc7\src\ngx_postgres_processor.c"
 					>
 				</File>
 				<File
-					RelativePath=".\ngx_postgres-1.0rc3\src\ngx_postgres_processor.h"
+					RelativePath=".\ngx_postgres-1.0rc7\src\ngx_postgres_processor.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ngx_postgres-1.0rc3\src\ngx_postgres_rewrite.c"
+					RelativePath=".\ngx_postgres-1.0rc7\src\ngx_postgres_rewrite.c"
 					>
 				</File>
 				<File
-					RelativePath=".\ngx_postgres-1.0rc3\src\ngx_postgres_rewrite.h"
+					RelativePath=".\ngx_postgres-1.0rc7\src\ngx_postgres_rewrite.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ngx_postgres-1.0rc3\src\ngx_postgres_upstream.c"
+					RelativePath=".\ngx_postgres-1.0rc7\src\ngx_postgres_upstream.c"
 					>
 				</File>
 				<File
-					RelativePath=".\ngx_postgres-1.0rc3\src\ngx_postgres_upstream.h"
+					RelativePath=".\ngx_postgres-1.0rc7\src\ngx_postgres_upstream.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ngx_postgres-1.0rc3\src\ngx_postgres_util.c"
+					RelativePath=".\ngx_postgres-1.0rc7\src\ngx_postgres_util.c"
 					>
 				</File>
 				<File
-					RelativePath=".\ngx_postgres-1.0rc3\src\ngx_postgres_util.h"
+					RelativePath=".\ngx_postgres-1.0rc7\src\ngx_postgres_util.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ngx_postgres-1.0rc3\src\ngx_postgres_variable.c"
+					RelativePath=".\ngx_postgres-1.0rc7\src\ngx_postgres_variable.c"
 					>
 				</File>
 				<File
-					RelativePath=".\ngx_postgres-1.0rc3\src\ngx_postgres_variable.h"
+					RelativePath=".\ngx_postgres-1.0rc7\src\ngx_postgres_variable.h"
 					>
 				</File>
 				<File
-					RelativePath=".\ngx_postgres-1.0rc3\src\resty_dbd_stream.h"
+					RelativePath=".\ngx_postgres-1.0rc7\src\resty_dbd_stream.h"
 					>
 				</File>
 			</Filter>

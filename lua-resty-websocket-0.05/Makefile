@@ -10,8 +10,8 @@ INSTALL ?= install
 all: ;
 
 install: all
-	$(INSTALL) -d $(DESTDIR)/$(LUA_LIB_DIR)/resty/websocket
-	$(INSTALL) lib/resty/websocket/*.lua $(DESTDIR)/$(LUA_LIB_DIR)/resty/websocket/
+	$(INSTALL) -d $(DESTDIR)$(LUA_LIB_DIR)/resty/websocket
+	$(INSTALL) lib/resty/websocket/*.lua $(DESTDIR)$(LUA_LIB_DIR)/resty/websocket/
 
 test: all
 	PATH=$(OPENRESTY_PREFIX)/nginx/sbin:$$PATH prove -I../test-nginx/lib -r t
