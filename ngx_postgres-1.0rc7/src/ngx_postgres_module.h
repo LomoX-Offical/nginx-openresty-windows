@@ -29,8 +29,6 @@
 #ifndef _NGX_POSTGRES_MODULE_H_
 #define _NGX_POSTGRES_MODULE_H_
 
-#include "stdint.h"
-
 #include <nginx.h>
 #include <ngx_core.h>
 #include <ngx_http.h>

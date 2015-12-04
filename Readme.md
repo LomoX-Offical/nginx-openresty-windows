@@ -1,19 +1,27 @@
 ## Nginx Openresty For Windows ##
 
 ### lastest release ###
-Version:1.9.7.1001
 
-32 bit: http://pan.baidu.com/s/1o68bOEI
+Version:1.9.7.1002
 
-64 bit: http://pan.baidu.com/s/1kTzu1oz
+32 bit: http://pan.baidu.com/s/1mgXobxe
 
->Release time: 2015-11-19
+64 bit: http://pan.baidu.com/s/1pKjtk3T
+
+>Release time: 2015-11-04
 
 >Changelog:  
 
-- update nginx to 1.9.7 version.
-- The ngx_http_v2_module module (1.9.7) provides support for HTTP/2 and supersedes the ngx_http_spdy_module module.
+- update ngx_lua module to 0.9.19
+- update headers-more-nginx-module to 0.28
+- update ngx_lua_upstream module to 0.04
+- update rds-csv-nginx-module to 0.07
 
+- update lua-cjson module to 2.1.0.3
+- update lua-rds-parser module to 0.06
+- update lua-redis-parser module to 0.12
+
+- update LuaJIT to 2.1.0 beta1
 
 
 
@@ -276,3 +284,17 @@ Version:1.9.5.1001
 - update nginx to 1.9.5 version.
 - The ngx_http_v2_module module (1.9.5) provides support for HTTP/2 and supersedes the ngx_http_spdy_module module.
 
+
+
+Version:1.9.7.1001
+
+32 bit: http://pan.baidu.com/s/1o68bOEI
+
+64 bit: http://pan.baidu.com/s/1kTzu1oz
+
+>Release time: 2015-11-19
+
+>Changelog:  
+
+- update nginx to 1.9.7 version.
+- The ngx_http_v2_module module (1.9.7) provides support for HTTP/2 and supersedes the ngx_http_spdy_module module.

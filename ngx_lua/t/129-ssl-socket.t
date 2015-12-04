@@ -1,6 +1,5 @@
 # vim:set ft= ts=4 sw=4 et fdm=marker:
 
-use lib 'lib';
 use Test::Nginx::Socket::Lua;
 
 repeat_each(2);
@@ -102,13 +101,13 @@ __DATA__
 
 --- request
 GET /t
---- response_body
-connected: 1
+--- response_body_like chop
+\Aconnected: 1
 ssl handshake: userdata
 sent http request: 59 bytes.
-received: HTTP/1.1 200 OK
+received: HTTP/1.1 (?:200 OK|302 Found)
 close: 1 nil
-
+\z
 --- grep_error_log eval: qr/lua ssl (?:set|save|free) session: [0-9A-F]+:\d+/
 --- grep_error_log_out eval
 qr/^lua ssl save session: ([0-9A-F]+):2
@@ -920,13 +919,13 @@ $::EquifaxRootCertificate"
 
 --- request
 GET /t
---- response_body
-connected: 1
+--- response_body_like chop
+\Aconnected: 1
 ssl handshake: userdata
 sent http request: 59 bytes.
-received: HTTP/1.1 200 OK
+received: HTTP/1.1 (?:200 OK|302 Found)
 close: 1 nil
-
+\z
 --- grep_error_log eval: qr/lua ssl (?:set|save|free) session: [0-9A-F]+:\d+/
 --- grep_error_log_out eval
 qr/^lua ssl save session: ([0-9A-F]+):2
