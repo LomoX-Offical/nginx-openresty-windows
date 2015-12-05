@@ -8,7 +8,7 @@ Version:1.9.7.1002
 
 64 bit: http://pan.baidu.com/s/1pKjtk3T
 
->Release time: 2015-11-04
+>Release time: 2015-12-04
 
 >Changelog:  
 
@@ -16,11 +16,9 @@ Version:1.9.7.1002
 - update headers-more-nginx-module to 0.28
 - update ngx_lua_upstream module to 0.04
 - update rds-csv-nginx-module to 0.07
-
 - update lua-cjson module to 2.1.0.3
 - update lua-rds-parser module to 0.06
 - update lua-redis-parser module to 0.12
-
 - update LuaJIT to 2.1.0 beta1
 
 
