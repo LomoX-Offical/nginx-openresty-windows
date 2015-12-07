@@ -1,30 +1,30 @@
 ## Nginx Openresty For Windows ##
-[ 语言: [English](Readme-en.md), [中文](Readme.md)]
+[ languages: [中文](Readme.md), [English](Readme-en.md) ]
 
-### 最新版本 ###
+### lastest release ###
 
-版本号:1.9.7.1002
+Version:1.9.7.1002
 
-32 位下载地址: http://pan.baidu.com/s/1mgXobxe
+32 bit: http://pan.baidu.com/s/1mgXobxe
 
-64 位下载地址: http://pan.baidu.com/s/1pKjtk3T
+64 bit: http://pan.baidu.com/s/1pKjtk3T
 
->发布时间: 2015-12-04
+>Release time: 2015-12-04
 
->修改日志:  
+>Changelog:  
 
-- 更新 ngx_lua module 版本到 0.9.19
-- 更新 headers-more-nginx-module 版本到 0.28
-- 更新 ngx_lua_upstream module 版本到 0.04
-- 更新 rds-csv-nginx-module 版本到 0.07
-- 更新 lua-cjson module 版本到 2.1.0.3
-- 更新 lua-rds-parser module 版本到 0.06
-- 更新 lua-redis-parser module 版本到 0.12
-- 更新 LuaJIT 版本到 2.1.0 beta1
+- update ngx_lua module to 0.9.19
+- update headers-more-nginx-module to 0.28
+- update ngx_lua_upstream module to 0.04
+- update rds-csv-nginx-module to 0.07
+- update lua-cjson module to 2.1.0.3
+- update lua-rds-parser module to 0.06
+- update lua-redis-parser module to 0.12
+- update LuaJIT to 2.1.0 beta1
 
 
 
-### 关于 ###
+### about ###
 
 OpenResty is a fast web app server by extending nginx.
 
