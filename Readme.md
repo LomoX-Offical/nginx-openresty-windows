@@ -1,5 +1,13 @@
 ## Nginx Openresty For Windows ##
 
+### lasted bin ### 
+Version:1.9.7.1002
+
+32 bit: http://pan.baidu.com/s/1mgXobxe
+
+64 bit: http://pan.baidu.com/s/1pKjtk3T
+
+
 ### about ###
 
 OpenResty is a fast web app server by extending nginx.
