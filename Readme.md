@@ -1,28 +1,5 @@
 ## Nginx Openresty For Windows ##
 
-### lastest release ###
-
-Version:1.9.7.1002
-
-32 bit: http://pan.baidu.com/s/1mgXobxe
-
-64 bit: http://pan.baidu.com/s/1pKjtk3T
-
->Release time: 2015-12-04
-
->Changelog:  
-
-- update ngx_lua module to 0.9.19
-- update headers-more-nginx-module to 0.28
-- update ngx_lua_upstream module to 0.04
-- update rds-csv-nginx-module to 0.07
-- update lua-cjson module to 2.1.0.3
-- update lua-rds-parser module to 0.06
-- update lua-redis-parser module to 0.12
-- update LuaJIT to 2.1.0 beta1
-
-
-
 ### about ###
 
 OpenResty is a fast web app server by extending nginx.
@@ -31,8 +8,8 @@ OpenResty is a fast web app server by extending nginx.
 
 it has some feature:
 
-- high performance
-- concurrent more than twenty thousand connections
+- high performance then official version
+- concurrent more than twenty thousand connections, (window server 2008r2 muticore cpu, more then 35000 connections)
 - multi process
 - various bugs fixed compare with nginx orginal
 
@@ -81,11 +58,35 @@ and these C module for Lua:
 
 ### resource ###
 
-开源架构群:**167813458**
+开源架构群 qqgroup:**167813458** 
+
+nginx win32 build ppt: [http://pan.baidu.com/s/1dEnbHHv]
 
 Documentation of Nginx at [http://www.nginx.org](http://www.nginx.org)
 
 Documentation of Openresty at [http://www.openresty.org](http://www.openresty.org)
+
+
+### lastest release ###
+
+Version:1.9.7.1002
+
+32 bit: http://pan.baidu.com/s/1mgXobxe
+
+64 bit: http://pan.baidu.com/s/1pKjtk3T
+
+>Release time: 2015-12-04
+
+>Changelog:  
+
+- update ngx_lua module to 0.9.19
+- update headers-more-nginx-module to 0.28
+- update ngx_lua_upstream module to 0.04
+- update rds-csv-nginx-module to 0.07
+- update lua-cjson module to 2.1.0.3
+- update lua-rds-parser module to 0.06
+- update lua-redis-parser module to 0.12
+- update LuaJIT to 2.1.0 beta1
 
 
 ### history ###
