@@ -1,10 +1,9 @@
 ## Nginx Openresty For Windows ##
 
-### lasted bin ### 
+### lastest release ###
+
 Version:1.9.7.1002
-
 32 bit: http://pan.baidu.com/s/1mgXobxe
-
 64 bit: http://pan.baidu.com/s/1pKjtk3T
 
 
