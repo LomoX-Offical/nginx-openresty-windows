@@ -250,6 +250,11 @@ ngx_http_upstream_header_t  ngx_http_upstream_headers_in[] = {
                  ngx_http_upstream_copy_allow_ranges,
                  offsetof(ngx_http_headers_out_t, accept_ranges), 1 },
 
+    { ngx_string("Content-Range"),
+                 ngx_http_upstream_ignore_header_line, 0,
+                 ngx_http_upstream_copy_header_line,
+                 offsetof(ngx_http_headers_out_t, content_range), 0 },
+
     { ngx_string("Connection"),
                  ngx_http_upstream_process_connection, 0,
                  ngx_http_upstream_ignore_header_line, 0, 0 },
@@ -633,7 +638,19 @@ ngx_http_upstream_init_request(ngx_http_request_t *r)
         u->ssl_name = u->resolved->host;
 #endif
 
+        host = &u->resolved->host;
+
         if (u->resolved->sockaddr) {
+
+            if (u->resolved->port == 0
+                && u->resolved->sockaddr->sa_family != AF_UNIX)
+            {
+                ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+                              "no port in upstream \"%V\"", host);
+                ngx_http_upstream_finalize_request(r, u,
+                                               NGX_HTTP_INTERNAL_SERVER_ERROR);
+                return;
+            }
 
             if (ngx_http_upstream_create_round_robin_peer(r, u->resolved)
                 != NGX_OK)
@@ -647,8 +664,6 @@ ngx_http_upstream_init_request(ngx_http_request_t *r)
 
             return;
         }
-
-        host = &u->resolved->host;
 
         umcf = ngx_http_get_module_main_conf(r, ngx_http_upstream_module);
 
@@ -764,7 +779,7 @@ ngx_http_upstream_cache(ngx_http_request_t *r, ngx_http_upstream_t *u)
             return rc;
         }
 
-        if ((r->method & NGX_HTTP_HEAD) && u->conf->cache_convert_head) {
+        if (r->method == NGX_HTTP_HEAD && u->conf->cache_convert_head) {
             u->method = ngx_http_core_get_method;
         }
 

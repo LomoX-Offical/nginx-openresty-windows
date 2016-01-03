@@ -14,6 +14,9 @@
 static void ngx_thread_read_handler(void *data, ngx_log_t *log);
 #endif
 
+static ssize_t ngx_writev_file(ngx_file_t *file, ngx_array_t *vec, size_t size,
+    off_t offset);
+
 
 #if (NGX_HAVE_FILE_AIO)
 
@@ -176,7 +179,8 @@ ngx_thread_read_handler(void *data, ngx_log_t *log)
 ssize_t
 ngx_write_file(ngx_file_t *file, u_char *buf, size_t size, off_t offset)
 {
-    ssize_t  n, written;
+    ssize_t    n, written;
+    ngx_err_t  err;
 
     ngx_log_debug4(NGX_LOG_DEBUG_CORE, file->log, 0,
                    "write: %d, %p, %uz, %O", file->fd, buf, size, offset);
@@ -189,7 +193,15 @@ ngx_write_file(ngx_file_t *file, u_char *buf, size_t size, off_t offset)
         n = pwrite(file->fd, buf + written, size, offset);
 
         if (n == -1) {
-            ngx_log_error(NGX_LOG_CRIT, file->log, ngx_errno,
+            err = ngx_errno;
+
+            if (err == NGX_EINTR) {
+                ngx_log_debug0(NGX_LOG_DEBUG_CORE, file->log, err,
+                               "pwrite() was interrupted");
+                continue;
+            }
+
+            ngx_log_error(NGX_LOG_CRIT, file->log, err,
                           "pwrite() \"%s\" failed", file->name.data);
             return NGX_ERROR;
         }
@@ -221,11 +233,20 @@ ngx_write_file(ngx_file_t *file, u_char *buf, size_t size, off_t offset)
         n = write(file->fd, buf + written, size);
 
         if (n == -1) {
-            ngx_log_error(NGX_LOG_CRIT, file->log, ngx_errno,
+            err = ngx_errno;
+
+            if (err == NGX_EINTR) {
+                ngx_log_debug0(NGX_LOG_DEBUG_CORE, file->log, err,
+                               "write() was interrupted");
+                continue;
+            }
+
+            ngx_log_error(NGX_LOG_CRIT, file->log, err,
                           "write() \"%s\" failed", file->name.data);
             return NGX_ERROR;
         }
 
+        file->sys_offset += n;
         file->offset += n;
         written += n;
 
@@ -264,7 +285,6 @@ ngx_write_chain_to_file(ngx_file_t *file, ngx_chain_t *cl, off_t offset,
     u_char        *prev;
     size_t         size;
     ssize_t        total, n;
-    ngx_err_t      err;
     ngx_array_t    vec;
     struct iovec  *iov, iovs[NGX_IOVS];
 
@@ -326,52 +346,101 @@ ngx_write_chain_to_file(ngx_file_t *file, ngx_chain_t *cl, off_t offset,
             return total + n;
         }
 
-        if (file->sys_offset != offset) {
-            if (lseek(file->fd, offset, SEEK_SET) == -1) {
-                ngx_log_error(NGX_LOG_CRIT, file->log, ngx_errno,
-                              "lseek() \"%s\" failed", file->name.data);
-                return NGX_ERROR;
-            }
+        n = ngx_writev_file(file, &vec, size, offset);
 
-            file->sys_offset = offset;
+        if (n == NGX_ERROR) {
+            return n;
         }
 
-eintr:
-
-        n = writev(file->fd, vec.elts, vec.nelts);
-
-        if (n == -1) {
-            err = ngx_errno;
-
-            if (err == NGX_EINTR) {
-                ngx_log_debug0(NGX_LOG_DEBUG_CORE, file->log, err,
-                               "writev() was interrupted");
-                goto eintr;
-            }
-
-            ngx_log_error(NGX_LOG_CRIT, file->log, err,
-                          "writev() \"%s\" failed", file->name.data);
-            return NGX_ERROR;
-        }
-
-        if ((size_t) n != size) {
-            ngx_log_error(NGX_LOG_CRIT, file->log, 0,
-                          "writev() \"%s\" has written only %z of %uz",
-                          file->name.data, n, size);
-            return NGX_ERROR;
-        }
-
-        ngx_log_debug2(NGX_LOG_DEBUG_CORE, file->log, 0,
-                       "writev: %d, %z", file->fd, n);
-
-        file->sys_offset += n;
-        file->offset += n;
         offset += n;
         total += n;
 
     } while (cl);
 
     return total;
+}
+
+
+static ssize_t
+ngx_writev_file(ngx_file_t *file, ngx_array_t *vec, size_t size, off_t offset)
+{
+    ssize_t    n;
+    ngx_err_t  err;
+
+    ngx_log_debug3(NGX_LOG_DEBUG_CORE, file->log, 0,
+                   "writev: %d, %uz, %O", file->fd, size, offset);
+
+#if (NGX_HAVE_PWRITEV)
+
+eintr:
+
+    n = pwritev(file->fd, vec->elts, vec->nelts, offset);
+
+    if (n == -1) {
+        err = ngx_errno;
+
+        if (err == NGX_EINTR) {
+            ngx_log_debug0(NGX_LOG_DEBUG_CORE, file->log, err,
+                           "pwritev() was interrupted");
+            goto eintr;
+        }
+
+        ngx_log_error(NGX_LOG_CRIT, file->log, err,
+                      "pwritev() \"%s\" failed", file->name.data);
+        return NGX_ERROR;
+    }
+
+    if ((size_t) n != size) {
+        ngx_log_error(NGX_LOG_CRIT, file->log, 0,
+                      "pwritev() \"%s\" has written only %z of %uz",
+                      file->name.data, n, size);
+        return NGX_ERROR;
+    }
+
+#else
+
+    if (file->sys_offset != offset) {
+        if (lseek(file->fd, offset, SEEK_SET) == -1) {
+            ngx_log_error(NGX_LOG_CRIT, file->log, ngx_errno,
+                          "lseek() \"%s\" failed", file->name.data);
+            return NGX_ERROR;
+        }
+
+        file->sys_offset = offset;
+    }
+
+eintr:
+
+    n = writev(file->fd, vec->elts, vec->nelts);
+
+    if (n == -1) {
+        err = ngx_errno;
+
+        if (err == NGX_EINTR) {
+            ngx_log_debug0(NGX_LOG_DEBUG_CORE, file->log, err,
+                           "writev() was interrupted");
+            goto eintr;
+        }
+
+        ngx_log_error(NGX_LOG_CRIT, file->log, err,
+                      "writev() \"%s\" failed", file->name.data);
+        return NGX_ERROR;
+    }
+
+    if ((size_t) n != size) {
+        ngx_log_error(NGX_LOG_CRIT, file->log, 0,
+                      "writev() \"%s\" has written only %z of %uz",
+                      file->name.data, n, size);
+        return NGX_ERROR;
+    }
+
+    file->sys_offset += n;
+
+#endif
+
+    file->offset += n;
+
+    return n;
 }
 
 
