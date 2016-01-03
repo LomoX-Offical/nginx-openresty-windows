@@ -776,7 +776,7 @@ ngx_module_t  ngx_http_core_module = {
 };
 
 
-ngx_str_t  ngx_http_core_get_method = { 3, (u_char *) "GET " };
+ngx_str_t  ngx_http_core_get_method = { 3, (u_char *) "GET" };
 
 
 void
@@ -3503,7 +3503,7 @@ ngx_http_core_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child)
     /* TODO: it does not merge, it inits only */
 
     ngx_conf_merge_size_value(conf->connection_pool_size,
-                              prev->connection_pool_size, 256);
+                              prev->connection_pool_size, 64 * sizeof(void *));
     ngx_conf_merge_size_value(conf->request_pool_size,
                               prev->request_pool_size, 4096);
     ngx_conf_merge_msec_value(conf->client_header_timeout,

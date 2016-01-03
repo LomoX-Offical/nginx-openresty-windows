@@ -5,9 +5,9 @@ NGINX =		nginx-$(VER)
 TEMP =		tmp
 
 OBJS =		objs.msvc8
-OPENSSL =	openssl-1.0.2d
+OPENSSL =	openssl-1.0.2e
 ZLIB =		zlib-1.2.8
-PCRE =		pcre-8.37
+PCRE =		pcre-8.38
 
 
 release: export
@@ -79,6 +79,7 @@ win32:
 		--with-http_auth_request_module				\
 		--with-http_random_index_module				\
 		--with-http_secure_link_module				\
+		--with-http_slice_module				\
 		--with-mail						\
 		--with-stream						\
 		--with-openssl=$(OBJS)/lib/$(OPENSSL)			\
