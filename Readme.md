@@ -3,24 +3,21 @@
 
 ### 最新版本 ###
 
-版本号:1.9.7.1002
+版本号:1.9.9.1001
 
-32 位下载地址: http://pan.baidu.com/s/1mgXobxe
+32 位下载地址: http://pan.baidu.com/s/1kUekvMv
 
-64 位下载地址: http://pan.baidu.com/s/1pKjtk3T
+64 位下载地址: http://pan.baidu.com/s/1mgPpprU
 
->发布时间: 2015-12-04
+>发布时间: 2016-01-11
 
 >修改日志:  
-
-- 更新 ngx_lua module 版本到 0.9.19
-- 更新 headers-more-nginx-module 版本到 0.28
-- 更新 ngx_lua_upstream module 版本到 0.04
-- 更新 rds-csv-nginx-module 版本到 0.07
-- 更新 lua-cjson module 版本到 2.1.0.3
-- 更新 lua-rds-parser module 版本到 0.06
-- 更新 lua-redis-parser module 版本到 0.12
-- 更新 LuaJIT 版本到 2.1.0 beta1
+- 更新 nginx 版本到 1.9.9
+- 更新 headers-more-nginx-module模块 版本到 0.29
+- 更新 LuaJIT 版本到 2.1-20151219
+- 更新 ngx_lua版本到 0.9.20
+- 更新 lua-resty-core 版本到 0.1.3
+- 更新 lua-resty-redis 版本到 0.22
 
 
 
@@ -297,3 +294,22 @@ Version:1.9.7.1001
 
 - update nginx to 1.9.7 version.
 - The ngx_http_v2_module module (1.9.7) provides support for HTTP/2 and supersedes the ngx_http_spdy_module module.
+
+版本号:1.9.7.1002
+
+32 位下载地址: http://pan.baidu.com/s/1mgXobxe
+
+64 位下载地址: http://pan.baidu.com/s/1pKjtk3T
+
+>发布时间: 2015-12-04
+
+>修改日志:  
+
+- 更新 ngx_lua module 版本到 0.9.19
+- 更新 headers-more-nginx-module 版本到 0.28
+- 更新 ngx_lua_upstream module 版本到 0.04
+- 更新 rds-csv-nginx-module 版本到 0.07
+- 更新 lua-cjson module 版本到 2.1.0.3
+- 更新 lua-rds-parser module 版本到 0.06
+- 更新 lua-redis-parser module 版本到 0.12
+- 更新 LuaJIT 版本到 2.1.0 beta1

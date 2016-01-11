@@ -3,25 +3,21 @@
 
 ### lastest release ###
 
-Version:1.9.7.1002
+version:1.9.9.1001
 
-32 bit: http://pan.baidu.com/s/1mgXobxe
+32 bit: http://pan.baidu.com/s/1kUekvMv
 
-64 bit: http://pan.baidu.com/s/1pKjtk3T
-
->Release time: 2015-12-04
+64 bit: http://pan.baidu.com/s/1mgPpprU
 
 >Changelog:  
 
-- update ngx_lua module to 0.9.19
-- update headers-more-nginx-module to 0.28
-- update ngx_lua_upstream module to 0.04
+- update nginx core to 1.9.9
+- update ngx_lua module to 0.9.20
+- update LuaJIT to 2.1-20151219
+- update headers-more-nginx-module to 0.29
 - update rds-csv-nginx-module to 0.07
-- update lua-cjson module to 2.1.0.3
-- update lua-rds-parser module to 0.06
-- update lua-redis-parser module to 0.12
-- update LuaJIT to 2.1.0 beta1
-
+- update lua-resty-redis to 0.22
+- update lua-resty-core to 0.1.3
 
 
 ### about ###
@@ -297,3 +293,23 @@ Version:1.9.7.1001
 
 - update nginx to 1.9.7 version.
 - The ngx_http_v2_module module (1.9.7) provides support for HTTP/2 and supersedes the ngx_http_spdy_module module.
+
+
+Version:1.9.7.1002
+
+32 bit: http://pan.baidu.com/s/1mgXobxe
+
+64 bit: http://pan.baidu.com/s/1pKjtk3T
+
+>Release time: 2015-12-04
+
+>Changelog:  
+
+- update ngx_lua module to 0.9.19
+- update headers-more-nginx-module to 0.28
+- update ngx_lua_upstream module to 0.04
+- update rds-csv-nginx-module to 0.07
+- update lua-cjson module to 2.1.0.3
+- update lua-rds-parser module to 0.06
+- update lua-redis-parser module to 0.12
+- update LuaJIT to 2.1.0 beta1
