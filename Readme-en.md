@@ -5,9 +5,9 @@
 
 version:1.9.10.1001
 
-32 bit: 
+32 bit: http://pan.baidu.com/s/1jHlhiXw
 
-64 bit: 
+64 bit: http://pan.baidu.com/s/1eQUuqoq
 
 >Changelog:  
 

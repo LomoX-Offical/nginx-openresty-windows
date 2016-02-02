@@ -5,9 +5,9 @@
 
 版本号:1.9.10.1001
 
-32 位下载地址: 
+32 位下载地址: http://pan.baidu.com/s/1jHlhiXw
 
-64 位下载地址: 
+64 位下载地址: http://pan.baidu.com/s/1eQUuqoq
 
 >发布时间: 2016-02-02
 
