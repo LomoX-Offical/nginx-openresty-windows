@@ -3,22 +3,20 @@
 
 ### 最新版本 ###
 
-版本号:1.9.9.1001
+版本号:1.9.10.1001
 
-32 位下载地址: http://pan.baidu.com/s/1kUekvMv
+32 位下载地址: http://pan.baidu.com/s/1jHlhiXw
 
-64 位下载地址: http://pan.baidu.com/s/1mgPpprU
+64 位下载地址: http://pan.baidu.com/s/1eQUuqoq
 
->发布时间: 2016-01-11
+>发布时间: 2016-02-02
 
 >修改日志:  
-- 更新 nginx 版本到 1.9.9
-- 更新 headers-more-nginx-module模块 版本到 0.29
-- 更新 LuaJIT 版本到 2.1-20151219
-- 更新 ngx_lua版本到 0.9.20
-- 更新 lua-resty-core 版本到 0.1.3
-- 更新 lua-resty-redis 版本到 0.22
-
+- 更新 nginx 版本到 1.9.10
+- 更新 openssl 版本到 1.0.2f
+- 更新 LuaJIT 版本到 2.1-20160108
+- 更新 ngx_lua版本到 0.10.00
+- 更新 lua-resty-core 版本到 0.1.4
 
 
 ### 关于 ###
@@ -313,3 +311,20 @@ Version:1.9.7.1001
 - 更新 lua-rds-parser module 版本到 0.06
 - 更新 lua-redis-parser module 版本到 0.12
 - 更新 LuaJIT 版本到 2.1.0 beta1
+
+版本号:1.9.9.1001
+
+32 位下载地址: http://pan.baidu.com/s/1kUekvMv
+
+64 位下载地址: http://pan.baidu.com/s/1mgPpprU
+
+>发布时间: 2016-01-11
+
+>修改日志:  
+- 更新 nginx 版本到 1.9.9
+- 更新 headers-more-nginx-module模块 版本到 0.29
+- 更新 LuaJIT 版本到 2.1-20151219
+- 更新 ngx_lua版本到 0.9.20
+- 更新 lua-resty-core 版本到 0.1.3
+- 更新 lua-resty-redis 版本到 0.22
+
