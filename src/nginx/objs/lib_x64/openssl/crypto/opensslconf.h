@@ -5,9 +5,6 @@
 extern "C" {
 #endif
 /* OpenSSL was configured with the following options: */
-#ifndef OPENSSL_SYSNAME_WIN64A
-# define OPENSSL_SYSNAME_WIN64A
-#endif
 #ifndef OPENSSL_DOING_MAKEDEPEND
 
 
@@ -50,11 +47,8 @@ extern "C" {
 
 #endif /* OPENSSL_DOING_MAKEDEPEND */
 
-#ifndef OPENSSL_THREADS
-# define OPENSSL_THREADS
-#endif
-#ifndef OPENSSL_NO_ASM
-# define OPENSSL_NO_ASM
+#ifndef OPENSSL_NO_DYNAMIC_ENGINE
+# define OPENSSL_NO_DYNAMIC_ENGINE
 #endif
 
 /* The OPENSSL_NO_* macros are also defined as NO_* if the application
@@ -107,8 +101,8 @@ extern "C" {
 
 #if !(defined(VMS) || defined(__VMS)) /* VMS uses logical names instead */
 #if defined(HEADER_CRYPTLIB_H) && !defined(OPENSSLDIR)
-#define ENGINESDIR "c:\\openssl/lib/engines"
-#define OPENSSLDIR "c:\\openssl/ssl"
+#define ENGINESDIR "/usr/local/ssl/lib/engines"
+#define OPENSSLDIR "/usr/local/ssl"
 #endif
 #endif
 
@@ -116,7 +110,6 @@ extern "C" {
 #define OPENSSL_UNISTD <unistd.h>
 
 #undef OPENSSL_EXPORT_VAR_AS_FUNCTION
-#define OPENSSL_EXPORT_VAR_AS_FUNCTION
 
 #if defined(HEADER_IDEA_H) && !defined(IDEA_INT)
 #define IDEA_INT unsigned int
@@ -147,7 +140,7 @@ extern "C" {
  * This enables code handling data aligned at natural CPU word
  * boundary. See crypto/rc4/rc4_enc.c for further details.
  */
-#define RC4_CHUNK unsigned long long
+#undef RC4_CHUNK
 #endif
 #endif
 
@@ -155,7 +148,7 @@ extern "C" {
 /* If this is set to 'unsigned int' on a DEC Alpha, this gives about a
  * %20 speed up (longs are 8 bytes, int's are 4). */
 #ifndef DES_LONG
-#define DES_LONG unsigned int
+#define DES_LONG unsigned long
 #endif
 #endif
 
@@ -167,8 +160,8 @@ extern "C" {
 
 /* Only one for the following should be defined */
 #undef SIXTY_FOUR_BIT_LONG
-#define SIXTY_FOUR_BIT
-#undef THIRTY_TWO_BIT
+#undef SIXTY_FOUR_BIT
+#define THIRTY_TWO_BIT
 #endif
 
 #if defined(HEADER_RC4_LOCL_H) && !defined(CONFIG_HEADER_RC4_LOCL_H)
