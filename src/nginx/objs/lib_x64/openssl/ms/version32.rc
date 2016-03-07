@@ -3,8 +3,8 @@
 LANGUAGE 0x09,0x01
 
 1 VERSIONINFO
-  FILEVERSION 1,0,2,6
-  PRODUCTVERSION 1,0,2,6
+  FILEVERSION 1,0,2,7
+  PRODUCTVERSION 1,0,2,7
   FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
   FILEFLAGS 0x01L
@@ -22,7 +22,7 @@ BEGIN
 	    // Required:	    
 	    VALUE "CompanyName", "The OpenSSL Project, http://www.openssl.org/\0"
 	    VALUE "FileDescription", "OpenSSL Shared Library\0"
-	    VALUE "FileVersion", "1.0.2f\0"
+	    VALUE "FileVersion", "1.0.2g\0"
 #if defined(CRYPTO)
 	    VALUE "InternalName", "libeay32\0"
 	    VALUE "OriginalFilename", "libeay32.dll\0"
@@ -31,7 +31,7 @@ BEGIN
 	    VALUE "OriginalFilename", "ssleay32.dll\0"
 #endif
 	    VALUE "ProductName", "The OpenSSL Toolkit\0"
-	    VALUE "ProductVersion", "1.0.2f\0"
+	    VALUE "ProductVersion", "1.0.2g\0"
 	    // Optional:
 	    //VALUE "Comments", "\0"
 	    VALUE "LegalCopyright", "Copyright  © 1998-2005 The OpenSSL Project. Copyright © 1995-1998 Eric A. Young, Tim J. Hudson. All rights reserved.\0"
