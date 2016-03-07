@@ -2405,6 +2405,7 @@ EXPORTS
     SRP_Calc_u                              @4573
     SRP_Calc_x                              @4577
     SRP_VBASE_free                          @4574
+    SRP_VBASE_get1_by_user                  @2393
     SRP_VBASE_get_by_user                   @4569
     SRP_VBASE_init                          @4583
     SRP_VBASE_new                           @4579
@@ -2414,6 +2415,7 @@ EXPORTS
     SRP_create_verifier                     @4571
     SRP_create_verifier_BN                  @4572
     SRP_get_default_gN                      @4576
+    SRP_user_pwd_free                       @2394
     SSLeay_version                          @2
     SXNETID_free                            @1332
     SXNETID_it                              @2669

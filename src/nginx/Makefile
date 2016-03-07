@@ -6,7 +6,6 @@ clean:
 
 build:
 	$(MAKE) -f objs/Makefile
-	$(MAKE) -f objs/Makefile manpage
 
 install:
 	$(MAKE) -f objs/Makefile install

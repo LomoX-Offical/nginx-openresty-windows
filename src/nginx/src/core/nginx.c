@@ -24,6 +24,10 @@ static char *ngx_set_cpu_affinity(ngx_conf_t *cf, ngx_command_t *cmd,
     void *conf);
 static char *ngx_set_worker_processes(ngx_conf_t *cf, ngx_command_t *cmd,
     void *conf);
+static char *ngx_load_module(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+#if (NGX_HAVE_DLOPEN)
+static void ngx_unload_module(void *data);
+#endif
 
 
 static ngx_conf_enum_t  ngx_debug_points[] = {
@@ -133,6 +137,13 @@ static ngx_command_t  ngx_core_commands[] = {
       0,
       NULL },
 
+    { ngx_string("load_module"),
+      NGX_MAIN_CONF|NGX_DIRECT_CONF|NGX_CONF_TAKE1,
+      ngx_load_module,
+      0,
+      0,
+      NULL },
+
       ngx_null_command
 };
 
@@ -159,8 +170,6 @@ ngx_module_t  ngx_core_module = {
     NGX_MODULE_V1_PADDING
 };
 
-
-ngx_uint_t          ngx_max_module;
 
 static ngx_uint_t   ngx_show_help;
 static ngx_uint_t   ngx_show_version;
@@ -260,9 +269,8 @@ main(int argc, char *const *argv)
         return 1;
     }
 
-    ngx_max_module = 0;
-    for (i = 0; ngx_modules[i]; i++) {
-        ngx_modules[i]->index = ngx_max_module++;
+    if (ngx_preinit_modules() != NGX_OK) {
+        return 1;
     }
 
     cycle = ngx_init_cycle(&init_cycle);
@@ -471,6 +479,12 @@ ngx_add_inherited_sockets(ngx_cycle_t *cycle)
 
             ls->fd = (ngx_socket_t) s;
         }
+    }
+
+    if (v != p) {
+        ngx_log_error(NGX_LOG_EMERG, cycle->log, 0,
+                      "invalid socket number \"%s\" in " NGINX_VAR
+                      " environment variable, ignoring", v);
     }
 
     ngx_inherited = 1;
@@ -1256,16 +1270,16 @@ ngx_set_cpu_affinity(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 #if (NGX_HAVE_CPU_AFFINITY)
     ngx_core_conf_t  *ccf = conf;
 
-    u_char            ch;
-    uint64_t         *mask;
+    u_char            ch, *p;
     ngx_str_t        *value;
     ngx_uint_t        i, n;
+    ngx_cpuset_t     *mask;
 
     if (ccf->cpu_affinity) {
         return "is duplicate";
     }
 
-    mask = ngx_palloc(cf->pool, (cf->args->nelts - 1) * sizeof(uint64_t));
+    mask = ngx_palloc(cf->pool, (cf->args->nelts - 1) * sizeof(ngx_cpuset_t));
     if (mask == NULL) {
         return NGX_CONF_ERROR;
     }
@@ -1285,7 +1299,12 @@ ngx_set_cpu_affinity(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         }
 
         ccf->cpu_affinity_auto = 1;
-        mask[0] = (uint64_t) -1 >> (64 - ngx_min(64, ngx_ncpu));
+
+        CPU_ZERO(&mask[0]);
+        for (i = 0; i < (ngx_uint_t) ngx_min(ngx_ncpu, CPU_SETSIZE); i++) {
+            CPU_SET(i, &mask[0]);
+        }
+
         n = 2;
 
     } else {
@@ -1294,30 +1313,34 @@ ngx_set_cpu_affinity(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     for ( /* void */ ; n < cf->args->nelts; n++) {
 
-        if (value[n].len > 64) {
+        if (value[n].len > CPU_SETSIZE) {
             ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                         "\"worker_cpu_affinity\" supports up to 64 CPUs only");
+                         "\"worker_cpu_affinity\" supports up to %d CPUs only",
+                         CPU_SETSIZE);
             return NGX_CONF_ERROR;
         }
 
-        mask[n - 1] = 0;
+        i = 0;
+        CPU_ZERO(&mask[n - 1]);
 
-        for (i = 0; i < value[n].len; i++) {
-
-            ch = value[n].data[i];
+        for (p = value[n].data + value[n].len - 1;
+             p >= value[n].data;
+             p--)
+        {
+            ch = *p;
 
             if (ch == ' ') {
                 continue;
             }
 
-            mask[n - 1] <<= 1;
+            i++;
 
             if (ch == '0') {
                 continue;
             }
 
             if (ch == '1') {
-                mask[n - 1] |= 1;
+                CPU_SET(i - 1, &mask[n - 1]);
                 continue;
             }
 
@@ -1339,43 +1362,57 @@ ngx_set_cpu_affinity(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 }
 
 
-uint64_t
+ngx_cpuset_t *
 ngx_get_cpu_affinity(ngx_uint_t n)
 {
-    uint64_t          mask;
-    ngx_uint_t        i;
+#if (NGX_HAVE_CPU_AFFINITY)
+    ngx_uint_t        i, j;
+    ngx_cpuset_t     *mask;
     ngx_core_conf_t  *ccf;
+
+    static ngx_cpuset_t  result;
 
     ccf = (ngx_core_conf_t *) ngx_get_conf(ngx_cycle->conf_ctx,
                                            ngx_core_module);
 
     if (ccf->cpu_affinity == NULL) {
-        return 0;
+        return NULL;
     }
 
     if (ccf->cpu_affinity_auto) {
-        mask = ccf->cpu_affinity[ccf->cpu_affinity_n - 1];
+        mask = &ccf->cpu_affinity[ccf->cpu_affinity_n - 1];
 
-        if (mask == 0) {
-            return 0;
-        }
+        for (i = 0, j = n; /* void */ ; i++) {
 
-        for (i = 0; /* void */ ; i++) {
-            if ((mask & ((uint64_t) 1 << (i % 64))) && n-- == 0) {
+            if (CPU_ISSET(i % CPU_SETSIZE, mask) && j-- == 0) {
                 break;
+            }
+
+            if (i == CPU_SETSIZE && j == n) {
+                /* empty mask */
+                return NULL;
             }
 
             /* void */
         }
 
-        return (uint64_t) 1 << (i % 64);
+        CPU_ZERO(&result);
+        CPU_SET(i % CPU_SETSIZE, &result);
+
+        return &result;
     }
 
     if (ccf->cpu_affinity_n > n) {
-        return ccf->cpu_affinity[n];
+        return &ccf->cpu_affinity[n];
     }
 
-    return ccf->cpu_affinity[ccf->cpu_affinity_n - 1];
+    return &ccf->cpu_affinity[ccf->cpu_affinity_n - 1];
+
+#else
+
+    return NULL;
+
+#endif
 }
 
 
@@ -1406,3 +1443,101 @@ ngx_set_worker_processes(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     return NGX_CONF_OK;
 }
+
+
+static char *
+ngx_load_module(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
+{
+#if (NGX_HAVE_DLOPEN)
+    void                *handle;
+    char               **names, **order;
+    ngx_str_t           *value, file;
+    ngx_uint_t           i;
+    ngx_module_t        *module, **modules;
+    ngx_pool_cleanup_t  *cln;
+
+    if (cf->cycle->modules_used) {
+        return "is specified too late";
+    }
+
+    value = cf->args->elts;
+
+    file = value[1];
+
+    if (ngx_conf_full_name(cf->cycle, &file, 0) != NGX_OK) {
+        return NGX_CONF_ERROR;
+    }
+
+    cln = ngx_pool_cleanup_add(cf->cycle->pool, 0);
+    if (cln == NULL) {
+        return NGX_CONF_ERROR;
+    }
+
+    handle = ngx_dlopen(file.data);
+    if (handle == NULL) {
+        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
+                           ngx_dlopen_n " \"%s\" failed (%s)",
+                           file.data, ngx_dlerror());
+        return NGX_CONF_ERROR;
+    }
+
+    cln->handler = ngx_unload_module;
+    cln->data = handle;
+
+    modules = ngx_dlsym(handle, "ngx_modules");
+    if (modules == NULL) {
+        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
+                           ngx_dlsym_n " \"%V\", \"%s\" failed (%s)",
+                           &value[1], "ngx_modules", ngx_dlerror());
+        return NGX_CONF_ERROR;
+    }
+
+    names = ngx_dlsym(handle, "ngx_module_names");
+    if (names == NULL) {
+        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
+                           ngx_dlsym_n " \"%V\", \"%s\" failed (%s)",
+                           &value[1], "ngx_module_names", ngx_dlerror());
+        return NGX_CONF_ERROR;
+    }
+
+    order = ngx_dlsym(handle, "ngx_module_order");
+
+    for (i = 0; modules[i]; i++) {
+        module = modules[i];
+        module->name = names[i];
+
+        if (ngx_add_module(cf, &file, module, order) != NGX_OK) {
+            return NGX_CONF_ERROR;
+        }
+
+        ngx_log_debug2(NGX_LOG_DEBUG_CORE, cf->log, 0, "module: %s i:%i",
+                       module->name, module->index);
+    }
+
+    return NGX_CONF_OK;
+
+#else
+
+    ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
+                       "\"load_module\" is not supported "
+                       "on this platform");
+    return NGX_CONF_ERROR;
+
+#endif
+}
+
+
+#if (NGX_HAVE_DLOPEN)
+
+static void
+ngx_unload_module(void *data)
+{
+    void  *handle = data;
+
+    if (ngx_dlclose(handle) != 0) {
+        ngx_log_error(NGX_LOG_ALERT, ngx_cycle->log, 0,
+                      ngx_dlclose_n " failed (%s)", ngx_dlerror());
+    }
+}
+
+#endif
