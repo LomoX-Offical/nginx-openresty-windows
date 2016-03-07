@@ -36,13 +36,20 @@
 #define NGX_RESOLVER_MAX_RECURSION    50
 
 
+typedef struct ngx_resolver_s  ngx_resolver_t;
+
+
 typedef struct {
-    ngx_connection_t         *connection;
+    ngx_connection_t         *udp;
+    ngx_connection_t         *tcp;
     struct sockaddr          *sockaddr;
     socklen_t                 socklen;
     ngx_str_t                 server;
     ngx_log_t                 log;
-} ngx_udp_connection_t;
+    ngx_buf_t                *read_buf;
+    ngx_buf_t                *write_buf;
+    ngx_resolver_t           *resolver;
+} ngx_resolver_connection_t;
 
 
 typedef struct ngx_resolver_ctx_s  ngx_resolver_ctx_t;
@@ -93,11 +100,18 @@ typedef struct {
     time_t                    valid;
     uint32_t                  ttl;
 
+    unsigned                  tcp:1;
+#if (NGX_HAVE_INET6)
+    unsigned                  tcp6:1;
+#endif
+
+    ngx_uint_t                last_connection;
+
     ngx_resolver_ctx_t       *waiting;
 } ngx_resolver_node_t;
 
 
-typedef struct {
+struct ngx_resolver_s {
     /* has to be pointer because of "incomplete type" */
     ngx_event_t              *event;
     void                     *dummy;
@@ -107,7 +121,7 @@ typedef struct {
     ngx_int_t                 ident;
 
     /* simple round robin DNS peers balancer */
-    ngx_array_t               udp_connections;
+    ngx_array_t               connections;
     ngx_uint_t                last_connection;
 
     ngx_rbtree_t              name_rbtree;
@@ -131,17 +145,18 @@ typedef struct {
 #endif
 
     time_t                    resend_timeout;
+    time_t                    tcp_timeout;
     time_t                    expire;
     time_t                    valid;
 
     ngx_uint_t                log_level;
-} ngx_resolver_t;
+};
 
 
 struct ngx_resolver_ctx_s {
     ngx_resolver_ctx_t       *next;
     ngx_resolver_t           *resolver;
-    ngx_udp_connection_t     *udp_connection;
+    ngx_resolver_node_t      *node;
 
     /* event ident must be after 3 pointers as in ngx_connection_t */
     ngx_int_t                 ident;
@@ -161,8 +176,6 @@ struct ngx_resolver_ctx_s {
     ngx_uint_t                quick;  /* unsigned  quick:1; */
     ngx_uint_t                recursion;
     ngx_event_t              *event;
-
-    ngx_resolver_node_t      *node;
 };
 
 

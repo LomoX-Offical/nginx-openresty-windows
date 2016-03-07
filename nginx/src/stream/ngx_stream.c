@@ -91,14 +91,7 @@ ngx_stream_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     /* count the number of the stream modules and set up their indices */
 
-    ngx_stream_max_module = 0;
-    for (m = 0; ngx_modules[m]; m++) {
-        if (ngx_modules[m]->type != NGX_STREAM_MODULE) {
-            continue;
-        }
-
-        ngx_modules[m]->ctx_index = ngx_stream_max_module++;
-    }
+    ngx_stream_max_module = ngx_count_modules(cf->cycle, NGX_STREAM_MODULE);
 
 
     /* the stream main_conf context, it's the same in the all stream contexts */
@@ -126,13 +119,13 @@ ngx_stream_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
      * create the main_conf's and the null srv_conf's of the all stream modules
      */
 
-    for (m = 0; ngx_modules[m]; m++) {
-        if (ngx_modules[m]->type != NGX_STREAM_MODULE) {
+    for (m = 0; cf->cycle->modules[m]; m++) {
+        if (cf->cycle->modules[m]->type != NGX_STREAM_MODULE) {
             continue;
         }
 
-        module = ngx_modules[m]->ctx;
-        mi = ngx_modules[m]->ctx_index;
+        module = cf->cycle->modules[m]->ctx;
+        mi = cf->cycle->modules[m]->ctx_index;
 
         if (module->create_main_conf) {
             ctx->main_conf[mi] = module->create_main_conf(cf);
@@ -170,13 +163,13 @@ ngx_stream_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     cmcf = ctx->main_conf[ngx_stream_core_module.ctx_index];
     cscfp = cmcf->servers.elts;
 
-    for (m = 0; ngx_modules[m]; m++) {
-        if (ngx_modules[m]->type != NGX_STREAM_MODULE) {
+    for (m = 0; cf->cycle->modules[m]; m++) {
+        if (cf->cycle->modules[m]->type != NGX_STREAM_MODULE) {
             continue;
         }
 
-        module = ngx_modules[m]->ctx;
-        mi = ngx_modules[m]->ctx_index;
+        module = cf->cycle->modules[m]->ctx;
+        mi = cf->cycle->modules[m]->ctx_index;
 
         /* init stream{} main_conf's */
 
@@ -208,12 +201,12 @@ ngx_stream_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         }
     }
 
-    for (m = 0; ngx_modules[m]; m++) {
-        if (ngx_modules[m]->type != NGX_STREAM_MODULE) {
+    for (m = 0; cf->cycle->modules[m]; m++) {
+        if (cf->cycle->modules[m]->type != NGX_STREAM_MODULE) {
             continue;
         }
 
-        module = ngx_modules[m]->ctx;
+        module = cf->cycle->modules[m]->ctx;
 
         if (module->postconfiguration) {
             if (module->postconfiguration(cf) != NGX_OK) {

@@ -26,6 +26,18 @@ case ".$NGX_SBIN_PATH" in
 esac
 
 
+case ".$NGX_MODULES_PATH" in
+    ./*)
+    ;;
+
+    *)
+        NGX_MODULES_PATH=$NGX_PREFIX/$NGX_MODULES_PATH
+    ;;
+esac
+
+NGX_MODULES_PATH=`dirname $NGX_MODULES_PATH/.`
+
+
 case ".$NGX_CONF_PATH" in
     ./*)
     ;;
@@ -92,8 +104,7 @@ $NGX_OBJS/nginx.8:	$NGX_MAN $NGX_AUTO_CONFIG_H
 		-e "s|%%ERROR_LOG_PATH%%|${NGX_ERROR_LOG_PATH:-stderr}|" \\
 		< $NGX_MAN > \$@
 
-install:	$NGX_OBJS${ngx_dirsep}nginx${ngx_binext} \
-		$NGX_INSTALL_PERL_MODULES
+install:	build $NGX_INSTALL_PERL_MODULES
 	test -d '\$(DESTDIR)$NGX_PREFIX' || mkdir -p '\$(DESTDIR)$NGX_PREFIX'
 
 	test -d '\$(DESTDIR)`dirname "$NGX_SBIN_PATH"`' \
@@ -158,13 +169,23 @@ END
 fi
 
 
+if test -n "$NGX_MODULES"; then
+    cat << END                                                >> $NGX_MAKEFILE
+
+	test -d '\$(DESTDIR)$NGX_MODULES_PATH' \
+		|| mkdir -p '\$(DESTDIR)$NGX_MODULES_PATH'
+	cp $NGX_MODULES '\$(DESTDIR)$NGX_MODULES_PATH'
+END
+
+fi
+
+
 # create Makefile
 
 cat << END >> Makefile
 
 build:
 	\$(MAKE) -f $NGX_MAKEFILE
-	\$(MAKE) -f $NGX_MAKEFILE manpage
 
 install:
 	\$(MAKE) -f $NGX_MAKEFILE install
