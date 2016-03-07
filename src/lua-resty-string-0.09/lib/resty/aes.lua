@@ -7,7 +7,7 @@ local ffi_new = ffi.new
 local ffi_gc = ffi.gc
 local ffi_str = ffi.string
 local ffi_copy = ffi.copy
-local C = ffi.C
+local C =  (ffi.os=="Windows" and ffi.load'libeay32' or ffi.C)
 local setmetatable = setmetatable
 local error = error
 local type = type
