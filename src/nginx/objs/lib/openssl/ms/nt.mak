@@ -18,7 +18,7 @@ OPENSSLDIR=c:\openssl\ssl
 # Set your compiler options
 PLATFORM=VC-WIN32
 CC=cl
-CFLAG= /MT /Ox /O2 /Ob2 -DOPENSSL_THREADS  -DDSO_WIN32 -W3 -Gs0 -GF -Gy -nologo -DOPENSSL_SYSNAME_WIN32 -DWIN32_LEAN_AND_MEAN -DL_ENDIAN -D_CRT_SECURE_NO_DEPRECATE -DOPENSSL_NO_RC5 -DOPENSSL_NO_MD2 -DOPENSSL_NO_KRB5 -DOPENSSL_NO_JPAKE -DOPENSSL_NO_DYNAMIC_ENGINE    
+CFLAG= /MT /Ox /O2 /Ob2 -DOPENSSL_THREADS  -DDSO_WIN32 -W3 -Gs0 -GF -Gy -nologo -DOPENSSL_SYSNAME_WIN32 -DWIN32_LEAN_AND_MEAN -DL_ENDIAN -D_CRT_SECURE_NO_DEPRECATE -DOPENSSL_NO_RC5 -DOPENSSL_NO_MD2 -DOPENSSL_NO_SSL2 -DOPENSSL_NO_KRB5 -DOPENSSL_NO_JPAKE -DOPENSSL_NO_WEAK_SSL_CIPHERS -DOPENSSL_NO_DYNAMIC_ENGINE    
 APP_CFLAG= /Zi /Fd$(TMP_D)/app
 LIB_CFLAG=/Zl /Zi /Fd$(TMP_D)/lib
 SHLIB_CFLAG=
@@ -31,7 +31,7 @@ EX_LIBS=ws2_32.lib gdi32.lib advapi32.lib crypt32.lib user32.lib
 # The OpenSSL directory
 SRC_D=.
 
-LINK=link
+LINK_CMD=link
 LFLAGS=/nologo /subsystem:console /opt:ref /debug
 RSC=rc
 
@@ -175,7 +175,7 @@ T_OBJ=$(OBJ_D)\constant_time_test.obj \
 	$(OBJ_D)\evp_test.obj $(OBJ_D)\evp_extra_test.obj $(OBJ_D)\verify_extra_test.obj \
 	$(OBJ_D)\v3nametest.obj $(OBJ_D)\enginetest.obj $(OBJ_D)\wp_test.obj \
 	$(OBJ_D)\srptest.obj $(OBJ_D)\ssltest.obj $(OBJ_D)\heartbeat_test.obj \
-	$(OBJ_D)\clienthellotest.obj $(OBJ_D)\igetest.obj 
+	$(OBJ_D)\clienthellotest.obj $(OBJ_D)\sslv2conftest.obj $(OBJ_D)\igetest.obj 
 
 E_OBJ=$(OBJ_D)\verify.obj \
 	$(OBJ_D)\asn1pars.obj $(OBJ_D)\req.obj $(OBJ_D)\dgst.obj \
@@ -434,7 +434,7 @@ T_EXE=$(TEST_D)\constant_time_test.exe \
 	$(TEST_D)\evp_test.exe $(TEST_D)\evp_extra_test.exe $(TEST_D)\verify_extra_test.exe \
 	$(TEST_D)\v3nametest.exe $(TEST_D)\enginetest.exe $(TEST_D)\wp_test.exe \
 	$(TEST_D)\srptest.exe $(TEST_D)\ssltest.exe $(TEST_D)\heartbeat_test.exe \
-	$(TEST_D)\clienthellotest.exe $(TEST_D)\igetest.exe 
+	$(TEST_D)\clienthellotest.exe $(TEST_D)\sslv2conftest.exe $(TEST_D)\igetest.exe 
 
 E_SHLIB=
 
@@ -1053,6 +1053,9 @@ $(OBJ_D)\heartbeat_test.obj: $(SRC_D)\ssl\heartbeat_test.c
 
 $(OBJ_D)\clienthellotest.obj: $(SRC_D)\ssl\clienthellotest.c
 	$(CC) /Fo$(OBJ_D)\clienthellotest.obj $(APP_CFLAGS) -c $(SRC_D)\ssl\clienthellotest.c
+
+$(OBJ_D)\sslv2conftest.obj: $(SRC_D)\ssl\sslv2conftest.c
+	$(CC) /Fo$(OBJ_D)\sslv2conftest.obj $(APP_CFLAGS) -c $(SRC_D)\ssl\sslv2conftest.c
 
 $(OBJ_D)\igetest.obj: $(SRC_D)\test\igetest.c
 	$(CC) /Fo$(OBJ_D)\igetest.obj $(APP_CFLAGS) -c $(SRC_D)\test\igetest.c
@@ -3209,217 +3212,223 @@ $(OBJ_D)\$(SSL).res: ms\version32.rc
 	$(RSC) /fo"$(OBJ_D)\$(SSL).res" /d SSL ms\version32.rc
 
 $(TEST_D)\constant_time_test.exe: $(OBJ_D)\constant_time_test.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\constant_time_test.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\constant_time_test.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\constant_time_test.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\md4test.exe: $(OBJ_D)\md4test.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\md4test.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\md4test.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\md4test.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\md5test.exe: $(OBJ_D)\md5test.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\md5test.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\md5test.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\md5test.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\shatest.exe: $(OBJ_D)\shatest.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\shatest.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\shatest.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\shatest.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\sha1test.exe: $(OBJ_D)\sha1test.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\sha1test.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\sha1test.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\sha1test.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\sha256t.exe: $(OBJ_D)\sha256t.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\sha256t.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\sha256t.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\sha256t.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\sha512t.exe: $(OBJ_D)\sha512t.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\sha512t.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\sha512t.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\sha512t.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\mdc2test.exe: $(OBJ_D)\mdc2test.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\mdc2test.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\mdc2test.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\mdc2test.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\hmactest.exe: $(OBJ_D)\hmactest.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\hmactest.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\hmactest.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\hmactest.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\rmdtest.exe: $(OBJ_D)\rmdtest.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\rmdtest.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\rmdtest.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\rmdtest.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\destest.exe: $(OBJ_D)\destest.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\destest.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\destest.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\destest.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\rc2test.exe: $(OBJ_D)\rc2test.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\rc2test.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\rc2test.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\rc2test.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\rc4test.exe: $(OBJ_D)\rc4test.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\rc4test.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\rc4test.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\rc4test.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\ideatest.exe: $(OBJ_D)\ideatest.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\ideatest.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\ideatest.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\ideatest.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\bftest.exe: $(OBJ_D)\bftest.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\bftest.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\bftest.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\bftest.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\casttest.exe: $(OBJ_D)\casttest.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\casttest.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\casttest.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\casttest.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\bntest.exe: $(OBJ_D)\bntest.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\bntest.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\bntest.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\bntest.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\exptest.exe: $(OBJ_D)\exptest.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\exptest.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\exptest.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\exptest.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\rsa_test.exe: $(OBJ_D)\rsa_test.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\rsa_test.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\rsa_test.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\rsa_test.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\dsatest.exe: $(OBJ_D)\dsatest.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\dsatest.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\dsatest.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\dsatest.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\dhtest.exe: $(OBJ_D)\dhtest.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\dhtest.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\dhtest.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\dhtest.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\ectest.exe: $(OBJ_D)\ectest.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\ectest.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\ectest.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\ectest.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\ecdhtest.exe: $(OBJ_D)\ecdhtest.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\ecdhtest.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\ecdhtest.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\ecdhtest.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\ecdsatest.exe: $(OBJ_D)\ecdsatest.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\ecdsatest.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\ecdsatest.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\ecdsatest.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\randtest.exe: $(OBJ_D)\randtest.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\randtest.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\randtest.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\randtest.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\evp_test.exe: $(OBJ_D)\evp_test.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\evp_test.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\evp_test.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\evp_test.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\evp_extra_test.exe: $(OBJ_D)\evp_extra_test.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\evp_extra_test.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\evp_extra_test.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\evp_extra_test.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\verify_extra_test.exe: $(OBJ_D)\verify_extra_test.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\verify_extra_test.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\verify_extra_test.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\verify_extra_test.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\v3nametest.exe: $(OBJ_D)\v3nametest.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\v3nametest.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\v3nametest.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\v3nametest.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\enginetest.exe: $(OBJ_D)\enginetest.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\enginetest.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\enginetest.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\enginetest.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\wp_test.exe: $(OBJ_D)\wp_test.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\wp_test.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\wp_test.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\wp_test.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\srptest.exe: $(OBJ_D)\srptest.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\srptest.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\srptest.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\srptest.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\ssltest.exe: $(OBJ_D)\ssltest.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\ssltest.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\ssltest.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\ssltest.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\heartbeat_test.exe: $(OBJ_D)\heartbeat_test.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\heartbeat_test.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\heartbeat_test.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\heartbeat_test.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_D)\clienthellotest.exe: $(OBJ_D)\clienthellotest.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\clienthellotest.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\clienthellotest.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\clienthellotest.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
 
+$(TEST_D)\sslv2conftest.exe: $(OBJ_D)\sslv2conftest.obj $(LIBS_DEP)
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\sslv2conftest.exe @<<
+	$(APP_EX_OBJ) $(OBJ_D)\sslv2conftest.obj $(L_LIBS) $(EX_LIBS)
+<<
+	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
+
 $(TEST_D)\igetest.exe: $(OBJ_D)\igetest.obj $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(TEST_D)\igetest.exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(TEST_D)\igetest.exe @<<
 	$(APP_EX_OBJ) $(OBJ_D)\igetest.obj $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
@@ -3435,7 +3444,7 @@ $(O_CRYPTO): $(CRYPTOOBJ)
 <<
 
 $(BIN_D)\$(E_EXE).exe: $(E_OBJ) $(LIBS_DEP)
-	$(LINK) $(LFLAGS) /out:$(BIN_D)\$(E_EXE).exe @<<
+	$(LINK_CMD) $(LFLAGS) /out:$(BIN_D)\$(E_EXE).exe @<<
 	$(APP_EX_OBJ) $(E_OBJ) $(L_LIBS) $(EX_LIBS)
 <<
 	IF EXIST $@.manifest mt -nologo -manifest $@.manifest -outputresource:$@;1
