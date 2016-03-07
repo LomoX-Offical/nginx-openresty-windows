@@ -3,20 +3,18 @@
 
 ### 最新版本 ###
 
-版本号:1.9.10.1001
+版本号:1.9.12.1001
 
-32 位下载地址: http://pan.baidu.com/s/1jHlhiXw
+32 位下载地址: http://pan.baidu.com/s/1eR1bR9o
 
-64 位下载地址: http://pan.baidu.com/s/1eQUuqoq
+64 位下载地址: http://pan.baidu.com/s/1hqPeoJy
 
->发布时间: 2016-02-02
+>发布时间: 2016-03-07
 
 >修改日志:  
-- 更新 nginx 版本到 1.9.10
-- 更新 openssl 版本到 1.0.2f
-- 更新 LuaJIT 版本到 2.1-20160108
-- 更新 ngx_lua版本到 0.10.00
-- 更新 lua-resty-core 版本到 0.1.4
+- 更新 nginx 版本到 1.9.12
+- 更新 openssl 版本到 1.0.2g
+- 更新ngx_lua 版本到 0.10.1rc0
 
 
 ### 关于 ###
@@ -327,4 +325,21 @@ Version:1.9.7.1001
 - 更新 ngx_lua版本到 0.9.20
 - 更新 lua-resty-core 版本到 0.1.3
 - 更新 lua-resty-redis 版本到 0.22
+
+
+版本号:1.9.10.1001
+
+32 位下载地址: http://pan.baidu.com/s/1jHlhiXw
+
+64 位下载地址: http://pan.baidu.com/s/1eQUuqoq
+
+>发布时间: 2016-02-02
+
+>修改日志:  
+- 更新 nginx 版本到 1.9.10
+- 更新 openssl 版本到 1.0.2f
+- 更新 LuaJIT 版本到 2.1-20160108
+- 更新 ngx_lua版本到 0.10.00
+- 更新 lua-resty-core 版本到 0.1.4
+
 

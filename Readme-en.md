@@ -3,19 +3,17 @@
 
 ### lastest release ###
 
-version:1.9.10.1001
+version:1.9.12.1001
 
-32 bit: http://pan.baidu.com/s/1jHlhiXw
+32 bit: http://pan.baidu.com/s/1eR1bR9o
 
-64 bit: http://pan.baidu.com/s/1eQUuqoq
+64 bit: http://pan.baidu.com/s/1hqPeoJy
 
 >Changelog:  
 
-- update nginx core to 1.9.10
-- update openssl to 1.0.2f
-- update LuaJIT to 2.1-20160108
-- update ngx_lua to 0.10.00
-- update lua-resty-core to 0.1.4
+- nginx core update to 1.9.12
+- update openssl to 1.0.2g
+- update ngx_lua_module to 0.10.1rc0
 
 
 ### about ###
@@ -327,3 +325,18 @@ version:1.9.9.1001
 - update rds-csv-nginx-module to 0.07
 - update lua-resty-redis to 0.22
 - update lua-resty-core to 0.1.3
+
+
+version:1.9.10.1001
+
+32 bit: http://pan.baidu.com/s/1jHlhiXw
+
+64 bit: http://pan.baidu.com/s/1eQUuqoq
+
+>Changelog:  
+
+- update nginx core to 1.9.10
+- update openssl to 1.0.2f
+- update LuaJIT to 2.1-20160108
+- update ngx_lua to 0.10.00
+- update lua-resty-core to 0.1.4
