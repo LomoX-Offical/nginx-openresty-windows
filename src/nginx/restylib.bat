@@ -12,6 +12,7 @@ export UPSTREAM_HEALTHCHECK_LIB=../lua-resty-upstream-healthcheck-0.03/
 export WEBSOCKET_LIB=../lua-resty-websocket-0.05/
 
 rm -r ${LUA_LIB_DIR}/resty/
+rm -r ${LUA_LIB_DIR}/ngx/
 mkdir -p ${LUA_LIB_DIR}/resty/
 
 mkdir -p ${LUA_LIB_DIR}/resty/core/
