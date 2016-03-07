@@ -1351,12 +1351,11 @@ ngx_http_process_request_headers(ngx_event_t *rev)
             continue;
         }
 
-        /* rc == NGX_HTTP_PARSE_INVALID_HEADER: "\r" is not followed by "\n" */
+        /* rc == NGX_HTTP_PARSE_INVALID_HEADER */
 
         ngx_log_error(NGX_LOG_INFO, c->log, 0,
-                      "client sent invalid header line: \"%*s\\r...\"",
-                      r->header_end - r->header_name_start,
-                      r->header_name_start);
+                      "client sent invalid header line");
+
         ngx_http_finalize_request(r, NGX_HTTP_BAD_REQUEST);
         return;
     }
@@ -2574,12 +2573,6 @@ ngx_http_set_write_handler(ngx_http_request_t *r)
                                 ngx_http_test_reading;
     r->write_event_handler = ngx_http_writer;
 
-#if (NGX_HTTP_V2)
-    if (r->stream) {
-        return NGX_OK;
-    }
-#endif
-
     wev = r->connection->write;
 
     if (wev->ready && wev->delayed) {
@@ -2664,12 +2657,6 @@ ngx_http_writer(ngx_http_request_t *r)
     }
 
     if (r->buffered || r->postponed || (r == r->main && c->buffered)) {
-
-#if (NGX_HTTP_V2)
-        if (r->stream) {
-            return;
-        }
-#endif
 
         if (!wev->delayed) {
             ngx_add_timer(wev, clcf->send_timeout);

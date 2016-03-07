@@ -73,6 +73,7 @@ typedef struct {
     unsigned                         flags:8;
 
     unsigned                         incomplete:1;
+    unsigned                         keep_pool:1;
 
     /* HPACK */
     unsigned                         parse_name:1;
@@ -167,7 +168,6 @@ struct ngx_http_v2_stream_s {
     ngx_http_v2_connection_t        *connection;
     ngx_http_v2_node_t              *node;
 
-    ngx_uint_t                       header_buffers;
     ngx_uint_t                       queued;
 
     /*
@@ -186,6 +186,8 @@ struct ngx_http_v2_stream_s {
     ngx_array_t                     *cookies;
 
     size_t                           header_limit;
+
+    ngx_pool_t                      *pool;
 
     unsigned                         handled:1;
     unsigned                         blocked:1;
@@ -275,6 +277,8 @@ ngx_int_t ngx_http_v2_table_size(ngx_http_v2_connection_t *h2c, size_t size);
 
 ngx_int_t ngx_http_v2_huff_decode(u_char *state, u_char *src, size_t len,
     u_char **dst, ngx_uint_t last, ngx_log_t *log);
+size_t ngx_http_v2_huff_encode(u_char *src, size_t len, u_char *dst,
+    ngx_uint_t lower);
 
 
 #define ngx_http_v2_prefix(bits)  ((1 << (bits)) - 1)
