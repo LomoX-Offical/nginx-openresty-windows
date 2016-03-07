@@ -39,6 +39,7 @@ EXPORTS
     ngx_http_lua_ffi_req_get_method_name @30
     ngx_http_lua_ffi_req_set_method @31
     ngx_http_lua_ffi_req_header_set_single_value @32
+    
     ngx_http_lua_ffi_set_resp_header @33
     ngx_http_lua_ffi_get_resp_header @34
 		
@@ -64,5 +65,30 @@ EXPORTS
 
 	ngx_hex_dump @48
 	ngx_atoi @49
-
-
+    
+    ngx_http_lua_ffi_balancer_set_current_peer @50
+    ngx_http_lua_ffi_balancer_set_more_tries @51
+    ngx_http_lua_ffi_balancer_get_last_failure @52
+    
+    ngx_http_lua_ffi_ssl_get_ocsp_responder_from_der_chain @53
+    ngx_http_lua_ffi_ssl_create_ocsp_request @54
+    ngx_http_lua_ffi_ssl_validate_ocsp_response @55
+    ngx_http_lua_ffi_ssl_set_ocsp_status_resp @56
+    
+    ngx_http_lua_ffi_semaphore_new @57
+    ngx_http_lua_ffi_semaphore_post @58
+    ngx_http_lua_ffi_semaphore_count @59
+    ngx_http_lua_ffi_semaphore_wait @60
+    ngx_http_lua_ffi_semaphore_gc @61
+    
+    
+    ngx_http_lua_ffi_ssl_set_der_certificate @62
+    ngx_http_lua_ffi_ssl_clear_certs @63
+    ngx_http_lua_ffi_ssl_set_der_private_key @64
+    ngx_http_lua_ffi_ssl_raw_server_addr @65
+    ngx_http_lua_ffi_ssl_server_name @66
+    ngx_http_lua_ffi_cert_pem_to_der @67
+    ngx_http_lua_ffi_priv_key_pem_to_der @68
+    ngx_http_lua_ffi_ssl_get_tls1_version @69
+    
+   
