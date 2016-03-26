@@ -1,0 +1,44 @@
+if test -n "$ngx_module_link"; then
+    if test -n "$NDK_SRCS"; then
+        echo "found ngx_devel_kit for ngx_array_var; looks good."
+    else
+        echo "error: ngx_devel_kit is required to build ngx_array_var; please put it before ngx_array_var." 1>&2
+        exit 1
+    fi
+else
+    if echo $HTTP_MODULES | grep " ndk_http_module" > /dev/null; then
+        echo "found ngx_devel_kit for ngx_array_var; looks good."
+    else
+        echo "error: ngx_devel_kit is required to build ngx_array_var; please put it before ngx_array_var." 1>&2
+        exit 1
+    fi
+fi
+
+ngx_addon_name=ngx_http_array_var_module
+
+HTTP_ARRAY_VAR_SRCS="                                                       \
+                    $ngx_addon_dir/src/ngx_http_array_var_module.c          \
+                    $ngx_addon_dir/src/ngx_http_array_var_util.c            \
+                    "
+
+HTTP_ARRAY_VAR_DEPS="                                                       \
+                    $ngx_addon_dir/src/ddebug.h                             \
+                    $ngx_addon_dir/src/ngx_http_array_var_util.h            \
+                    "
+
+if test -n "$ngx_module_link"; then
+    ngx_module_type=HTTP
+    ngx_module_name=$ngx_addon_name
+    ngx_module_incs=
+    ngx_module_deps="$HTTP_ARRAY_VAR_DEPS"
+    ngx_module_srcs="$HTTP_ARRAY_VAR_SRCS"
+    ngx_module_libs=
+
+    . auto/module
+else
+    HTTP_MODULES="$HTTP_MODULES $ngx_addon_name"
+    NGX_ADDON_SRCS="$NGX_ADDON_SRCS $HTTP_ARRAY_VAR_SRCS"
+    NGX_ADDON_DEPS="$NGX_ADDON_DEPS $HTTP_ARRAY_VAR_DEPS"
+fi
+
+CFLAGS="$CFLAGS -DNDK_SET_VAR"

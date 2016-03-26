@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# this script is intended to be used by the authors themselves
+
+ctags -R src buildroot/nginx-1.0.8/src ~/work/drizzle7-2011.08.23/libdrizzle-1.0
+
