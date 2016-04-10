@@ -1,4 +1,5 @@
 ngx_addon_name=ngx_http_set_misc_module
+ngx_module_link=
 
 if test -n "$ngx_module_link"; then
     if test -n "$NDK_SRCS"; then

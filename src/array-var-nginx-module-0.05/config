@@ -1,3 +1,5 @@
+ngx_module_link=
+
 if test -n "$ngx_module_link"; then
     if test -n "$NDK_SRCS"; then
         echo "found ngx_devel_kit for ngx_array_var; looks good."
