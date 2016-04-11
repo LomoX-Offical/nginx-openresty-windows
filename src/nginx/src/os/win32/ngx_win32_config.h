@@ -132,7 +132,6 @@ typedef long  time_t;
 typedef unsigned __int32    uint32_t;
 typedef __int32             int32_t;
 typedef unsigned __int16    uint16_t;
-typedef unsigned __int8     uint8_t;
 #define ngx_libc_cdecl      __cdecl
 
 #elif defined __BORLANDC__
@@ -152,22 +151,18 @@ typedef unsigned short int  uint16_t;
 typedef __int64             int64_t;
 typedef unsigned __int64    uint64_t;
 
-#ifndef _WIN64
-#ifndef __WATCOMC__
+#if !defined(__WATCOMC__) && !defined(__MINGW64_VERSION_MAJOR)
 typedef int                 intptr_t;
 typedef u_int               uintptr_t;
 #endif
-#endif
 
-#ifndef _OFF_T_DEFINED
+
 #ifndef __MINGW64_VERSION_MAJOR
 
-typedef __int64    off_t;
-typedef __int64    _off_t;
-
-
+/* Windows defines off_t as long, which is 32-bit */
+typedef __int64             off_t;
 #define _OFF_T_DEFINED
-#endif
+
 #endif
 
 
@@ -190,11 +185,7 @@ typedef unsigned int        ino_t;
 
 
 #ifndef __MINGW64_VERSION_MAJOR
-#ifdef _WIN64
-typedef __int64             ssize_t;
-#else
 typedef int                 ssize_t;
-#endif
 #endif
 
 
@@ -224,7 +215,7 @@ typedef int                 sig_atomic_t;
 #endif
 
 
-#define NGX_OFF_T_LEN           (sizeof("-9223372036854775808") - 1)
+#define NGX_OFF_T_LEN           (sizeof("-9223372036854775807") - 1)
 #define NGX_MAX_OFF_T_VALUE     9223372036854775807
 #define NGX_SIG_ATOMIC_T_SIZE   4
 

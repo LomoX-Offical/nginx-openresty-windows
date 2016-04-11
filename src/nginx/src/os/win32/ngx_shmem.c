@@ -8,10 +8,6 @@
 #include <ngx_config.h>
 #include <ngx_core.h>
 
-typedef	u_char *	caddr_t;
-#define page_const ((ptrdiff_t) 65536)
-#define pround(n) ((ptrdiff_t)((((n) / page_const) + 1) * page_const))
-#define off_addr(base_addr, size)	((u_char *)((caddr_t) base_addr + pround(size)))
 
 /*
  * Base addresses selected by system for shared memory mappings are likely
@@ -36,9 +32,9 @@ typedef	u_char *	caddr_t;
 
 
 #ifdef _WIN64
-#define NGX_SHMEM_BASE  0x000000200000000
+#define NGX_SHMEM_BASE  0x0000047047e00000
 #else
-#define NGX_SHMEM_BASE  0x20000000
+#define NGX_SHMEM_BASE  0x2efe0000
 #endif
 
 
@@ -48,30 +44,28 @@ ngx_uint_t  ngx_allocation_granularity;
 ngx_int_t
 ngx_shm_alloc(ngx_shm_t *shm)
 {
-    u_char    *name;
-    uint64_t   size;
-	u_char    *reserved_mem;
+    u_char         *name;
+    uint64_t        size;
     static u_char  *base = (u_char *) NGX_SHMEM_BASE;
 
-    name = ngx_alloc(shm->name.len + 9 + NGX_INT32_LEN, shm->log); // 9 = "Global\\" + "_" + \0
+    name = ngx_alloc(shm->name.len + 2 + NGX_INT32_LEN, shm->log);
     if (name == NULL) {
         return NGX_ERROR;
     }
 
-    (void) ngx_sprintf(name, "Global\\%V_%s%Z", &shm->name, ngx_unique);
+    (void) ngx_sprintf(name, "%V_%s%Z", &shm->name, ngx_unique);
 
     ngx_set_errno(0);
 
     size = shm->size;
 
-    ngx_log_error(NGX_LOG_NOTICE, shm->log, ngx_errno, "Shared memory name is [%s]", name);
     shm->handle = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE,
                                     (u_long) (size >> 32),
                                     (u_long) (size & 0xffffffff),
                                     (char *) name);
 
     if (shm->handle == NULL) {
-        ngx_log_error(NGX_LOG_EMERG, shm->log, ngx_errno,
+        ngx_log_error(NGX_LOG_ALERT, shm->log, ngx_errno,
                       "CreateFileMapping(%uz, %s) failed",
                       shm->size, name);
         ngx_free(name);
@@ -84,14 +78,6 @@ ngx_shm_alloc(ngx_shm_t *shm)
     if (ngx_errno == ERROR_ALREADY_EXISTS) {
         shm->exists = 1;
     }
-
-    reserved_mem = (u_char*)VirtualAlloc(
-        base,
-        shm->size,
-        MEM_RESERVE,
-        PAGE_NOACCESS);
-    VirtualFree(reserved_mem, 0, MEM_RELEASE);
-    ngx_log_error(NGX_LOG_NOTICE, shm->log, ngx_errno, "VirtualAlloc MEM_RELEASE: %p, base_address: %p", reserved_mem, base);
 
     shm->addr = MapViewOfFileEx(shm->handle, FILE_MAP_WRITE, 0, 0, 0, base);
 
@@ -115,25 +101,24 @@ ngx_shm_alloc(ngx_shm_t *shm)
      */
 
     shm->addr = MapViewOfFile(shm->handle, FILE_MAP_WRITE, 0, 0, 0);
+
     if (shm->addr != NULL) {
-		ngx_log_error(NGX_LOG_NOTICE, shm->log, ngx_errno,
-			"MapViewOfFile(%uz) of file mapping \"%V\" success: %p",
-			shm->size, &shm->name, shm->addr);
-		return NGX_OK;
+        return NGX_OK;
     }
 
-    ngx_log_error(NGX_LOG_EMERG, shm->log, ngx_errno,
+    ngx_log_error(NGX_LOG_ALERT, shm->log, ngx_errno,
                   "MapViewOfFile(%uz) of file mapping \"%V\" failed",
                   shm->size, &shm->name);
 
     if (CloseHandle(shm->handle) == 0) {
-        ngx_log_error(NGX_LOG_EMERG, shm->log, ngx_errno,
+        ngx_log_error(NGX_LOG_ALERT, shm->log, ngx_errno,
                       "CloseHandle() of file mapping \"%V\" failed",
                       &shm->name);
     }
 
     return NGX_ERROR;
 }
+
 
 ngx_int_t
 ngx_shm_remap(ngx_shm_t *shm, u_char *addr)
@@ -173,7 +158,4 @@ ngx_shm_free(ngx_shm_t *shm)
                       "CloseHandle() of file mapping \"%V\" failed",
                       &shm->name);
     }
-
-
-
 }
