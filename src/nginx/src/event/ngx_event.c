@@ -525,7 +525,7 @@ ngx_event_module_init(ngx_cycle_t *cycle)
     (void) ngx_atomic_cmp_set(ngx_connection_counter, 0, 1);
 
     ngx_log_debug2(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
-                   "counter: %p, %d",
+                   "counter: %p, %uA",
                    ngx_connection_counter, *ngx_connection_counter);
 
     ngx_temp_number = (ngx_atomic_t *) (shared + 2 * cl);
@@ -746,6 +746,7 @@ ngx_event_process_init(ngx_cycle_t *cycle)
             return NGX_ERROR;
         }
 
+        c->type = ls[i].type;
         c->log = &ls[i].log;
 
         c->listening = &ls[i];
@@ -818,7 +819,8 @@ ngx_event_process_init(ngx_cycle_t *cycle)
 
 #else
 
-        rev->handler = ngx_event_accept;
+        rev->handler = (c->type == SOCK_STREAM) ? ngx_event_accept
+                                                : ngx_event_recvmsg;
 
         if (ngx_use_accept_mutex
 #if (NGX_HAVE_REUSEPORT)
@@ -1206,7 +1208,7 @@ ngx_event_core_init_conf(ngx_cycle_t *cycle, void *conf)
 
 #endif
 
-#if (NGX_HAVE_DEVPOLL)
+#if (NGX_HAVE_DEVPOLL) && !(NGX_TEST_BUILD_DEVPOLL)
 
     module = &ngx_devpoll_module;
 

@@ -400,6 +400,13 @@ static ngx_command_t  ngx_http_core_commands[] = {
       0,
       NULL },
 
+    { ngx_string("aio_write"),
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_FLAG,
+      ngx_conf_set_flag_slot,
+      NGX_HTTP_LOC_CONF_OFFSET,
+      offsetof(ngx_http_core_loc_conf_t, aio_write),
+      NULL },
+
     { ngx_string("read_ahead"),
       NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_size_slot,
@@ -1215,7 +1222,7 @@ ngx_http_core_try_files_phase(ngx_http_request_t *r,
             }
 
             name = path.data + root;
-         }
+        }
 
         if (tf->values == NULL) {
 
@@ -1590,7 +1597,8 @@ ngx_http_core_find_static_location(ngx_http_request_t *r,
         }
 
         ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                       "test location: \"%*s\"", node->len, node->name);
+                       "test location: \"%*s\"",
+                       (size_t) node->len, node->name);
 
         n = (len <= (size_t) node->len) ? len : node->len;
 
@@ -3097,7 +3105,7 @@ ngx_http_core_location(ngx_conf_t *cf, ngx_command_t *cmd, void *dummy)
             ctx->loc_conf[cf->cycle->modules[i]->ctx_index] =
                                                    module->create_loc_conf(cf);
             if (ctx->loc_conf[cf->cycle->modules[i]->ctx_index] == NULL) {
-                 return NGX_CONF_ERROR;
+                return NGX_CONF_ERROR;
             }
         }
     }
@@ -3606,6 +3614,7 @@ ngx_http_core_create_loc_conf(ngx_conf_t *cf)
     clcf->sendfile = NGX_CONF_UNSET;
     clcf->sendfile_max_chunk = NGX_CONF_UNSET_SIZE;
     clcf->aio = NGX_CONF_UNSET;
+    clcf->aio_write = NGX_CONF_UNSET;
 #if (NGX_THREADS)
     clcf->thread_pool = NGX_CONF_UNSET_PTR;
     clcf->thread_pool_value = NGX_CONF_UNSET_PTR;
@@ -3827,6 +3836,7 @@ ngx_http_core_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
                               prev->sendfile_max_chunk, 0);
 #if (NGX_HAVE_FILE_AIO || NGX_THREADS)
     ngx_conf_merge_value(conf->aio, prev->aio, NGX_HTTP_AIO_OFF);
+    ngx_conf_merge_value(conf->aio_write, prev->aio_write, 0);
 #endif
 #if (NGX_THREADS)
     ngx_conf_merge_ptr_value(conf->thread_pool, prev->thread_pool, NULL);
@@ -4531,21 +4541,21 @@ ngx_http_core_root(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
 
 static ngx_http_method_name_t  ngx_methods_names[] = {
-   { (u_char *) "GET",       (uint32_t) ~NGX_HTTP_GET },
-   { (u_char *) "HEAD",      (uint32_t) ~NGX_HTTP_HEAD },
-   { (u_char *) "POST",      (uint32_t) ~NGX_HTTP_POST },
-   { (u_char *) "PUT",       (uint32_t) ~NGX_HTTP_PUT },
-   { (u_char *) "DELETE",    (uint32_t) ~NGX_HTTP_DELETE },
-   { (u_char *) "MKCOL",     (uint32_t) ~NGX_HTTP_MKCOL },
-   { (u_char *) "COPY",      (uint32_t) ~NGX_HTTP_COPY },
-   { (u_char *) "MOVE",      (uint32_t) ~NGX_HTTP_MOVE },
-   { (u_char *) "OPTIONS",   (uint32_t) ~NGX_HTTP_OPTIONS },
-   { (u_char *) "PROPFIND",  (uint32_t) ~NGX_HTTP_PROPFIND },
-   { (u_char *) "PROPPATCH", (uint32_t) ~NGX_HTTP_PROPPATCH },
-   { (u_char *) "LOCK",      (uint32_t) ~NGX_HTTP_LOCK },
-   { (u_char *) "UNLOCK",    (uint32_t) ~NGX_HTTP_UNLOCK },
-   { (u_char *) "PATCH",     (uint32_t) ~NGX_HTTP_PATCH },
-   { NULL, 0 }
+    { (u_char *) "GET",       (uint32_t) ~NGX_HTTP_GET },
+    { (u_char *) "HEAD",      (uint32_t) ~NGX_HTTP_HEAD },
+    { (u_char *) "POST",      (uint32_t) ~NGX_HTTP_POST },
+    { (u_char *) "PUT",       (uint32_t) ~NGX_HTTP_PUT },
+    { (u_char *) "DELETE",    (uint32_t) ~NGX_HTTP_DELETE },
+    { (u_char *) "MKCOL",     (uint32_t) ~NGX_HTTP_MKCOL },
+    { (u_char *) "COPY",      (uint32_t) ~NGX_HTTP_COPY },
+    { (u_char *) "MOVE",      (uint32_t) ~NGX_HTTP_MOVE },
+    { (u_char *) "OPTIONS",   (uint32_t) ~NGX_HTTP_OPTIONS },
+    { (u_char *) "PROPFIND",  (uint32_t) ~NGX_HTTP_PROPFIND },
+    { (u_char *) "PROPPATCH", (uint32_t) ~NGX_HTTP_PROPPATCH },
+    { (u_char *) "LOCK",      (uint32_t) ~NGX_HTTP_LOCK },
+    { (u_char *) "UNLOCK",    (uint32_t) ~NGX_HTTP_UNLOCK },
+    { (u_char *) "PATCH",     (uint32_t) ~NGX_HTTP_PATCH },
+    { NULL, 0 }
 };
 
 
@@ -4618,7 +4628,7 @@ ngx_http_core_limit_except(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
             mconf = module->create_loc_conf(cf);
             if (mconf == NULL) {
-                 return NGX_CONF_ERROR;
+                return NGX_CONF_ERROR;
             }
 
             ctx->loc_conf[cf->cycle->modules[i]->ctx_index] = mconf;

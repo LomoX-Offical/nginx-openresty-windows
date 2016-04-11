@@ -213,6 +213,7 @@ static ngx_conf_bitmask_t  ngx_http_proxy_next_upstream_masks[] = {
     { ngx_string("error"), NGX_HTTP_UPSTREAM_FT_ERROR },
     { ngx_string("timeout"), NGX_HTTP_UPSTREAM_FT_TIMEOUT },
     { ngx_string("invalid_header"), NGX_HTTP_UPSTREAM_FT_INVALID_HEADER },
+    { ngx_string("non_idempotent"), NGX_HTTP_UPSTREAM_FT_NON_IDEMPOTENT },
     { ngx_string("http_500"), NGX_HTTP_UPSTREAM_FT_HTTP_500 },
     { ngx_string("http_502"), NGX_HTTP_UPSTREAM_FT_HTTP_502 },
     { ngx_string("http_503"), NGX_HTTP_UPSTREAM_FT_HTTP_503 },
@@ -1558,7 +1559,7 @@ ngx_http_proxy_body_output_filter(void *data, ngx_chain_t *in)
 
     for ( ;; ) {
         ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                       "proxy output chunk: %d", ngx_buf_size(cl->buf));
+                       "proxy output chunk: %O", ngx_buf_size(cl->buf));
 
         size += ngx_buf_size(cl->buf);
 
@@ -1916,7 +1917,7 @@ ngx_http_proxy_input_filter_init(void *data)
     }
 
     ngx_log_debug4(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                   "http proxy filter init s:%d h:%d c:%d l:%O",
+                   "http proxy filter init s:%ui h:%d c:%d l:%O",
                    u->headers_in.status_n, ctx->head, u->headers_in.chunked,
                    u->headers_in.content_length_n);
 
@@ -2124,7 +2125,7 @@ ngx_http_proxy_chunked_filter(ngx_event_pipe_t *p, ngx_buf_t *buf)
     }
 
     ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                   "http proxy chunked state %d, length %d",
+                   "http proxy chunked state %ui, length %O",
                    ctx->chunked.state, p->length);
 
     if (b) {
@@ -2298,7 +2299,7 @@ ngx_http_proxy_non_buffered_chunked_filter(void *data, ssize_t bytes)
 
         for (cl = u->out_bufs; cl; cl = cl->next) {
             ngx_log_debug3(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                           "http proxy in memory %p-%p %uz",
+                           "http proxy in memory %p-%p %O",
                            cl->buf->pos, cl->buf->last, ngx_buf_size(cl->buf));
 
             if (buf->last == cl->buf->pos) {
