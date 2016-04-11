@@ -512,6 +512,10 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
                     continue;
                 }
 
+                if (ls[i].type != nls[n].type) {
+                    continue;
+                }
+
                 if (ngx_cmp_sockaddr(nls[n].sockaddr, nls[n].socklen,
                                      ls[i].sockaddr, ls[i].socklen, 1)
                     == NGX_OK)
@@ -1002,7 +1006,7 @@ ngx_int_t
 ngx_signal_process(ngx_cycle_t *cycle, char *sig)
 {
     ssize_t           n;
-    ngx_int_t         pid;
+    ngx_pid_t         pid;
     ngx_file_t        file;
     ngx_core_conf_t  *ccf;
     u_char            buf[NGX_INT64_LEN + 2];
@@ -1040,7 +1044,7 @@ ngx_signal_process(ngx_cycle_t *cycle, char *sig)
 
     pid = ngx_atoi(buf, ++n);
 
-    if (pid == NGX_ERROR) {
+    if (pid == (ngx_pid_t) NGX_ERROR) {
         ngx_log_error(NGX_LOG_ERR, cycle->log, 0,
                       "invalid PID number \"%*s\" in \"%s\"",
                       n, buf, file.name.data);
@@ -1309,7 +1313,7 @@ ngx_clean_old_cycles(ngx_event_t *ev)
             if (cycle[i]->connections[n].fd != (ngx_socket_t) -1) {
                 found = 1;
 
-                ngx_log_debug1(NGX_LOG_DEBUG_CORE, log, 0, "live fd:%d", n);
+                ngx_log_debug1(NGX_LOG_DEBUG_CORE, log, 0, "live fd:%ui", n);
 
                 break;
             }
@@ -1320,13 +1324,13 @@ ngx_clean_old_cycles(ngx_event_t *ev)
             continue;
         }
 
-        ngx_log_debug1(NGX_LOG_DEBUG_CORE, log, 0, "clean old cycle: %d", i);
+        ngx_log_debug1(NGX_LOG_DEBUG_CORE, log, 0, "clean old cycle: %ui", i);
 
         ngx_destroy_pool(cycle[i]->pool);
         cycle[i] = NULL;
     }
 
-    ngx_log_debug1(NGX_LOG_DEBUG_CORE, log, 0, "old cycles status: %d", live);
+    ngx_log_debug1(NGX_LOG_DEBUG_CORE, log, 0, "old cycles status: %ui", live);
 
     if (live) {
         ngx_add_timer(ev, 30000);
