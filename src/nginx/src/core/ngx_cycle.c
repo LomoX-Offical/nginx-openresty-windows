@@ -401,6 +401,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
 
 
     /* create shared memory */
+    ngx_slab_module_init();
 
     part = &cycle->shared_memory.part;
     shm_zone = part->elts;
@@ -517,7 +518,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
                     == NGX_OK)
                 {
                     nls[n].fd = ls[i].fd;
-                    nls[n].previous = &ls[i];
+                    nls[n].previous = NULL; //&ls[i]; 这里会引起 崩溃。
                     ls[i].remain = 1;
 
                     if (ls[i].backlog != nls[n].backlog) {

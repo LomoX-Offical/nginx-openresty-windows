@@ -84,7 +84,7 @@ ngx_spawn_process(ngx_cycle_t *cycle, char *name, ngx_int_t respawn)
     events[0] = ngx_master_process_event;
     events[1] = ctx.child;
 
-    rc = WaitForMultipleObjects(2, events, 0, 5000);
+    rc = WaitForMultipleObjects(2, events, 0, 60000);
 
     ngx_time_update();
 
@@ -192,11 +192,14 @@ failed:
         ngx_close_handle(ngx_processes[s].term);
     }
 
-    TerminateProcess(ngx_processes[s].handle, 2);
-
     if (ngx_processes[s].handle) {
+        TerminateProcess(ngx_processes[s].handle, 2);
         ngx_close_handle(ngx_processes[s].handle);
         ngx_processes[s].handle = NULL;
+    }
+ 
+    if (ngx_processes[s].handle) {
+        ngx_close_handle(ngx_processes[s].handle);
     }
 
     return NGX_INVALID_PID;
@@ -215,7 +218,7 @@ ngx_execute(ngx_cycle_t *cycle, ngx_exec_ctx_t *ctx)
     ngx_memzero(&pi, sizeof(PROCESS_INFORMATION));
 
     if (CreateProcess(ctx->path, ctx->args,
-                      NULL, NULL, 0, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)
+                      NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)
         == 0)
     {
         ngx_log_error(NGX_LOG_CRIT, cycle->log, ngx_errno,

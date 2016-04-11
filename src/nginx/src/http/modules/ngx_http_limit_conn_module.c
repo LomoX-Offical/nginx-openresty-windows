@@ -406,18 +406,22 @@ ngx_http_limit_conn_init_zone(ngx_shm_zone_t *shm_zone, void *data)
             return NGX_ERROR;
         }
 
-        ctx->rbtree = octx->rbtree;
-
-        return NGX_OK;
+//        ctx->rbtree = octx->rbtree;
+//         return NGX_OK;
     }
+
 
     shpool = (ngx_slab_pool_t *) shm_zone->shm.addr;
 
-    if (shm_zone->shm.exists) {
+    if ((shm_zone->shm.exists) && !octx) {
         ctx->rbtree = shpool->data;
 
         return NGX_OK;
     }
+
+    // 重新分配内存
+    ngx_slab_init(shpool);
+
 
     ctx->rbtree = ngx_slab_alloc(shpool, sizeof(ngx_rbtree_t));
     if (ctx->rbtree == NULL) {
