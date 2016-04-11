@@ -2652,38 +2652,55 @@ objs/nginx.8:	man/nginx.8 objs/ngx_auto_config.h
 install:	build 
 	test -d '$(DESTDIR)' || mkdir -p '$(DESTDIR)'
 
-	test -d '$(DESTDIR)/' 		|| mkdir -p '$(DESTDIR)/'
-	test ! -f '$(DESTDIR)/nginx.exe' 		|| mv '$(DESTDIR)/nginx.exe' 			'$(DESTDIR)/nginx.exe.old'
+	test -d '$(DESTDIR)/' \
+		|| mkdir -p '$(DESTDIR)/'
+	test ! -f '$(DESTDIR)/nginx.exe' \
+		|| mv '$(DESTDIR)/nginx.exe' \
+			'$(DESTDIR)/nginx.exe.old'
 	cp objs/nginx '$(DESTDIR)/nginx.exe'
 
-	test -d '$(DESTDIR)/conf' 		|| mkdir -p '$(DESTDIR)/conf'
+	test -d '$(DESTDIR)/conf' \
+		|| mkdir -p '$(DESTDIR)/conf'
 
 	cp conf/koi-win '$(DESTDIR)/conf'
 	cp conf/koi-utf '$(DESTDIR)/conf'
 	cp conf/win-utf '$(DESTDIR)/conf'
 
-	test -f '$(DESTDIR)/conf/mime.types' 		|| cp conf/mime.types '$(DESTDIR)/conf'
+	test -f '$(DESTDIR)/conf/mime.types' \
+		|| cp conf/mime.types '$(DESTDIR)/conf'
 	cp conf/mime.types '$(DESTDIR)/conf/mime.types.default'
 
-	test -f '$(DESTDIR)/conf/fastcgi_params' 		|| cp conf/fastcgi_params '$(DESTDIR)/conf'
-	cp conf/fastcgi_params 		'$(DESTDIR)/conf/fastcgi_params.default'
+	test -f '$(DESTDIR)/conf/fastcgi_params' \
+		|| cp conf/fastcgi_params '$(DESTDIR)/conf'
+	cp conf/fastcgi_params \
+		'$(DESTDIR)/conf/fastcgi_params.default'
 
-	test -f '$(DESTDIR)/conf/fastcgi.conf' 		|| cp conf/fastcgi.conf '$(DESTDIR)/conf'
+	test -f '$(DESTDIR)/conf/fastcgi.conf' \
+		|| cp conf/fastcgi.conf '$(DESTDIR)/conf'
 	cp conf/fastcgi.conf '$(DESTDIR)/conf/fastcgi.conf.default'
 
-	test -f '$(DESTDIR)/conf/uwsgi_params' 		|| cp conf/uwsgi_params '$(DESTDIR)/conf'
-	cp conf/uwsgi_params 		'$(DESTDIR)/conf/uwsgi_params.default'
+	test -f '$(DESTDIR)/conf/uwsgi_params' \
+		|| cp conf/uwsgi_params '$(DESTDIR)/conf'
+	cp conf/uwsgi_params \
+		'$(DESTDIR)/conf/uwsgi_params.default'
 
-	test -f '$(DESTDIR)/conf/scgi_params' 		|| cp conf/scgi_params '$(DESTDIR)/conf'
-	cp conf/scgi_params 		'$(DESTDIR)/conf/scgi_params.default'
+	test -f '$(DESTDIR)/conf/scgi_params' \
+		|| cp conf/scgi_params '$(DESTDIR)/conf'
+	cp conf/scgi_params \
+		'$(DESTDIR)/conf/scgi_params.default'
 
-	test -f '$(DESTDIR)/conf/nginx.conf' 		|| cp conf/nginx.conf '$(DESTDIR)/conf/nginx.conf'
+	test -f '$(DESTDIR)/conf/nginx.conf' \
+		|| cp conf/nginx.conf '$(DESTDIR)/conf/nginx.conf'
 	cp conf/nginx.conf '$(DESTDIR)/conf/nginx.conf.default'
 
-	test -d '$(DESTDIR)/logs' 		|| mkdir -p '$(DESTDIR)/logs'
+	test -d '$(DESTDIR)/logs' \
+		|| mkdir -p '$(DESTDIR)/logs'
 
-	test -d '$(DESTDIR)/logs' || 		mkdir -p '$(DESTDIR)/logs'
+	test -d '$(DESTDIR)/logs' \
+		|| mkdir -p '$(DESTDIR)/logs'
 
-	test -d '$(DESTDIR)/html' 		|| cp -R html '$(DESTDIR)'
+	test -d '$(DESTDIR)/html' \
+		|| cp -R html '$(DESTDIR)'
 
-	test -d '$(DESTDIR)/logs' || 		mkdir -p '$(DESTDIR)/logs'
+	test -d '$(DESTDIR)/logs' \
+		|| mkdir -p '$(DESTDIR)/logs'
