@@ -10,7 +10,7 @@ Production ready.
 
 = Version =
 
-This document describes ngx_lua [https://github.com/openresty/lua-nginx-module/tags v0.10.0] released on 11 January 2016.
+This document describes ngx_lua [https://github.com/openresty/lua-nginx-module/tags v0.10.2] released on 8 March 2016.
 
 = Synopsis =
 <geshi lang="nginx">
@@ -75,7 +75,7 @@ This document describes ngx_lua [https://github.com/openresty/lua-nginx-module/t
                     ngx.say("status: ", res.status)
                     ngx.say("body:")
                     ngx.print(res.body)
-                end';
+                end
             }
         }
  
@@ -199,7 +199,7 @@ It is highly recommended to use the [http://openresty.org OpenResty bundle] that
 
 Alternatively, ngx_lua can be manually compiled into Nginx:
 
-# Install LuaJIT 2.0 or 2.1 (recommended) or Lua 5.1 (Lua 5.2 is ''not'' supported yet). LuaJIT can be downloaded from the [http://luajit.org/download.html the LuaJIT project website] and Lua 5.1, from the [http://www.lua.org/ Lua project website].  Some distribution package managers also distribute LuaJIT and/or Lua.
+# Install LuaJIT 2.0 or 2.1 (recommended) or Lua 5.1 (Lua 5.2 is ''not'' supported yet). LuaJIT can be downloaded from the [http://luajit.org/download.html LuaJIT project website] and Lua 5.1, from the [http://www.lua.org/ Lua project website].  Some distribution package managers also distribute LuaJIT and/or Lua.
 # Download the latest version of the ngx_devel_kit (NDK) module [https://github.com/simpl/ngx_devel_kit/tags HERE].
 # Download the latest version of ngx_lua [https://github.com/openresty/lua-nginx-module/tags HERE].
 # Download the latest version of Nginx [http://nginx.org/ HERE] (See [[#Nginx Compatibility|Nginx Compatibility]])
@@ -232,6 +232,17 @@ Build the source with this module:
     make -j2
     make install
 </geshi>
+
+== Building as a dynamic module ==
+
+Starting from NGINX 1.9.11, you can also compile this module as a dynamic module, by using the `--add-dynamic-module=PATH` option instead of `--add-module=PATH` on the
+`./configure` command line above. And then you can explicitly load the module in your `nginx.conf` via the [load_module](http://nginx.org/en/docs/ngx_core_module.html#load_module)
+directive, for example,
+
+```nginx
+load_module /path/to/modules/ndk_http_module.so;  # assuming NDK is built as a dynamic module too
+load_module /path/to/modules/ngx_http_lua_module.so;
+```
 
 == C Macro Configurations ==
 
@@ -674,20 +685,10 @@ phases.
 = TODO =
 
 * cosocket: implement LuaSocket's unconnected UDP API.
-* add support for implementing general TCP servers instead of HTTP servers in Lua. For example,
+* port this module to the "datagram" subsystem of NGINX for implementing general UDP servers instead of HTTP
+servers in Lua. For example,
 <geshi lang="lua">
-    tcp {
-        server {
-            listen 11212;
-            handler_by_lua '
-                -- custom Lua code implementing the special TCP server...
-            ';
-        }
-    }
-</geshi>
-* add support for implementing general UDP servers instead of HTTP servers in Lua. For example,
-<geshi lang="lua">
-    udp {
+    datagram {
         server {
             listen 1953;
             handler_by_lua '
@@ -710,6 +711,7 @@ phases.
 * add <code>ignore_resp_headers</code>, <code>ignore_resp_body</code>, and <code>ignore_resp</code> options to [[#ngx.location.capture|ngx.location.capture]] and [[#ngx.location.capture_multi|ngx.location.capture_multi]] methods, to allow micro performance tuning on the user side.
 * add automatic Lua code time slicing support by yielding and resuming the Lua VM actively via Lua's debug hooks.
 * add <code>stat</code> mode similar to [https://httpd.apache.org/docs/trunk/mod/mod_lua.html mod_lua].
+* cosocket: add client SSL certificiate support.
 
 = Changes =
 
@@ -3250,7 +3252,7 @@ See also [[#ngx.now|ngx.now]] and [[#ngx.update_time|ngx.update_time]].
 
 Returns the HTTP version number for the current request as a Lua number.
 
-Current possible values are 1.0, 1.1, and 0.9. Returns <code>nil</code> for unrecognized values.
+Current possible values are 2.0, 1.0, 1.1, and 0.9. Returns <code>nil</code> for unrecognized values.
 
 This method was first introduced in the <code>v0.7.17</code> release.
 
@@ -5757,10 +5759,14 @@ Retrieves the current running phase name. Possible return values are
 : for the context of [[#init_by_lua|init_by_lua]] or [[#init_by_lua_file|init_by_lua_file]].
 * <code>init_worker</code>
 : for the context of [[#init_worker_by_lua|init_worker_by_lua]] or [[#init_worker_by_lua_file|init_worker_by_lua_file]].
+* <code>ssl_cert</code>
+: for the context of [[#ssl_certificate_by_lua_block|ssl_certificate_by_lua_block]] or [[#ssl_certificate_by_lua_file|ssl_certificate_by_lua_file]].
 * <code>set</code>
 : for the context of [[#set_by_lua|set_by_lua]] or [[#set_by_lua_file|set_by_lua_file]].
 * <code>rewrite</code>
 : for the context of [[#rewrite_by_lua|rewrite_by_lua]] or [[#rewrite_by_lua_file|rewrite_by_lua_file]].
+* <code>balancer</code>
+: for the context of [[#balancer_by_lua_block|balancer_by_lua_block]] or [[#balancer_by_lua_file|balancer_by_lua_file]].
 * <code>access</code>
 : for the context of [[#access_by_lua|access_by_lua]] or [[#access_by_lua_file|access_by_lua_file]].
 * <code>content</code>

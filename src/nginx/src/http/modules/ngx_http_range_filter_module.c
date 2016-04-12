@@ -207,7 +207,7 @@ ngx_http_range_header_filter(ngx_http_request_t *r)
         if_range_time = ngx_parse_http_time(if_range->data, if_range->len);
 
         ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                       "http ir:%d lm:%d",
+                       "http ir:%T lm:%T",
                        if_range_time, r->headers_out.last_modified_time);
 
         if (if_range_time != r->headers_out.last_modified_time) {
@@ -665,7 +665,7 @@ ngx_http_range_test_overlapped(ngx_http_request_t *r,
         range = ctx->ranges.elts;
         for (i = 0; i < ctx->ranges.nelts; i++) {
             if (start > range[i].start || last < range[i].end) {
-                 goto overlapped;
+                goto overlapped;
             }
         }
     }

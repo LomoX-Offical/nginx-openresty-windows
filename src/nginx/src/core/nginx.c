@@ -10,7 +10,7 @@
 #include <nginx.h>
 
 
-static void ngx_show_version_info();
+static void ngx_show_version_info(void);
 static ngx_int_t ngx_add_inherited_sockets(ngx_cycle_t *cycle);
 static ngx_int_t ngx_get_options(int argc, char *const *argv);
 static ngx_int_t ngx_process_options(ngx_cycle_t *cycle);
@@ -372,7 +372,7 @@ main(int argc, char *const *argv)
 
 
 static void
-ngx_show_version_info()
+ngx_show_version_info(void)
 {
     ngx_write_stderr("nginx version: " NGINX_VER_BUILD NGX_LINEFEED);
 
@@ -413,13 +413,12 @@ ngx_show_version_info()
 #endif
 
 #if (NGX_SSL)
-        if (SSLeay() == SSLEAY_VERSION_NUMBER) {
+        if (ngx_strcmp(ngx_ssl_version(), OPENSSL_VERSION_TEXT) == 0) {
             ngx_write_stderr("built with " OPENSSL_VERSION_TEXT NGX_LINEFEED);
         } else {
             ngx_write_stderr("built with " OPENSSL_VERSION_TEXT
                              " (running with ");
-            ngx_write_stderr((char *) (uintptr_t)
-                             SSLeay_version(SSLEAY_VERSION));
+            ngx_write_stderr((char *) (uintptr_t) ngx_ssl_version());
             ngx_write_stderr(")" NGX_LINEFEED);
         }
 #ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
@@ -1510,7 +1509,7 @@ ngx_load_module(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
             return NGX_CONF_ERROR;
         }
 
-        ngx_log_debug2(NGX_LOG_DEBUG_CORE, cf->log, 0, "module: %s i:%i",
+        ngx_log_debug2(NGX_LOG_DEBUG_CORE, cf->log, 0, "module: %s i:%ui",
                        module->name, module->index);
     }
 

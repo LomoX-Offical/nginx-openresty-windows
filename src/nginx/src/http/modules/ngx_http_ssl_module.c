@@ -337,8 +337,9 @@ ngx_http_ssl_alpn_select(ngx_ssl_conn_t *ssl_conn, const unsigned char **out,
 
 #if (NGX_DEBUG)
     for (i = 0; i < inlen; i += in[i] + 1) {
-         ngx_log_debug2(NGX_LOG_DEBUG_HTTP, c->log, 0,
-                        "SSL ALPN supported by client: %*s", in[i], &in[i + 1]);
+        ngx_log_debug2(NGX_LOG_DEBUG_HTTP, c->log, 0,
+                       "SSL ALPN supported by client: %*s",
+                       (size_t) in[i], &in[i + 1]);
     }
 #endif
 
@@ -365,7 +366,7 @@ ngx_http_ssl_alpn_select(ngx_ssl_conn_t *ssl_conn, const unsigned char **out,
     }
 
     ngx_log_debug2(NGX_LOG_DEBUG_HTTP, c->log, 0,
-                   "SSL ALPN selected: %*s", *outlen, *out);
+                   "SSL ALPN selected: %*s", (size_t) *outlen, *out);
 
     return SSL_TLSEXT_ERR_OK;
 }
@@ -717,7 +718,7 @@ ngx_http_ssl_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child)
         SSL_CTX_set_options(conf->ssl.ctx, SSL_OP_CIPHER_SERVER_PREFERENCE);
     }
 
-#ifndef LIBRESSL_VERSION_NUMBER
+#if (OPENSSL_VERSION_NUMBER < 0x10100001L && !defined LIBRESSL_VERSION_NUMBER)
     /* a temporary 512-bit RSA key is required for export versions of MSIE */
     SSL_CTX_set_tmp_rsa_callback(conf->ssl.ctx, ngx_ssl_rsa512_key_callback);
 #endif

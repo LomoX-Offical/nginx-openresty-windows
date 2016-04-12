@@ -24,7 +24,7 @@ if [ -n "$LIBPQ_INC" -o -n "$LIBPQ_LIB" ]; then
                 ngx_feature_libs="$LIBPQ_LIB/libpq.lib"
             fi
             . auto/feature
-      fi
+        fi
     fi
     
 else

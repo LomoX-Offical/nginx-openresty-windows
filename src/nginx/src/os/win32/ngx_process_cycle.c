@@ -28,6 +28,9 @@ static void ngx_cache_manager_process_handler(void);
 static ngx_thread_value_t __stdcall ngx_cache_loader_thread(void *data);
 
 
+static void ngx_set_inherited_listen_sockets(ngx_cycle_t *cycle);
+
+
 ngx_uint_t     ngx_process;
 ngx_uint_t     ngx_worker;
 ngx_pid_t      ngx_pid;
@@ -73,6 +76,12 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
                 "ngx_master_%s%Z", ngx_unique);
 
     if (ngx_process == NGX_PROCESS_WORKER) {
+
+        if (FreeConsole() == 0) {
+            ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
+                "FreeConsole() failed");
+        }
+
         ngx_worker_process_cycle(cycle, ngx_master_process_event_name);
         return;
     }
@@ -113,7 +122,8 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
     events[2] = ngx_reopen_event;
     events[3] = ngx_reload_event;
 
-    ngx_close_listening_sockets(cycle);
+//    ngx_close_listening_sockets(cycle);
+    ngx_set_inherited_listen_sockets(cycle);
 
     if (ngx_start_worker_processes(cycle, NGX_PROCESS_RESPAWN) == 0) {
         exit(2);
@@ -199,19 +209,51 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
                               ngx_reload_event_name);
             }
 
-            cycle = ngx_init_cycle(cycle);
-            if (cycle == NULL) {
-                cycle = (ngx_cycle_t *) ngx_cycle;
-                continue;
-            }
+			
+/* 这个方案暂时已经可用了。不好的地方就是不能重启端口。如果端口配置有变化，就会有毛病。
+			cycle = ngx_init_cycle(cycle);
+			if (cycle == NULL) {
+				cycle = (ngx_cycle_t *) ngx_cycle;
+				continue;
+			}
 
-            ngx_cycle = cycle;
+			ngx_cycle = cycle;
 
-            ngx_close_listening_sockets(cycle);
+			//ngx_close_listening_sockets(cycle);
 
-            if (ngx_start_worker_processes(cycle, NGX_PROCESS_JUST_RESPAWN)) {
-                ngx_quit_worker_processes(cycle, 1);
-            }
+			if (ngx_start_worker_processes(cycle, NGX_PROCESS_JUST_RESPAWN)) {
+				ngx_quit_worker_processes(cycle, 1);
+			}
+*/
+
+			/*---code 这里代码是先退掉所有工作进程，然后关闭listen 端口，再reload 配置，重启端口，重启工作进程*/
+			ngx_quit_worker_processes(cycle, 0);
+			ngx_close_listening_sockets(cycle);
+
+			ngx_msleep(500);
+
+			cycle = ngx_init_cycle(cycle);
+			if (cycle == NULL) {
+				cycle = (ngx_cycle_t *) ngx_cycle;
+				continue;
+			}
+
+			ngx_cycle = cycle;
+
+			if (ngx_open_listening_sockets(cycle) != NGX_OK) {
+				ngx_log_error(NGX_LOG_ALERT, cycle->log, err,
+					"reload ngx_open_listening_sockets() failed");
+
+				ngx_quit = 1;
+				continue;
+			}
+
+			ngx_set_inherited_listen_sockets(cycle);
+
+			if (ngx_start_worker_processes(cycle, NGX_PROCESS_RESPAWN) == 0) {
+				exit(2);
+			}
+			/*---code --- end*/
 
             continue;
         }
@@ -316,10 +358,19 @@ ngx_console_handler(u_long type)
 static ngx_int_t
 ngx_create_signal_events(ngx_cycle_t *cycle)
 {
+    SECURITY_DESCRIPTOR SecurityDescriptor = { 0 };
+    SECURITY_ATTRIBUTES SecurityAttribute = { 0 };
+
+    InitializeSecurityDescriptor((PSECURITY_DESCRIPTOR)&SecurityDescriptor, 1);
+    SetSecurityDescriptorDacl((PSECURITY_DESCRIPTOR)&SecurityDescriptor, TRUE, NULL, FALSE);
+    SecurityAttribute.nLength               = sizeof(SecurityAttribute);
+    SecurityAttribute.lpSecurityDescriptor  = &SecurityDescriptor;
+    SecurityAttribute.bInheritHandle        = TRUE;
+    
     ngx_sprintf((u_char *) ngx_stop_event_name,
                 "Global\\ngx_stop_%s%Z", ngx_unique);
 
-    ngx_stop_event = CreateEvent(NULL, 1, 0, ngx_stop_event_name);
+    ngx_stop_event = CreateEvent(&SecurityAttribute, 1, 0, ngx_stop_event_name);
     if (ngx_stop_event == NULL) {
         ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
                       "CreateEvent(\"%s\") failed", ngx_stop_event_name);
@@ -330,7 +381,7 @@ ngx_create_signal_events(ngx_cycle_t *cycle)
     ngx_sprintf((u_char *) ngx_quit_event_name,
                 "Global\\ngx_quit_%s%Z", ngx_unique);
 
-    ngx_quit_event = CreateEvent(NULL, 1, 0, ngx_quit_event_name);
+    ngx_quit_event = CreateEvent(&SecurityAttribute, 1, 0, ngx_quit_event_name);
     if (ngx_quit_event == NULL) {
         ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
                       "CreateEvent(\"%s\") failed", ngx_quit_event_name);
@@ -341,7 +392,7 @@ ngx_create_signal_events(ngx_cycle_t *cycle)
     ngx_sprintf((u_char *) ngx_reopen_event_name,
                 "Global\\ngx_reopen_%s%Z", ngx_unique);
 
-    ngx_reopen_event = CreateEvent(NULL, 1, 0, ngx_reopen_event_name);
+    ngx_reopen_event = CreateEvent(&SecurityAttribute, 1, 0, ngx_reopen_event_name);
     if (ngx_reopen_event == NULL) {
         ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
                       "CreateEvent(\"%s\") failed", ngx_reopen_event_name);
@@ -352,7 +403,7 @@ ngx_create_signal_events(ngx_cycle_t *cycle)
     ngx_sprintf((u_char *) ngx_reload_event_name,
                 "Global\\ngx_reload_%s%Z", ngx_unique);
 
-    ngx_reload_event = CreateEvent(NULL, 1, 0, ngx_reload_event_name);
+    ngx_reload_event = CreateEvent(&SecurityAttribute, 1, 0, ngx_reload_event_name);
     if (ngx_reload_event == NULL) {
         ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
                       "CreateEvent(\"%s\") failed", ngx_reload_event_name);
@@ -406,7 +457,11 @@ ngx_reopen_worker_processes(ngx_cycle_t *cycle)
 static void
 ngx_quit_worker_processes(ngx_cycle_t *cycle, ngx_uint_t old)
 {
-    ngx_int_t  n;
+	ngx_int_t  n;
+	ngx_int_t  count;
+	HANDLE  handles[NGX_MAX_PROCESSES] = {0};
+	u_long  rc      = 0;
+
 
     for (n = 0; n < ngx_last_process; n++) {
 
@@ -435,6 +490,20 @@ ngx_quit_worker_processes(ngx_cycle_t *cycle, ngx_uint_t old)
 
         ngx_processes[n].exiting = 1;
     }
+
+
+    for (n = 0, count = 0; n < ngx_last_process; n++) {
+ 
+        if (ngx_processes[n].handle == NULL) {
+            continue;
+        }
+ 
+        handles[count] = ngx_processes[n].handle;
+        count++;
+    }
+ 
+    WaitForMultipleObjects(count, handles, TRUE, 2000);
+    ngx_terminate_worker_processes(cycle);
 }
 
 
@@ -442,6 +511,7 @@ static void
 ngx_terminate_worker_processes(ngx_cycle_t *cycle)
 {
     ngx_int_t  n;
+    u_long     rc = 0;
 
     for (n = 0; n < ngx_last_process; n++) {
 
@@ -449,18 +519,26 @@ ngx_terminate_worker_processes(ngx_cycle_t *cycle)
             continue;
         }
 
-        if (TerminateProcess(ngx_processes[n].handle, 0) == 0) {
-            ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
-                          "TerminateProcess(\"%p\") failed",
-                          ngx_processes[n].handle);
-        }
-
         ngx_processes[n].exiting = 1;
 
         ngx_close_handle(ngx_processes[n].reopen);
         ngx_close_handle(ngx_processes[n].quit);
         ngx_close_handle(ngx_processes[n].term);
+        ngx_processes[n].reopen = NULL;
+        ngx_processes[n].quit = NULL;
+        ngx_processes[n].term = NULL;
+ 
+        GetExitCodeProcess(ngx_processes[n].handle, &rc);
+        if (rc == STILL_ACTIVE) {
+            if (TerminateProcess(ngx_processes[n].handle, 0) == 0) {
+                ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
+                    "TerminateProcess(\"%p\") failed",
+                    ngx_processes[n].handle);
+            }
+        }
+
         ngx_close_handle(ngx_processes[n].handle);
+        ngx_processes[n].handle = NULL;
     }
 }
 
@@ -581,7 +659,7 @@ ngx_worker_process_cycle(ngx_cycle_t *cycle, char *mevn)
 
     ngx_log_debug0(NGX_LOG_DEBUG_CORE, log, 0, "worker started");
 
-    ngx_sprintf((u_char *) wtevn, "ngx_worker_term_%ul%Z", ngx_pid);
+    ngx_sprintf((u_char *) wtevn, "ngx_worker_term_%P%Z", ngx_pid);
     events[0] = CreateEvent(NULL, 1, 0, wtevn);
     if (events[0] == NULL) {
         ngx_log_error(NGX_LOG_ALERT, log, ngx_errno,
@@ -589,7 +667,7 @@ ngx_worker_process_cycle(ngx_cycle_t *cycle, char *mevn)
         goto failed;
     }
 
-    ngx_sprintf((u_char *) wqevn, "ngx_worker_quit_%ul%Z", ngx_pid);
+    ngx_sprintf((u_char *) wqevn, "ngx_worker_quit_%P%Z", ngx_pid);
     events[1] = CreateEvent(NULL, 1, 0, wqevn);
     if (events[1] == NULL) {
         ngx_log_error(NGX_LOG_ALERT, log, ngx_errno,
@@ -597,7 +675,7 @@ ngx_worker_process_cycle(ngx_cycle_t *cycle, char *mevn)
         goto failed;
     }
 
-    ngx_sprintf((u_char *) wroevn, "ngx_worker_reopen_%ul%Z", ngx_pid);
+    ngx_sprintf((u_char *) wroevn, "ngx_worker_reopen_%P%Z", ngx_pid);
     events[2] = CreateEvent(NULL, 1, 0, wroevn);
     if (events[2] == NULL) {
         ngx_log_error(NGX_LOG_ALERT, log, ngx_errno,
@@ -1001,13 +1079,13 @@ ngx_single_process_cycle(ngx_cycle_t *cycle)
 
 
 ngx_int_t
-ngx_os_signal_process(ngx_cycle_t *cycle, char *sig, ngx_int_t pid)
+ngx_os_signal_process(ngx_cycle_t *cycle, char *sig, ngx_pid_t pid)
 {
     HANDLE     ev;
     ngx_int_t  rc;
     char       evn[NGX_PROCESS_SYNC_NAME];
 
-    ngx_sprintf((u_char *) evn, "Global\\ngx_%s_%ul%Z", sig, pid);
+    ngx_sprintf((u_char *) evn, "Global\\ngx_%s_%P%Z", sig, pid);
 
     ev = OpenEvent(EVENT_MODIFY_STATE, 0, evn);
     if (ev == NULL) {
@@ -1038,4 +1116,29 @@ ngx_close_handle(HANDLE h)
         ngx_log_error(NGX_LOG_ALERT, ngx_cycle->log, ngx_errno,
                       "CloseHandle(%p) failed", h);
     }
+}
+
+void
+ngx_set_inherited_listen_sockets(ngx_cycle_t *cycle)
+{
+	char              *var;
+	u_char            *p;
+	ngx_listening_t   *ls;
+	ngx_uint_t         i;
+
+	var = ngx_alloc(cycle->listening.nelts * (NGX_INT32_LEN + 1) + 1, cycle->log); // (numberMaxLen + ';') * n + '\0'
+
+	p = var;
+
+	ls = cycle->listening.elts;
+	for (i = 0; i < cycle->listening.nelts; i++) {
+		p = ngx_sprintf(p, "%d;", (int)ls[i].fd);
+	}
+
+	*p = '\0';
+
+	SetEnvironmentVariable(NGINX_VAR, var);
+
+	ngx_free(var);
+
 }
