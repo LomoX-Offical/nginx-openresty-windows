@@ -3,17 +3,15 @@
 
 ### lastest release ###
 
-version:1.9.12.1001
+version:1.9.14.1001
 
-32 bit: http://pan.baidu.com/s/1eR1bR9o
-
-64 bit: http://pan.baidu.com/s/1hqPeoJy
+32 bit: http://pan.baidu.com/s/1bY6jaY
+        
+64 bit: http://pan.baidu.com/s/1i56NNQd
 
 >Changelog:  
 
-- nginx core update to 1.9.12
-- update openssl to 1.0.2g
-- update ngx_lua_module to 0.10.1rc0
+- nginx core update to 1.9.14
 
 
 ### about ###
@@ -340,3 +338,17 @@ version:1.9.10.1001
 - update LuaJIT to 2.1-20160108
 - update ngx_lua to 0.10.00
 - update lua-resty-core to 0.1.4
+
+
+
+version:1.9.12.1001
+
+32 bit: http://pan.baidu.com/s/1eR1bR9o
+
+64 bit: http://pan.baidu.com/s/1hqPeoJy
+
+>Changelog:  
+
+- nginx core update to 1.9.12
+- update openssl to 1.0.2g
+- update ngx_lua_module to 0.10.1rc0
