@@ -5,14 +5,20 @@
 
 版本号:1.9.14.1001
 
-32 位下载地址: http://pan.baidu.com/s/1bY6jaY
+32 位下载地址: http://pan.baidu.com/s/1kUYTLkj
 
-64 位下载地址: http://pan.baidu.com/s/1i56NNQd
+64 位下载地址: http://pan.baidu.com/s/1qXZz82S
 
->发布时间: 2016-04-12
+>发布时间: 2016-04-13
 
 >修改日志:  
 - 更新 nginx 版本到 1.9.14
+- 更新 Lua Nginx Module 到 0.10.2.
+- 更新 Set Misc Nginx Module 到 0.30.
+- 更新 Array Var Nginx Module 到 0.05.
+- 更新 Lua Resty Core Library 到 0.1.5.
+- 更新 Lua Resty Upstream Healthcheck Library 到 0.04.
+- 更新 Lua Resty DNS Library 到 0.15.
 
 
 ### 关于 ###
