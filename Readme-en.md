@@ -5,13 +5,20 @@
 
 version:1.9.14.1001
 
-32 bit: http://pan.baidu.com/s/1bY6jaY
+32 bit: http://pan.baidu.com/s/1kUYTLkj
         
-64 bit: http://pan.baidu.com/s/1i56NNQd
+64 bit: http://pan.baidu.com/s/1qXZz82S
 
 >Changelog:  
 
-- nginx core update to 1.9.14
+- upgraded nginx core to 1.9.14
+- upgraded Lua Nginx Module to 0.10.2.
+- upgraded Set Misc Nginx Module to 0.30.
+- upgraded Array Var Nginx Module to 0.05.
+- upgraded Lua Resty Core Library to 0.1.5.
+- upgraded Lua Resty Upstream Healthcheck Library to 0.04.
+- upgraded Lua Resty DNS Library to 0.15.
+
 
 
 ### about ###
