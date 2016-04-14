@@ -20,7 +20,7 @@
 	</ToolFiles>
 	<Configurations>
 		<Configuration
-			Name="Debug|Win32"
+			Name="Release_Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
@@ -55,14 +55,13 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="0"
+				Optimization="2"
 				InlineFunctionExpansion="0"
 				AdditionalIncludeDirectories="&quot;..\luajit-root\luajit\include\luajit-2.1&quot;"
-				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;USE_INTERNAL_ISINF;DISABLE_INVALID_NUMBERS;CMAKE_INTDIR=\&quot;Debug\&quot;;cjson_EXPORTS"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;USE_INTERNAL_ISINF;DISABLE_INVALID_NUMBERS;CMAKE_INTDIR=\&quot;Release\&quot;;cjson_EXPORTS"
 				ExceptionHandling="0"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
-				AssemblerListingLocation="Debug/"
+				RuntimeLibrary="0"
+				AssemblerListingLocation="Release/"
 				ObjectFile="$(IntDir)\"
 				WarningLevel="3"
 				DebugInformationFormat="3"
@@ -73,7 +72,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;USE_INTERNAL_ISINF;DISABLE_INVALID_NUMBERS;CMAKE_INTDIR=\&quot;Debug\&quot;;cjson_EXPORTS"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;USE_INTERNAL_ISINF;DISABLE_INVALID_NUMBERS;CMAKE_INTDIR=\&quot;Release\&quot;;cjson_EXPORTS"
 				AdditionalIncludeDirectories="D:\opensource\nginx-openresty-windows\luajit-root\luajit\include\luajit-2.1;"
 			/>
 			<Tool
@@ -82,15 +81,14 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkLibraryDependencies="false"
-				AdditionalOptions=" /machine:X86 /debug"
+				AdditionalOptions=" /machine:X86"
 				AdditionalDependencies="kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib lua51.lib $(NOINHERIT)"
 				OutputFile="$(OutDir)\cjson.dll"
 				Version="0.0"
-				LinkIncremental="2"
+				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;..\luajit-root\luajit\lib&quot;"
 				ModuleDefinitionFile="cjson.def"
 				GenerateDebugInformation="true"
-				SubSystem="2"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -112,6 +110,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="mt.exe -manifest ../nginx/objs/nocrt.xml -outputresource:&quot;$(TargetPath)&quot;;2"
 			/>
 		</Configuration>
 		<Configuration
@@ -152,11 +151,11 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				InlineFunctionExpansion="0"
-				AdditionalIncludeDirectories="&quot;..\luajit-root\luajit\include\luajit-2.1&quot;"
+				AdditionalIncludeDirectories="&quot;..\luajit-root-x64\luajit\include\luajit-2.1&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;USE_INTERNAL_ISINF;DISABLE_INVALID_NUMBERS;CMAKE_INTDIR=\&quot;Debug\&quot;;cjson_EXPORTS"
 				ExceptionHandling="0"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				BasicRuntimeChecks="0"
+				RuntimeLibrary="1"
 				AssemblerListingLocation="Debug/"
 				ObjectFile="$(IntDir)\"
 				WarningLevel="3"
@@ -181,11 +180,11 @@
 				AdditionalDependencies="kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib lua51.lib $(NOINHERIT)"
 				OutputFile="$(OutDir)\cjson.dll"
 				Version="0.0"
-				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;..\luajit-root\luajit\lib&quot;"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="&quot;..\luajit-root-x64\luajit\lib&quot;"
 				ModuleDefinitionFile="cjson.def"
 				GenerateDebugInformation="true"
-				SubSystem="2"
+				SubSystem="0"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -342,12 +341,198 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="0"
-				AdditionalIncludeDirectories="&quot;..\luajit-root\luajit\include\luajit-2.1&quot;"
+				AdditionalIncludeDirectories="&quot;..\luajit-root-x64\luajit\include\luajit-2.1&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;USE_INTERNAL_ISINF;DISABLE_INVALID_NUMBERS;CMAKE_INTDIR=\&quot;Release\&quot;;cjson_EXPORTS"
 				ExceptionHandling="0"
 				RuntimeLibrary="0"
 				AssemblerListingLocation="Release/"
 				ObjectFile="$(IntDir)\"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+				CompileAs="1"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;USE_INTERNAL_ISINF;DISABLE_INVALID_NUMBERS;CMAKE_INTDIR=\&quot;Release\&quot;;cjson_EXPORTS"
+				AdditionalIncludeDirectories="D:\opensource\nginx-openresty-windows\luajit-root\luajit\include\luajit-2.1;"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				LinkLibraryDependencies="false"
+				AdditionalOptions=" /machine:X64"
+				AdditionalDependencies="kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib lua51.lib $(NOINHERIT)"
+				OutputFile="$(OutDir)\cjson.dll"
+				Version="0.0"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="&quot;..\luajit-root-x64\luajit\lib&quot;"
+				ModuleDefinitionFile="cjson.def"
+				GenerateDebugInformation="true"
+				TargetMachine="17"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine="mt.exe -manifest ../nginx/objs/nocrt.xml -outputresource:&quot;$(TargetPath)&quot;;2"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release_Debug|x64"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			ConfigurationType="2"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				AdditionalIncludeDirectories="D:\opensource\nginx-openresty-windows\luajit-root\luajit\include\luajit-2.1;"
+				MkTypLibCompatible="false"
+				TargetEnvironment="3"
+				GenerateStublessProxies="true"
+				TypeLibraryName="$(InputName).tlb"
+				OutputDirectory="$(IntDir)"
+				HeaderFileName="$(InputName).h"
+				DLLDataFileName=""
+				InterfaceIdentifierFileName="$(InputName)_i.c"
+				ProxyFileName="$(InputName)_p.c"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				InlineFunctionExpansion="0"
+				AdditionalIncludeDirectories="&quot;..\luajit-root-x64\luajit\include\luajit-2.1&quot;"
+				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;USE_INTERNAL_ISINF;DISABLE_INVALID_NUMBERS;CMAKE_INTDIR=\&quot;Debug\&quot;;cjson_EXPORTS"
+				ExceptionHandling="0"
+				RuntimeLibrary="1"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+				CompileAs="1"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;USE_INTERNAL_ISINF;DISABLE_INVALID_NUMBERS;CMAKE_INTDIR=\&quot;Release\&quot;;cjson_EXPORTS"
+				AdditionalIncludeDirectories="D:\opensource\nginx-openresty-windows\luajit-root\luajit\include\luajit-2.1;"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				LinkLibraryDependencies="false"
+				AdditionalOptions=" /machine:X64"
+				AdditionalDependencies="kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib lua51.lib $(NOINHERIT)"
+				OutputFile="$(OutDir)\cjson.dll"
+				Version="0.0"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="&quot;..\luajit-root-x64\luajit\lib&quot;"
+				ModuleDefinitionFile="cjson.def"
+				GenerateDebugInformation="true"
+				TargetMachine="17"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine="mt.exe -manifest ../nginx/objs/nocrt.xml -outputresource:&quot;$(TargetPath)&quot;;2"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Debug2|x64"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			ConfigurationType="2"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				AdditionalIncludeDirectories="D:\opensource\nginx-openresty-windows\luajit-root\luajit\include\luajit-2.1;"
+				MkTypLibCompatible="false"
+				TargetEnvironment="3"
+				GenerateStublessProxies="true"
+				TypeLibraryName="$(InputName).tlb"
+				OutputDirectory="$(IntDir)"
+				HeaderFileName="$(InputName).h"
+				DLLDataFileName=""
+				InterfaceIdentifierFileName="$(InputName)_i.c"
+				ProxyFileName="$(InputName)_p.c"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				InlineFunctionExpansion="0"
+				AdditionalIncludeDirectories="&quot;..\luajit-root-x64\luajit\include\luajit-2.1&quot;"
+				PreprocessorDefinitions="WIN32;_WINDOWS;USE_INTERNAL_ISINF;DISABLE_INVALID_NUMBERS;CMAKE_INTDIR=\&quot;Debug\&quot;;cjson_EXPORTS"
+				ExceptionHandling="0"
+				RuntimeLibrary="1"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 				CompileAs="1"

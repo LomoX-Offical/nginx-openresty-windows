@@ -16,6 +16,8 @@ char           **ngx_os_argv;
 ngx_int_t        ngx_last_process;
 ngx_process_t    ngx_processes[NGX_MAX_PROCESSES];
 
+static void ngx_set_worker_id(ngx_cycle_t *cycle, ngx_int_t id);
+
 
 ngx_pid_t
 ngx_spawn_process(ngx_cycle_t *cycle, char *name, ngx_int_t respawn)
@@ -64,6 +66,7 @@ ngx_spawn_process(ngx_cycle_t *cycle, char *name, ngx_int_t respawn)
     ctx.argv = NULL;
     ctx.envp = NULL;
 
+	ngx_set_worker_id(cycle, s);
     pid = ngx_execute(cycle, &ctx);
 
     if (pid == NGX_INVALID_PID) {
@@ -205,6 +208,24 @@ failed:
     return NGX_INVALID_PID;
 }
 
+
+void
+ngx_set_worker_id(ngx_cycle_t *cycle, ngx_int_t id)
+{
+	char              *var;
+	u_char            *p;
+
+	var = ngx_alloc(NGX_INT32_LEN + 1, cycle->log);
+
+	p = var;
+	p = ngx_sprintf(p, "%d", (ngx_int_t)id);
+	*p = '\0';
+
+	SetEnvironmentVariable(NGX_WORKER_ID, var);
+
+	ngx_free(var);
+
+}
 
 ngx_pid_t
 ngx_execute(ngx_cycle_t *cycle, ngx_exec_ctx_t *ctx)

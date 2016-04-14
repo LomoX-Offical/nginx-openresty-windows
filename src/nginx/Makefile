@@ -10,6 +10,9 @@ build:
 install:
 	$(MAKE) -f objs/Makefile install
 
+modules:
+	$(MAKE) -f objs/Makefile modules
+
 upgrade:
 	/nginx.exe -t
 
