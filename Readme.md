@@ -3,22 +3,18 @@
 
 ### 最新版本 ###
 
-版本号:1.9.14.1001
+版本号:1.9.15.1001
 
-32 位下载地址: http://pan.baidu.com/s/1kUYTLkj
+32 位下载地址: http://pan.baidu.com/s/1hsxxfxy
 
-64 位下载地址: http://pan.baidu.com/s/1qXZz82S
+64 位下载地址: http://pan.baidu.com/s/1qXM8ZBQ
 
->发布时间: 2016-04-13
+>发布时间: 2016-04-27
 
 >修改日志:  
-- 更新 nginx 版本到 1.9.14
-- 更新 Lua Nginx Module 到 0.10.2.
-- 更新 Set Misc Nginx Module 到 0.30.
-- 更新 Array Var Nginx Module 到 0.05.
-- 更新 Lua Resty Core Library 到 0.1.5.
-- 更新 Lua Resty Upstream Healthcheck Library 到 0.04.
-- 更新 Lua Resty DNS Library 到 0.15.
+- 更新 nginx 版本到 1.9.15
+- 更新 cjson dll
+- 适配ngx_lua_module的ngx.worker.id函数，现在windows上ngx_lua模块也可以使用这个函数了
 
 
 ### 关于 ###
@@ -360,3 +356,21 @@ Version:1.9.7.1001
 - 更新 nginx 版本到 1.9.12
 - 更新 openssl 版本到 1.0.2g
 - 更新ngx_lua 版本到 0.10.1rc0
+
+
+版本号:1.9.14.1001
+
+32 位下载地址: http://pan.baidu.com/s/1kUYTLkj
+
+64 位下载地址: http://pan.baidu.com/s/1qXZz82S
+
+>发布时间: 2016-04-13
+
+>修改日志:  
+- 更新 nginx 版本到 1.9.14
+- 更新 Lua Nginx Module 到 0.10.2.
+- 更新 Set Misc Nginx Module 到 0.30.
+- 更新 Array Var Nginx Module 到 0.05.
+- 更新 Lua Resty Core Library 到 0.1.5.
+- 更新 Lua Resty Upstream Healthcheck Library 到 0.04.
+- 更新 Lua Resty DNS Library 到 0.15.
