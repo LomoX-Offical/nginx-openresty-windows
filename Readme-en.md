@@ -3,21 +3,17 @@
 
 ### lastest release ###
 
-version:1.9.14.1001
+version:1.9.15.1001
 
-32 bit: http://pan.baidu.com/s/1kUYTLkj
+32 bit: http://pan.baidu.com/s/1hsxxfxy
         
-64 bit: http://pan.baidu.com/s/1qXZz82S
+64 bit: http://pan.baidu.com/s/1qXM8ZBQ
 
 >Changelog:  
 
-- upgraded nginx core to 1.9.14
-- upgraded Lua Nginx Module to 0.10.2.
-- upgraded Set Misc Nginx Module to 0.30.
-- upgraded Array Var Nginx Module to 0.05.
-- upgraded Lua Resty Core Library to 0.1.5.
-- upgraded Lua Resty Upstream Healthcheck Library to 0.04.
-- upgraded Lua Resty DNS Library to 0.15.
+- upgraded nginx core to 1.9.15
+- upgraded cjson dll
+- support for the function ngx.worker.id in ngx_lua_module
 
 
 
@@ -359,3 +355,20 @@ version:1.9.12.1001
 - nginx core update to 1.9.12
 - update openssl to 1.0.2g
 - update ngx_lua_module to 0.10.1rc0
+
+
+version:1.9.14.1001
+
+32 bit: http://pan.baidu.com/s/1kUYTLkj
+        
+64 bit: http://pan.baidu.com/s/1qXZz82S
+
+>Changelog:  
+
+- upgraded nginx core to 1.9.14
+- upgraded Lua Nginx Module to 0.10.2.
+- upgraded Set Misc Nginx Module to 0.30.
+- upgraded Array Var Nginx Module to 0.05.
+- upgraded Lua Resty Core Library to 0.1.5.
+- upgraded Lua Resty Upstream Healthcheck Library to 0.04.
+- upgraded Lua Resty DNS Library to 0.15.

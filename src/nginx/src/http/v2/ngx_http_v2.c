@@ -948,6 +948,7 @@ ngx_http_v2_state_headers(ngx_http_v2_connection_t *h2c, u_char *pos,
 {
     size_t                   size;
     ngx_uint_t               padded, priority, depend, dependency, excl, weight;
+    ngx_uint_t               status;
     ngx_http_v2_node_t      *node;
     ngx_http_v2_stream_t    *stream;
     ngx_http_v2_srv_conf_t  *h2scf;
@@ -1040,15 +1041,8 @@ ngx_http_v2_state_headers(ngx_http_v2_connection_t *h2c, u_char *pos,
                       "client sent HEADERS frame for stream %ui "
                       "with incorrect dependency", h2c->state.sid);
 
-        if (ngx_http_v2_send_rst_stream(h2c, h2c->state.sid,
-                                        NGX_HTTP_V2_PROTOCOL_ERROR)
-            != NGX_OK)
-        {
-            return ngx_http_v2_connection_error(h2c,
-                                                NGX_HTTP_V2_INTERNAL_ERROR);
-        }
-
-        return ngx_http_v2_state_header_block(h2c, pos, end);
+        status = NGX_HTTP_V2_PROTOCOL_ERROR;
+        goto rst_stream;
     }
 
     h2scf = ngx_http_get_module_srv_conf(h2c->http_connection->conf_ctx,
@@ -1060,15 +1054,18 @@ ngx_http_v2_state_headers(ngx_http_v2_connection_t *h2c, u_char *pos,
         ngx_log_error(NGX_LOG_INFO, h2c->connection->log, 0,
                       "concurrent streams exceeded %ui", h2c->processing);
 
-        if (ngx_http_v2_send_rst_stream(h2c, h2c->state.sid,
-                                        NGX_HTTP_V2_REFUSED_STREAM)
-            != NGX_OK)
-        {
-            return ngx_http_v2_connection_error(h2c,
-                                                NGX_HTTP_V2_INTERNAL_ERROR);
-        }
+        status = NGX_HTTP_V2_REFUSED_STREAM;
+        goto rst_stream;
+    }
 
-        return ngx_http_v2_state_header_block(h2c, pos, end);
+    if (!h2c->settings_ack && !(h2c->state.flags & NGX_HTTP_V2_END_STREAM_FLAG))
+    {
+        ngx_log_error(NGX_LOG_INFO, h2c->connection->log, 0,
+                      "client sent stream with data "
+                      "before settings were acknowledged");
+
+        status = NGX_HTTP_V2_REFUSED_STREAM;
+        goto rst_stream;
     }
 
     node = ngx_http_v2_get_node_by_id(h2c, h2c->state.sid, 1);
@@ -1102,6 +1099,14 @@ ngx_http_v2_state_headers(ngx_http_v2_connection_t *h2c, u_char *pos,
     if (priority || node->parent == NULL) {
         node->weight = weight;
         ngx_http_v2_set_dependency(h2c, node, depend, excl);
+    }
+
+    return ngx_http_v2_state_header_block(h2c, pos, end);
+
+rst_stream:
+
+    if (ngx_http_v2_send_rst_stream(h2c, h2c->state.sid, status) != NGX_OK) {
+        return ngx_http_v2_connection_error(h2c, NGX_HTTP_V2_INTERNAL_ERROR);
     }
 
     return ngx_http_v2_state_header_block(h2c, pos, end);
@@ -1883,7 +1888,7 @@ ngx_http_v2_state_settings(ngx_http_v2_connection_t *h2c, u_char *pos,
             return ngx_http_v2_connection_error(h2c, NGX_HTTP_V2_SIZE_ERROR);
         }
 
-        /* TODO settings acknowledged */
+        h2c->settings_ack = 1;
 
         return ngx_http_v2_state_complete(h2c, pos, end);
     }
@@ -3409,6 +3414,7 @@ ngx_http_v2_read_request_body(ngx_http_request_t *r,
     ngx_http_v2_stream_t      *stream;
     ngx_http_request_body_t   *rb;
     ngx_http_core_loc_conf_t  *clcf;
+    ngx_http_v2_connection_t  *h2c;
 
     stream = r->stream;
 
@@ -3468,6 +3474,7 @@ ngx_http_v2_read_request_body(ngx_http_request_t *r,
     }
 
     if (rb->buf == NULL) {
+        stream->skip_data = 1;
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
@@ -3476,20 +3483,31 @@ ngx_http_v2_read_request_body(ngx_http_request_t *r,
         return ngx_http_v2_process_request_body(r, NULL, 0, 1);
     }
 
-    if (r->request_body_no_buffering) {
-        stream->no_flow_control = 0;
-        stream->recv_window = (size_t) len;
+    if (len) {
+        if (r->request_body_no_buffering) {
+            stream->recv_window = (size_t) len;
 
-    } else {
-        stream->no_flow_control = 1;
-        stream->recv_window = NGX_HTTP_V2_MAX_WINDOW;
-    }
+        } else {
+            stream->no_flow_control = 1;
+            stream->recv_window = NGX_HTTP_V2_MAX_WINDOW;
+        }
 
-    if (ngx_http_v2_send_window_update(stream->connection, stream->node->id,
-                                       stream->recv_window)
-        == NGX_ERROR)
-    {
-        return NGX_HTTP_INTERNAL_SERVER_ERROR;
+        if (ngx_http_v2_send_window_update(stream->connection, stream->node->id,
+                                           stream->recv_window)
+            == NGX_ERROR)
+        {
+            stream->skip_data = 1;
+            return NGX_HTTP_INTERNAL_SERVER_ERROR;
+        }
+
+        h2c = stream->connection;
+
+        if (!h2c->blocked) {
+            if (ngx_http_v2_send_output_queue(h2c) == NGX_ERROR) {
+                stream->skip_data = 1;
+                return NGX_HTTP_INTERNAL_SERVER_ERROR;
+            }
+        }
     }
 
     ngx_add_timer(r->connection->read, clcf->client_body_timeout);
@@ -3859,11 +3877,33 @@ ngx_http_v2_close_stream(ngx_http_v2_stream_t *stream, ngx_int_t rc)
             }
 
         } else if (!stream->in_closed) {
+#if 0
             if (ngx_http_v2_send_rst_stream(h2c, node->id, NGX_HTTP_V2_NO_ERROR)
                 != NGX_OK)
             {
                 h2c->connection->error = 1;
             }
+#else
+            /*
+             * At the time of writing at least the latest versions of Chrome
+             * do not properly handle RST_STREAM with NO_ERROR status.
+             *
+             * See: https://bugs.chromium.org/p/chromium/issues/detail?id=603182
+             *
+             * As a workaround, the stream window is maximized before closing
+             * the stream.  This allows a client to send up to 2 GB of data
+             * before getting blocked on flow control.
+             */
+
+            if (stream->recv_window < NGX_HTTP_V2_MAX_WINDOW
+                && ngx_http_v2_send_window_update(h2c, node->id,
+                                                  NGX_HTTP_V2_MAX_WINDOW
+                                                  - stream->recv_window)
+                   != NGX_OK)
+            {
+                h2c->connection->error = 1;
+            }
+#endif
         }
     }
 

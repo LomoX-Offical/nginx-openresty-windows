@@ -16,6 +16,7 @@ typedef DWORD               ngx_pid_t;
 #define ngx_getpid          GetCurrentProcessId
 #define ngx_log_pid         ngx_pid
 
+#define NGX_WORKER_ID        "NGX_WORKER_ID"
 
 #define NGX_PROCESS_SYNC_NAME                                                 \
     (sizeof("ngx_cache_manager_mutex_") + NGX_INT32_LEN)

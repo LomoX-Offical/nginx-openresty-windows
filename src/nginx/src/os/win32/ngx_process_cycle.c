@@ -29,6 +29,7 @@ static ngx_thread_value_t __stdcall ngx_cache_loader_thread(void *data);
 
 
 static void ngx_set_inherited_listen_sockets(ngx_cycle_t *cycle);
+static ngx_uint_t ngx_get_worker_id(ngx_cycle_t *cycle);
 
 
 ngx_uint_t     ngx_process;
@@ -562,7 +563,7 @@ ngx_reap_worker(ngx_cycle_t *cycle, HANDLE h)
         }
 
         ngx_log_error(NGX_LOG_NOTICE, cycle->log, 0,
-                      "%s process %P exited with code %Xul",
+                      "%s process %P exited with code %Xl",
                       ngx_processes[n].name, ngx_processes[n].pid, code);
 
         ngx_close_handle(ngx_processes[n].reopen);
@@ -658,6 +659,9 @@ ngx_worker_process_cycle(ngx_cycle_t *cycle, char *mevn)
     log = cycle->log;
 
     ngx_log_debug0(NGX_LOG_DEBUG_CORE, log, 0, "worker started");
+
+	ngx_worker = ngx_get_worker_id(cycle);
+
 
     ngx_sprintf((u_char *) wtevn, "ngx_worker_term_%P%Z", ngx_pid);
     events[0] = CreateEvent(NULL, 1, 0, wtevn);
@@ -1116,6 +1120,32 @@ ngx_close_handle(HANDLE h)
         ngx_log_error(NGX_LOG_ALERT, ngx_cycle->log, ngx_errno,
                       "CloseHandle(%p) failed", h);
     }
+}
+
+ngx_uint_t 
+ngx_get_worker_id(ngx_cycle_t *cycle)
+{
+	u_char           *inherited;
+	ngx_int_t         s;
+
+	inherited = (u_char *) getenv(NGX_WORKER_ID);
+
+	if (inherited == NULL) {
+		return NGX_OK;
+	}
+
+	s = ngx_atoi(inherited, strlen(inherited));
+
+	if (s < 0) {
+		ngx_log_error(NGX_LOG_EMERG, cycle->log, 0,
+			"invalid worker id \"%s\" in " NGX_WORKER_ID
+			" environment variable, ignoring", inherited);
+	} else {
+		ngx_log_error(NGX_LOG_NOTICE, cycle->log, 0,
+			"using worker id from \"%d\"", s);
+	}
+
+	return (ngx_uint_t)s;
 }
 
 void
