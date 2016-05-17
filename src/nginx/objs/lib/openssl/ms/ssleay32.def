@@ -308,6 +308,9 @@ EXPORTS
     SSLv23_client_method                    @110
     SSLv23_method                           @111
     SSLv23_server_method                    @112
+    SSLv2_client_method                     @113
+    SSLv2_method                            @114
+    SSLv2_server_method                     @115
     SSLv3_client_method                     @116
     SSLv3_method                            @117
     SSLv3_server_method                     @118
