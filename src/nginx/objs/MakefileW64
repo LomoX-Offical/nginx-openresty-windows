@@ -201,6 +201,7 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/os/win32/ngx_wsarecv_chain.obj \
 	objs/src/os/win32/ngx_udp_wsarecv.obj \
 	objs/src/os/win32/ngx_wsasend.obj \
+	objs/src/os/win32/ngx_udp_wsasend.obj \
 	objs/src/os/win32/ngx_wsasend_chain.obj \
 	objs/src/os/win32/ngx_win32_init.obj \
 	objs/src/os/win32/ngx_user.obj \
@@ -479,6 +480,7 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/os/win32/ngx_wsarecv_chain.obj 
 	objs/src/os/win32/ngx_udp_wsarecv.obj 
 	objs/src/os/win32/ngx_wsasend.obj 
+	objs/src/os/win32/ngx_udp_wsasend.obj 
 	objs/src/os/win32/ngx_wsasend_chain.obj 
 	objs/src/os/win32/ngx_win32_init.obj 
 	objs/src/os/win32/ngx_user.obj 
@@ -1077,6 +1079,13 @@ objs/src/os/win32/ngx_wsasend.obj:	$(CORE_DEPS) \
 	$(CC) -c $(CFLAGS) $(CORE_INCS) \
 		-Foobjs/src/os/win32/ngx_wsasend.obj \
 		src/os/win32/ngx_wsasend.c
+
+
+objs/src/os/win32/ngx_udp_wsasend.obj:	$(CORE_DEPS) \
+	src/os/win32/ngx_udp_wsasend.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) \
+		-Foobjs/src/os/win32/ngx_udp_wsasend.obj \
+		src/os/win32/ngx_udp_wsasend.c
 
 
 objs/src/os/win32/ngx_wsasend_chain.obj:	$(CORE_DEPS) \
