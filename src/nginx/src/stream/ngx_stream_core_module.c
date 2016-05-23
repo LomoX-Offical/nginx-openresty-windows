@@ -354,13 +354,11 @@ ngx_stream_core_listen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     backlog = 0;
 
     for (i = 2; i < cf->args->nelts; i++) {
-
-#if !(NGX_WIN32)
         if (ngx_strcmp(value[i].data, "udp") == 0) {
             ls->type = SOCK_DGRAM;
             continue;
         }
-#endif
+
 
         if (ngx_strcmp(value[i].data, "bind") == 0) {
             ls->bind = 1;

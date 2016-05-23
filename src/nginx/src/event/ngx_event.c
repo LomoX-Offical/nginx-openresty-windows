@@ -806,7 +806,8 @@ ngx_event_process_init(ngx_cycle_t *cycle)
             }
 
         } else {
-            rev->handler = ngx_event_accept;
+            rev->handler = (c->type == SOCK_STREAM) ? ngx_event_accept
+                                                    : ngx_event_recvmsg;
 
             if (ngx_use_accept_mutex) {
                 continue;
