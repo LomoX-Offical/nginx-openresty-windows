@@ -196,13 +196,6 @@ E_OBJ=$(OBJ_D)\verify.obj \
 	$(OBJ_D)\ocsp.obj $(OBJ_D)\prime.obj $(OBJ_D)\ts.obj \
 	$(OBJ_D)\srp.obj $(OBJ_D)\openssl.obj 
 
-GOSTOBJ=$(OBJ_D)\e_gost_err.obj \
-	$(OBJ_D)\gost2001_keyx.obj $(OBJ_D)\gost2001.obj $(OBJ_D)\gost89.obj \
-	$(OBJ_D)\gost94_keyx.obj $(OBJ_D)\gost_ameth.obj $(OBJ_D)\gost_asn1.obj \
-	$(OBJ_D)\gost_crypt.obj $(OBJ_D)\gost_ctl.obj $(OBJ_D)\gost_eng.obj \
-	$(OBJ_D)\gosthash.obj $(OBJ_D)\gost_keywrap.obj $(OBJ_D)\gost_md.obj \
-	$(OBJ_D)\gost_params.obj $(OBJ_D)\gost_pmeth.obj $(OBJ_D)\gost_sign.obj 
-
 SSLOBJ=$(OBJ_D)\s2_meth.obj \
 	$(OBJ_D)\s2_srvr.obj $(OBJ_D)\s2_clnt.obj $(OBJ_D)\s2_lib.obj \
 	$(OBJ_D)\s2_enc.obj $(OBJ_D)\s2_pkt.obj $(OBJ_D)\s3_meth.obj \
@@ -221,6 +214,13 @@ SSLOBJ=$(OBJ_D)\s2_meth.obj \
 	$(OBJ_D)\bio_ssl.obj $(OBJ_D)\ssl_err.obj $(OBJ_D)\kssl.obj \
 	$(OBJ_D)\t1_reneg.obj $(OBJ_D)\tls_srp.obj $(OBJ_D)\t1_trce.obj \
 	$(OBJ_D)\ssl_utst.obj $(OBJ_D)\$(SSL).res 
+
+GOSTOBJ=$(OBJ_D)\e_gost_err.obj \
+	$(OBJ_D)\gost2001_keyx.obj $(OBJ_D)\gost2001.obj $(OBJ_D)\gost89.obj \
+	$(OBJ_D)\gost94_keyx.obj $(OBJ_D)\gost_ameth.obj $(OBJ_D)\gost_asn1.obj \
+	$(OBJ_D)\gost_crypt.obj $(OBJ_D)\gost_ctl.obj $(OBJ_D)\gost_eng.obj \
+	$(OBJ_D)\gosthash.obj $(OBJ_D)\gost_keywrap.obj $(OBJ_D)\gost_md.obj \
+	$(OBJ_D)\gost_params.obj $(OBJ_D)\gost_pmeth.obj $(OBJ_D)\gost_sign.obj 
 
 CRYPTOOBJ=$(OBJ_D)\cryptlib.obj \
 	$(OBJ_D)\mem.obj $(OBJ_D)\mem_dbg.obj $(OBJ_D)\cversion.obj \
@@ -1232,54 +1232,6 @@ $(OBJ_D)\srp.obj: $(SRC_D)\apps\srp.c
 $(OBJ_D)\openssl.obj: $(SRC_D)\apps\openssl.c
 	$(CC) /Fo$(OBJ_D)\openssl.obj -DMONOLITH $(APP_CFLAGS) -c $(SRC_D)\apps\openssl.c
 
-$(OBJ_D)\e_gost_err.obj: $(SRC_D)\engines\ccgost\e_gost_err.c
-	$(CC) /Fo$(OBJ_D)\e_gost_err.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\e_gost_err.c
-
-$(OBJ_D)\gost2001_keyx.obj: $(SRC_D)\engines\ccgost\gost2001_keyx.c
-	$(CC) /Fo$(OBJ_D)\gost2001_keyx.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\gost2001_keyx.c
-
-$(OBJ_D)\gost2001.obj: $(SRC_D)\engines\ccgost\gost2001.c
-	$(CC) /Fo$(OBJ_D)\gost2001.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\gost2001.c
-
-$(OBJ_D)\gost89.obj: $(SRC_D)\engines\ccgost\gost89.c
-	$(CC) /Fo$(OBJ_D)\gost89.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\gost89.c
-
-$(OBJ_D)\gost94_keyx.obj: $(SRC_D)\engines\ccgost\gost94_keyx.c
-	$(CC) /Fo$(OBJ_D)\gost94_keyx.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\gost94_keyx.c
-
-$(OBJ_D)\gost_ameth.obj: $(SRC_D)\engines\ccgost\gost_ameth.c
-	$(CC) /Fo$(OBJ_D)\gost_ameth.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\gost_ameth.c
-
-$(OBJ_D)\gost_asn1.obj: $(SRC_D)\engines\ccgost\gost_asn1.c
-	$(CC) /Fo$(OBJ_D)\gost_asn1.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\gost_asn1.c
-
-$(OBJ_D)\gost_crypt.obj: $(SRC_D)\engines\ccgost\gost_crypt.c
-	$(CC) /Fo$(OBJ_D)\gost_crypt.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\gost_crypt.c
-
-$(OBJ_D)\gost_ctl.obj: $(SRC_D)\engines\ccgost\gost_ctl.c
-	$(CC) /Fo$(OBJ_D)\gost_ctl.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\gost_ctl.c
-
-$(OBJ_D)\gost_eng.obj: $(SRC_D)\engines\ccgost\gost_eng.c
-	$(CC) /Fo$(OBJ_D)\gost_eng.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\gost_eng.c
-
-$(OBJ_D)\gosthash.obj: $(SRC_D)\engines\ccgost\gosthash.c
-	$(CC) /Fo$(OBJ_D)\gosthash.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\gosthash.c
-
-$(OBJ_D)\gost_keywrap.obj: $(SRC_D)\engines\ccgost\gost_keywrap.c
-	$(CC) /Fo$(OBJ_D)\gost_keywrap.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\gost_keywrap.c
-
-$(OBJ_D)\gost_md.obj: $(SRC_D)\engines\ccgost\gost_md.c
-	$(CC) /Fo$(OBJ_D)\gost_md.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\gost_md.c
-
-$(OBJ_D)\gost_params.obj: $(SRC_D)\engines\ccgost\gost_params.c
-	$(CC) /Fo$(OBJ_D)\gost_params.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\gost_params.c
-
-$(OBJ_D)\gost_pmeth.obj: $(SRC_D)\engines\ccgost\gost_pmeth.c
-	$(CC) /Fo$(OBJ_D)\gost_pmeth.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\gost_pmeth.c
-
-$(OBJ_D)\gost_sign.obj: $(SRC_D)\engines\ccgost\gost_sign.c
-	$(CC) /Fo$(OBJ_D)\gost_sign.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\gost_sign.c
-
 $(OBJ_D)\s2_meth.obj: $(SRC_D)\ssl\s2_meth.c
 	$(CC) /Fo$(OBJ_D)\s2_meth.obj  $(SHLIB_CFLAGS) -DOPENSSL_BUILD_SHLIBSSL -c $(SRC_D)\ssl\s2_meth.c
 
@@ -1429,6 +1381,54 @@ $(OBJ_D)\t1_trce.obj: $(SRC_D)\ssl\t1_trce.c
 
 $(OBJ_D)\ssl_utst.obj: $(SRC_D)\ssl\ssl_utst.c
 	$(CC) /Fo$(OBJ_D)\ssl_utst.obj  $(SHLIB_CFLAGS) -DOPENSSL_BUILD_SHLIBSSL -c $(SRC_D)\ssl\ssl_utst.c
+
+$(OBJ_D)\e_gost_err.obj: $(SRC_D)\engines\ccgost\e_gost_err.c
+	$(CC) /Fo$(OBJ_D)\e_gost_err.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\e_gost_err.c
+
+$(OBJ_D)\gost2001_keyx.obj: $(SRC_D)\engines\ccgost\gost2001_keyx.c
+	$(CC) /Fo$(OBJ_D)\gost2001_keyx.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\gost2001_keyx.c
+
+$(OBJ_D)\gost2001.obj: $(SRC_D)\engines\ccgost\gost2001.c
+	$(CC) /Fo$(OBJ_D)\gost2001.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\gost2001.c
+
+$(OBJ_D)\gost89.obj: $(SRC_D)\engines\ccgost\gost89.c
+	$(CC) /Fo$(OBJ_D)\gost89.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\gost89.c
+
+$(OBJ_D)\gost94_keyx.obj: $(SRC_D)\engines\ccgost\gost94_keyx.c
+	$(CC) /Fo$(OBJ_D)\gost94_keyx.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\gost94_keyx.c
+
+$(OBJ_D)\gost_ameth.obj: $(SRC_D)\engines\ccgost\gost_ameth.c
+	$(CC) /Fo$(OBJ_D)\gost_ameth.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\gost_ameth.c
+
+$(OBJ_D)\gost_asn1.obj: $(SRC_D)\engines\ccgost\gost_asn1.c
+	$(CC) /Fo$(OBJ_D)\gost_asn1.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\gost_asn1.c
+
+$(OBJ_D)\gost_crypt.obj: $(SRC_D)\engines\ccgost\gost_crypt.c
+	$(CC) /Fo$(OBJ_D)\gost_crypt.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\gost_crypt.c
+
+$(OBJ_D)\gost_ctl.obj: $(SRC_D)\engines\ccgost\gost_ctl.c
+	$(CC) /Fo$(OBJ_D)\gost_ctl.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\gost_ctl.c
+
+$(OBJ_D)\gost_eng.obj: $(SRC_D)\engines\ccgost\gost_eng.c
+	$(CC) /Fo$(OBJ_D)\gost_eng.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\gost_eng.c
+
+$(OBJ_D)\gosthash.obj: $(SRC_D)\engines\ccgost\gosthash.c
+	$(CC) /Fo$(OBJ_D)\gosthash.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\gosthash.c
+
+$(OBJ_D)\gost_keywrap.obj: $(SRC_D)\engines\ccgost\gost_keywrap.c
+	$(CC) /Fo$(OBJ_D)\gost_keywrap.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\gost_keywrap.c
+
+$(OBJ_D)\gost_md.obj: $(SRC_D)\engines\ccgost\gost_md.c
+	$(CC) /Fo$(OBJ_D)\gost_md.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\gost_md.c
+
+$(OBJ_D)\gost_params.obj: $(SRC_D)\engines\ccgost\gost_params.c
+	$(CC) /Fo$(OBJ_D)\gost_params.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\gost_params.c
+
+$(OBJ_D)\gost_pmeth.obj: $(SRC_D)\engines\ccgost\gost_pmeth.c
+	$(CC) /Fo$(OBJ_D)\gost_pmeth.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\gost_pmeth.c
+
+$(OBJ_D)\gost_sign.obj: $(SRC_D)\engines\ccgost\gost_sign.c
+	$(CC) /Fo$(OBJ_D)\gost_sign.obj  $(SHLIB_CFLAGS) -c $(SRC_D)\engines\ccgost\gost_sign.c
 
 $(OBJ_D)\cryptlib.obj: $(SRC_D)\crypto\cryptlib.c
 	$(CC) /Fo$(OBJ_D)\cryptlib.obj  $(SHLIB_CFLAGS) -DOPENSSL_BUILD_SHLIBCRYPTO -c $(SRC_D)\crypto\cryptlib.c

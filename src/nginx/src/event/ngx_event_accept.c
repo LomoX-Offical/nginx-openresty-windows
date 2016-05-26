@@ -634,6 +634,195 @@ ngx_event_recvmsg(ngx_event_t *ev)
     } while (ev->available);
 }
 
+#else
+void ngx_event_recvmsg(ngx_event_t *ev)
+{
+    ssize_t            n;
+    ngx_log_t         *log;
+    ngx_err_t          err;
+    ngx_event_t       *rev, *wev;    
+    WSABUF             wsabuf[1];	
+    u_long             bytes, flags;	
+    ngx_listening_t   *ls;
+    ngx_event_conf_t  *ecf;
+    ngx_connection_t  *c, *lc;
+    u_char             sa[NGX_SOCKADDRLEN];	
+    socklen_t          socklen = NGX_SOCKADDRLEN;
+    static u_char      buffer[65535];
+
+    if (ev->timedout) {
+        if (ngx_enable_accept_events((ngx_cycle_t *) ngx_cycle) != NGX_OK) {
+            return;
+        }
+
+        ev->timedout = 0;
+    }
+
+    ecf = ngx_event_get_conf(ngx_cycle->conf_ctx, ngx_event_core_module);
+
+    ev->available = ecf->multi_accept;
+
+    lc = ev->data;
+    ls = lc->listening;
+    ev->ready = 0;	
+
+    ngx_log_debug2(NGX_LOG_DEBUG_EVENT, ev->log, 0,
+                   "WSARecvFrom on %V, ready: %d", &ls->addr_text, ev->available);
+
+    do {
+        ngx_memzero(&wsabuf, sizeof(WSABUF));
+
+        wsabuf[0].buf = (void *) buffer;
+        wsabuf[0].len  = sizeof(buffer);
+
+        flags = 0;
+        bytes = 0;        
+        n = WSARecvFrom(lc->fd, &wsabuf, 1, &bytes, &flags,
+                     (struct sockaddr *) sa,
+                     (LPINT) &socklen, NULL, NULL);
+
+        if (n == SOCKET_ERROR) {
+            err = ngx_socket_errno;
+
+            if (err == NGX_EAGAIN) {
+                ngx_log_debug0(NGX_LOG_DEBUG_EVENT, ev->log, err,
+                               "WSARecvFrom() not ready");
+                return;
+            }
+
+            ngx_log_error(NGX_LOG_ALERT, ev->log, err, "WSARecvFrom() failed");
+
+            return;
+        }
+
+#if (NGX_STAT_STUB)
+        (void) ngx_atomic_fetch_add(ngx_stat_accepted, 1);
+#endif
+
+        ngx_accept_disabled = ngx_cycle->connection_n / 8
+                              - ngx_cycle->free_connection_n;
+
+        c = ngx_get_connection(lc->fd, ev->log);
+        if (c == NULL) {
+            return;
+        }
+
+        c->shared = 1;
+        c->type = SOCK_DGRAM;
+        c->socklen = sizeof(sa);
+
+#if (NGX_STAT_STUB)
+        (void) ngx_atomic_fetch_add(ngx_stat_active, 1);
+#endif
+
+        c->pool = ngx_create_pool(ls->pool_size, ev->log);
+        if (c->pool == NULL) {
+            ngx_close_accepted_connection(c);
+            return;
+        }
+
+        c->sockaddr = ngx_palloc(c->pool, c->socklen);
+        if (c->sockaddr == NULL) {
+            ngx_close_accepted_connection(c);
+            return;
+        }
+
+        ngx_memcpy(c->sockaddr, &sa, c->socklen);
+
+        log = ngx_palloc(c->pool, sizeof(ngx_log_t));
+        if (log == NULL) {
+            ngx_close_accepted_connection(c);
+            return;
+        }
+
+        *log = ls->log;
+
+        c->send = ngx_udp_send;
+
+        c->log = log;
+        c->pool->log = log;
+
+        c->listening = ls;
+        c->local_sockaddr = ls->sockaddr;
+        c->local_socklen = ls->socklen;
+
+        n = bytes;
+        c->buffer = ngx_create_temp_buf(c->pool, n);
+        if (c->buffer == NULL) {
+            ngx_close_accepted_connection(c);
+            return;
+        }
+
+        c->buffer->last = ngx_cpymem(c->buffer->last, buffer, n);
+
+        rev = c->read;
+        wev = c->write;
+
+        wev->ready = 1;
+
+        rev->log = log;
+        wev->log = log;
+
+        /*
+         * TODO: MT: - ngx_atomic_fetch_add()
+         *             or protection by critical section or light mutex
+         *
+         * TODO: MP: - allocated in a shared memory
+         *           - ngx_atomic_fetch_add()
+         *             or protection by critical section or light mutex
+         */
+
+        c->number = ngx_atomic_fetch_add(ngx_connection_counter, 1);
+
+#if (NGX_STAT_STUB)
+        (void) ngx_atomic_fetch_add(ngx_stat_handled, 1);
+#endif
+
+        if (ls->addr_ntop) {
+            c->addr_text.data = ngx_pnalloc(c->pool, ls->addr_text_max_len);
+            if (c->addr_text.data == NULL) {
+                ngx_close_accepted_connection(c);
+                return;
+            }
+
+            c->addr_text.len = ngx_sock_ntop(c->sockaddr, c->socklen,
+                                             c->addr_text.data,
+                                             ls->addr_text_max_len, 0);
+            if (c->addr_text.len == 0) {
+                ngx_close_accepted_connection(c);
+                return;
+            }
+        }
+
+#if (NGX_DEBUG)
+        {
+        ngx_str_t  addr;
+        u_char     text[NGX_SOCKADDR_STRLEN];
+
+        ngx_debug_accepted_connection(ecf, c);
+
+        if (log->log_level & NGX_LOG_DEBUG_EVENT) {
+            addr.data = text;
+            addr.len = ngx_sock_ntop(c->sockaddr, c->socklen, text,
+                                     NGX_SOCKADDR_STRLEN, 1);
+
+            ngx_log_debug4(NGX_LOG_DEBUG_EVENT, log, 0,
+                           "*%uA WSARecvFrom: %V fd:%d n:%z",
+                           c->number, &addr, c->fd, n);
+        }
+
+        }
+#endif
+
+        log->data = NULL;
+        log->handler = NULL;
+
+        ls->handler(c);
+
+    } while (ev->available);
+}
+
+
 #endif
 
 

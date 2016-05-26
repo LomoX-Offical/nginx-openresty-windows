@@ -332,15 +332,18 @@ ngx_http_lua_ffi_semaphore_wait(ngx_http_request_t *r,
     ngx_http_lua_co_ctx_t        *wait_co_ctx;
     ngx_int_t                     rc;
 
-    ngx_log_debug4(NGX_LOG_DEBUG_HTTP, ngx_cycle->log, 0,
+
+#if (nginx_version >= 1007005)
+	int posted = (int) sem->sem_event.posted;
+#else
+	int posted = sem->sem_event.prev ? 1 : 0;
+#endif
+
+	ngx_log_debug4(NGX_LOG_DEBUG_HTTP, ngx_cycle->log, 0,
                    "http lua semaphore wait: %p, timeout: %d, "
                    "resources: %d, event posted: %d",
                    sem, wait_ms, sem->resource_count,
-#if (nginx_version >= 1007005)
-                   (int) sem->sem_event.posted
-#else
-                   sem->sem_event.prev ? 1 : 0
-#endif
+                   posted
                    );
 
     ctx = ngx_http_get_module_ctx(r, ngx_http_lua_module);

@@ -496,9 +496,7 @@ extern ngx_module_t           ngx_event_core_module;
 
 
 void ngx_event_accept(ngx_event_t *ev);
-#if !(NGX_WIN32)
 void ngx_event_recvmsg(ngx_event_t *ev);
-#endif
 ngx_int_t ngx_trylock_accept_mutex(ngx_cycle_t *cycle);
 u_char *ngx_accept_log_error(ngx_log_t *log, u_char *buf, size_t len);
 

@@ -3,18 +3,18 @@
 
 ### 最新版本 ###
 
-版本号:1.9.15.1001
+版本号:1.9.15.1002
 
-32 位下载地址: http://pan.baidu.com/s/1hsxxfxy
+32 位下载地址: http://pan.baidu.com/s/1bpsjbAJ
 
-64 位下载地址: http://pan.baidu.com/s/1qXM8ZBQ
+64 位下载地址: http://pan.baidu.com/s/1slw0ppN
 
->发布时间: 2016-04-27
+>发布时间: 2016-05-26
 
 >修改日志:  
-- 更新 nginx 版本到 1.9.15
-- 更新 cjson dll
-- 适配ngx_lua_module的ngx.worker.id函数，现在windows上ngx_lua模块也可以使用这个函数了
+- ngx_stream_proxy_module模块支持udp(感谢 lihui0213 贡献的代码）
+- openssl更新到1.0.2h
+
 
 
 ### 关于 ###
@@ -28,6 +28,8 @@ it has some feature:
 - high performance
 - concurrent more than twenty thousand connections
 - multi process
+- shared memory supported
+- udp proxy supported
 - various bugs fixed compare with nginx orginal
 
 it has been complie with these offical modules:
@@ -374,3 +376,17 @@ Version:1.9.7.1001
 - 更新 Lua Resty Core Library 到 0.1.5.
 - 更新 Lua Resty Upstream Healthcheck Library 到 0.04.
 - 更新 Lua Resty DNS Library 到 0.15.
+
+
+版本号:1.9.15.1001
+
+32 位下载地址: http://pan.baidu.com/s/1hsxxfxy
+
+64 位下载地址: http://pan.baidu.com/s/1qXM8ZBQ
+
+>发布时间: 2016-04-27
+
+>修改日志:  
+- 更新 nginx 版本到 1.9.15
+- 更新 cjson dll
+- 适配ngx_lua_module的ngx.worker.id函数，现在windows上ngx_lua模块也可以使用这个函数了

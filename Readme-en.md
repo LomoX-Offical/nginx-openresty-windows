@@ -3,17 +3,18 @@
 
 ### lastest release ###
 
-version:1.9.15.1001
+version:1.9.15.1002
 
-32 bit: http://pan.baidu.com/s/1hsxxfxy
+32 bit: http://pan.baidu.com/s/1bpsjbAJ
         
-64 bit: http://pan.baidu.com/s/1qXM8ZBQ
+64 bit: http://pan.baidu.com/s/1slw0ppN
+
+>Publish Time: 2016-05-26
 
 >Changelog:  
 
-- upgraded nginx core to 1.9.15
-- upgraded cjson dll
-- support for the function ngx.worker.id in ngx_lua_module
+- ngx_stream_proxy_module support udp(Thanks to lihui0213）
+- upgrade openssl to 1.0.2h
 
 
 
@@ -27,6 +28,8 @@ it has some feature:
 
 - high performance
 - concurrent more than twenty thousand connections
+- shared memory supported
+- udp proxy supported
 - multi process
 - various bugs fixed compare with nginx orginal
 
@@ -372,3 +375,16 @@ version:1.9.14.1001
 - upgraded Lua Resty Core Library to 0.1.5.
 - upgraded Lua Resty Upstream Healthcheck Library to 0.04.
 - upgraded Lua Resty DNS Library to 0.15.
+
+
+version:1.9.15.1001
+
+32 bit: http://pan.baidu.com/s/1hsxxfxy
+        
+64 bit: http://pan.baidu.com/s/1qXM8ZBQ
+
+>Changelog:  
+
+- upgraded nginx core to 1.9.15
+- upgraded cjson dll
+- support for the function ngx.worker.id in ngx_lua_module

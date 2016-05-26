@@ -12,16 +12,16 @@ ALL_INCS = -I src/core \
 	-I ../ngx_devel_kit-0.2.19/objs \
 	-I objs/addon/ndk \
 	-I ../ngx_postgres-1.0rc7/include \
-	-I ../luajit-root-debug/luajit/include/luajit-2.1 \
 	-I ../ngx_lua/src/api \
-	-I objs/lib/pcre-8.37 \
-	-I objs/lib/openssl-1.0.2d/openssl/include \
-	-I objs/lib/zlib-1.2.8 \
+	-I objs/lib/pcre \
+	-I objs/lib/openssl/openssl/include \
+	-I objs/lib/zlib \
 	-I objs \
 	-I src/http \
 	-I src/http/modules \
 	-I src/http/v2 \
 	-I ../ngx_devel_kit-0.2.19/src \
+	-I ../luajit-root-debug/luajit/include/luajit-2.1 \
 	-I src/mail \
 	-I src/stream
 
@@ -55,6 +55,7 @@ CORE_DEPS = src/core/nginx.h \
 	src/core/ngx_connection.h \
 	src/core/ngx_cycle.h \
 	src/core/ngx_conf_file.h \
+	src/core/ngx_module.h \
 	src/core/ngx_resolver.h \
 	src/core/ngx_open_file_cache.h \
 	src/core/ngx_crypt.h \
@@ -77,11 +78,12 @@ CORE_DEPS = src/core/nginx.h \
 	src/os/win32/ngx_socket.h \
 	src/os/win32/ngx_os.h \
 	src/os/win32/ngx_user.h \
+	src/os/win32/ngx_dlopen.h \
 	src/os/win32/ngx_process_cycle.h \
 	src/event/ngx_event_openssl.h \
 	src/core/ngx_regex.h \
-	objs/lib/pcre-8.37/pcre.h \
-	objs/lib/openssl-1.0.2d/openssl/include/openssl/ssl.h \
+	objs/lib/pcre/pcre.h \
+	objs/lib/openssl/openssl/include/openssl/ssl.h \
 	objs/ngx_auto_config.h
 
 
@@ -92,11 +94,10 @@ CORE_INCS = -I src/core \
 	-I ../ngx_devel_kit-0.2.19/objs \
 	-I objs/addon/ndk \
 	-I ../ngx_postgres-1.0rc7/include \
-	-I ../luajit-root-debug/luajit/include/luajit-2.1 \
 	-I ../ngx_lua/src/api \
-	-I objs/lib/pcre-8.37 \
-	-I objs/lib/openssl-1.0.2d/openssl/include \
-	-I objs/lib/zlib-1.2.8 \
+	-I objs/lib/pcre \
+	-I objs/lib/openssl/openssl/include \
+	-I objs/lib/zlib \
 	-I objs
 
 
@@ -118,7 +119,8 @@ HTTP_DEPS = src/http/ngx_http.h \
 HTTP_INCS = -I src/http \
 	-I src/http/modules \
 	-I src/http/v2 \
-	-I ../ngx_devel_kit-0.2.19/src
+	-I ../ngx_devel_kit-0.2.19/src \
+	-I ../luajit-root/luajit/include/luajit-2.1
 
 
 MAIL_DEPS = src/mail/ngx_mail.h \
@@ -140,8 +142,12 @@ STREAM_DEPS = src/stream/ngx_stream.h \
 STREAM_INCS = -I src/stream
 
 
-ADDON_DEPS = $(CORE_DEPS)  ../echo-nginx-module-0.58/src/ngx_http_echo_module.h ../echo-nginx-module-0.58/src/ddebug.h ../echo-nginx-module-0.58/src/ngx_http_echo_handler.h ../echo-nginx-module-0.58/src/ngx_http_echo_util.h ../echo-nginx-module-0.58/src/ngx_http_echo_sleep.h ../echo-nginx-module-0.58/src/ngx_http_echo_filter.h ../echo-nginx-module-0.58/src/ngx_http_echo_var.h ../echo-nginx-module-0.58/src/ngx_http_echo_location.h ../echo-nginx-module-0.58/src/ngx_http_echo_echo.h ../echo-nginx-module-0.58/src/ngx_http_echo_request_info.h ../echo-nginx-module-0.58/src/ngx_http_echo_subrequest.h ../echo-nginx-module-0.58/src/ngx_http_echo_foreach.h ../ngx_coolkit-0.2rc3/src/ngx_coolkit_handlers.h ../ngx_coolkit-0.2rc3/src/ngx_coolkit_module.h ../ngx_coolkit-0.2rc3/src/ngx_coolkit_variables.h ../set-misc-nginx-module-0.29/src/ddebug.h ../set-misc-nginx-module-0.29/src/ngx_http_set_default_value.h ../set-misc-nginx-module-0.29/src/ngx_http_set_hashed_upstream.h ../set-misc-nginx-module-0.29/src/ngx_http_set_quote_sql.h ../set-misc-nginx-module-0.29/src/ngx_http_set_quote_json.h ../set-misc-nginx-module-0.29/src/ngx_http_set_unescape_uri.h ../set-misc-nginx-module-0.29/src/ngx_http_set_escape_uri.h ../set-misc-nginx-module-0.29/src/ngx_http_set_hash.h ../set-misc-nginx-module-0.29/src/ngx_http_set_local_today.h ../set-misc-nginx-module-0.29/src/ngx_http_set_hex.h ../set-misc-nginx-module-0.29/src/ngx_http_set_base64.h ../set-misc-nginx-module-0.29/src/ngx_http_set_random.h ../set-misc-nginx-module-0.29/src/ngx_http_set_rotate.h ../set-misc-nginx-module-0.29/src/ngx_http_set_secure_random.h ../set-misc-nginx-module-0.29/src/ngx_http_set_misc_module.h ../set-misc-nginx-module-0.29/src/ngx_http_set_hmac.h ../ngx_postgres-1.0rc7/src/ngx_postgres_escape.h ../ngx_postgres-1.0rc7/src/ngx_postgres_handler.h ../ngx_postgres-1.0rc7/src/ngx_postgres_keepalive.h ../ngx_postgres-1.0rc7/src/ngx_postgres_module.h ../ngx_postgres-1.0rc7/src/ngx_postgres_output.h ../ngx_postgres-1.0rc7/src/ngx_postgres_processor.h ../ngx_postgres-1.0rc7/src/ngx_postgres_rewrite.h ../ngx_postgres-1.0rc7/src/ngx_postgres_upstream.h ../ngx_postgres-1.0rc7/src/ngx_postgres_util.h ../ngx_postgres-1.0rc7/src/ngx_postgres_variable.h ../ngx_postgres-1.0rc7/src/ngx_postgres_ddebug.h ../ngx_postgres-1.0rc7/src/resty_dbd_stream.h ../form-input-nginx-module-0.11/src/ddebug.h ../encrypted-session-nginx-module-0.04/src/ddebug.h ../encrypted-session-nginx-module-0.04/src/ngx_http_encrypted_session_cipher.h                 ../ngx_lua/src/ddebug.h                 ../ngx_lua/src/ngx_http_lua_script.h                 ../ngx_lua/src/ngx_http_lua_log.h                 ../ngx_lua/src/ngx_http_lua_subrequest.h                 ../ngx_lua/src/ngx_http_lua_ndk.h                 ../ngx_lua/src/ngx_http_lua_control.h                 ../ngx_lua/src/ngx_http_lua_time.h                 ../ngx_lua/src/ngx_http_lua_string.h                 ../ngx_lua/src/ngx_http_lua_misc.h                 ../ngx_lua/src/ngx_http_lua_variable.h                 ../ngx_lua/src/ngx_http_lua_output.h                 ../ngx_lua/src/ngx_http_lua_headers.h                 ../ngx_lua/src/ngx_http_lua_uri.h                 ../ngx_lua/src/ngx_http_lua_req_body.h                 ../ngx_lua/src/ngx_http_lua_args.h                 ../ngx_lua/src/ngx_http_lua_ctx.h                 ../ngx_lua/src/ngx_http_lua_regex.h                 ../ngx_lua/src/ngx_http_lua_common.h                 ../ngx_lua/src/ngx_http_lua_directive.h                 ../ngx_lua/src/ngx_http_lua_headers_out.h                 ../ngx_lua/src/ngx_http_lua_headers_in.h                 ../ngx_lua/src/ngx_http_lua_consts.h                 ../ngx_lua/src/ngx_http_lua_exception.h                 ../ngx_lua/src/ngx_http_lua_util.h                 ../ngx_lua/src/ngx_http_lua_cache.h                 ../ngx_lua/src/ngx_http_lua_contentby.h                 ../ngx_lua/src/ngx_http_lua_rewriteby.h                 ../ngx_lua/src/ngx_http_lua_accessby.h                 ../ngx_lua/src/ngx_http_lua_setby.h                 ../ngx_lua/src/ngx_http_lua_capturefilter.h                 ../ngx_lua/src/ngx_http_lua_clfactory.h                 ../ngx_lua/src/ngx_http_lua_pcrefix.h                 ../ngx_lua/src/ngx_http_lua_headerfilterby.h                 ../ngx_lua/src/ngx_http_lua_shdict.h                 ../ngx_lua/src/ngx_http_lua_socket_tcp.h                 ../ngx_lua/src/api/ngx_http_lua_api.h                 ../ngx_lua/src/ngx_http_lua_logby.h                 ../ngx_lua/src/ngx_http_lua_sleep.h                 ../ngx_lua/src/ngx_http_lua_coroutine.h                 ../ngx_lua/src/ngx_http_lua_bodyfilterby.h                 ../ngx_lua/src/ngx_http_lua_initby.h                 ../ngx_lua/src/ngx_http_lua_initworkerby.h                 ../ngx_lua/src/ngx_http_lua_socket_udp.h                 ../ngx_lua/src/ngx_http_lua_req_method.h                 ../ngx_lua/src/ngx_http_lua_phase.h                 ../ngx_lua/src/ngx_http_lua_probe.h                 ../ngx_lua/src/ngx_http_lua_uthread.h                 ../ngx_lua/src/ngx_http_lua_timer.h                 ../ngx_lua/src/ngx_http_lua_config.h                 ../ngx_lua/src/ngx_http_lua_worker.h                 ../ngx_lua/src/ngx_http_lua_lex.h                  ../headers-more-nginx-module-0.28/src/ddebug.h ../headers-more-nginx-module-0.28/src/ngx_http_headers_more_filter_module.h ../headers-more-nginx-module-0.28/src/ngx_http_headers_more_headers_in.h ../headers-more-nginx-module-0.28/src/ngx_http_headers_more_headers_out.h ../headers-more-nginx-module-0.28/src/ngx_http_headers_more_headers_in.h ../headers-more-nginx-module-0.28/src/ngx_http_headers_more_util.h ../array-var-nginx-module-0.04/src/ddebug.h ../array-var-nginx-module-0.04/src/ngx_http_array_var_util.h ../rds-json-nginx-module-0.14/src/ddebug.h ../rds-json-nginx-module-0.14/src/resty_dbd_stream.h ../rds-json-nginx-module-0.14/src/ngx_http_rds_json_filter_module.h ../rds-json-nginx-module-0.14/src/ngx_http_rds_json_processor.h ../rds-json-nginx-module-0.14/src/ngx_http_rds_json_util.h ../rds-json-nginx-module-0.14/src/ngx_http_rds.h ../rds-json-nginx-module-0.14/src/resty_dbd_stream.h ../rds-json-nginx-module-0.14/src/ngx_http_rds_json_output.h ../rds-json-nginx-module-0.14/src/ngx_http_rds_utils.h ../rds-json-nginx-module-0.14/src/ngx_http_rds_json_handler.h ../redis2-nginx-module-0.12/src/ddebug.h ../redis2-nginx-module-0.12/src/ngx_http_redis2_module.h ../redis2-nginx-module-0.12/src/ngx_http_redis2_handler.h ../redis2-nginx-module-0.12/src/ngx_http_redis2_reply.h ../redis2-nginx-module-0.12/src/ngx_http_redis2_util.h $(HTTP_DEPS) $(MAIL_DEPS) $(STREAM_DEPS)
+ADDON_DEPS = $(CORE_DEPS)  ../echo-nginx-module-0.58/src/ngx_http_echo_module.h ../echo-nginx-module-0.58/src/ddebug.h ../echo-nginx-module-0.58/src/ngx_http_echo_handler.h ../echo-nginx-module-0.58/src/ngx_http_echo_util.h ../echo-nginx-module-0.58/src/ngx_http_echo_sleep.h ../echo-nginx-module-0.58/src/ngx_http_echo_filter.h ../echo-nginx-module-0.58/src/ngx_http_echo_var.h ../echo-nginx-module-0.58/src/ngx_http_echo_location.h ../echo-nginx-module-0.58/src/ngx_http_echo_echo.h ../echo-nginx-module-0.58/src/ngx_http_echo_request_info.h ../echo-nginx-module-0.58/src/ngx_http_echo_subrequest.h ../echo-nginx-module-0.58/src/ngx_http_echo_foreach.h ../ngx_coolkit-0.2rc3/src/ngx_coolkit_handlers.h ../ngx_coolkit-0.2rc3/src/ngx_coolkit_module.h ../ngx_coolkit-0.2rc3/src/ngx_coolkit_variables.h                                                                          ../set-misc-nginx-module-0.30/src/ddebug.h                                                 ../set-misc-nginx-module-0.30/src/ngx_http_set_default_value.h                             ../set-misc-nginx-module-0.30/src/ngx_http_set_hashed_upstream.h                           ../set-misc-nginx-module-0.30/src/ngx_http_set_quote_sql.h                                 ../set-misc-nginx-module-0.30/src/ngx_http_set_quote_json.h                                ../set-misc-nginx-module-0.30/src/ngx_http_set_unescape_uri.h                              ../set-misc-nginx-module-0.30/src/ngx_http_set_escape_uri.h                                ../set-misc-nginx-module-0.30/src/ngx_http_set_hash.h                                      ../set-misc-nginx-module-0.30/src/ngx_http_set_local_today.h                               ../set-misc-nginx-module-0.30/src/ngx_http_set_hex.h                                       ../set-misc-nginx-module-0.30/src/ngx_http_set_base64.h                                    ../set-misc-nginx-module-0.30/src/ngx_http_set_random.h                                    ../set-misc-nginx-module-0.30/src/ngx_http_set_rotate.h                                    ../set-misc-nginx-module-0.30/src/ngx_http_set_secure_random.h                             ../set-misc-nginx-module-0.30/src/ngx_http_set_misc_module.h                                ../set-misc-nginx-module-0.30/src/ngx_http_set_hmac.h ../ngx_postgres-1.0rc7/src/ngx_postgres_escape.h ../ngx_postgres-1.0rc7/src/ngx_postgres_handler.h ../ngx_postgres-1.0rc7/src/ngx_postgres_keepalive.h ../ngx_postgres-1.0rc7/src/ngx_postgres_module.h ../ngx_postgres-1.0rc7/src/ngx_postgres_output.h ../ngx_postgres-1.0rc7/src/ngx_postgres_processor.h ../ngx_postgres-1.0rc7/src/ngx_postgres_rewrite.h ../ngx_postgres-1.0rc7/src/ngx_postgres_upstream.h ../ngx_postgres-1.0rc7/src/ngx_postgres_util.h ../ngx_postgres-1.0rc7/src/ngx_postgres_variable.h ../ngx_postgres-1.0rc7/src/ngx_postgres_ddebug.h ../ngx_postgres-1.0rc7/src/resty_dbd_stream.h ../form-input-nginx-module-0.11/src/ddebug.h ../encrypted-session-nginx-module-0.04/src/ddebug.h ../encrypted-session-nginx-module-0.04/src/ngx_http_encrypted_session_cipher.h              ../ngx_lua/src/ddebug.h             ../ngx_lua/src/ngx_http_lua_script.h             ../ngx_lua/src/ngx_http_lua_log.h             ../ngx_lua/src/ngx_http_lua_subrequest.h             ../ngx_lua/src/ngx_http_lua_ndk.h             ../ngx_lua/src/ngx_http_lua_control.h             ../ngx_lua/src/ngx_http_lua_time.h             ../ngx_lua/src/ngx_http_lua_string.h             ../ngx_lua/src/ngx_http_lua_misc.h             ../ngx_lua/src/ngx_http_lua_variable.h             ../ngx_lua/src/ngx_http_lua_output.h             ../ngx_lua/src/ngx_http_lua_headers.h             ../ngx_lua/src/ngx_http_lua_uri.h             ../ngx_lua/src/ngx_http_lua_req_body.h             ../ngx_lua/src/ngx_http_lua_args.h             ../ngx_lua/src/ngx_http_lua_ctx.h             ../ngx_lua/src/ngx_http_lua_regex.h             ../ngx_lua/src/ngx_http_lua_common.h             ../ngx_lua/src/ngx_http_lua_directive.h             ../ngx_lua/src/ngx_http_lua_headers_out.h             ../ngx_lua/src/ngx_http_lua_headers_in.h             ../ngx_lua/src/ngx_http_lua_consts.h             ../ngx_lua/src/ngx_http_lua_exception.h             ../ngx_lua/src/ngx_http_lua_util.h             ../ngx_lua/src/ngx_http_lua_cache.h             ../ngx_lua/src/ngx_http_lua_contentby.h             ../ngx_lua/src/ngx_http_lua_rewriteby.h             ../ngx_lua/src/ngx_http_lua_accessby.h             ../ngx_lua/src/ngx_http_lua_setby.h             ../ngx_lua/src/ngx_http_lua_capturefilter.h             ../ngx_lua/src/ngx_http_lua_clfactory.h             ../ngx_lua/src/ngx_http_lua_pcrefix.h             ../ngx_lua/src/ngx_http_lua_headerfilterby.h             ../ngx_lua/src/ngx_http_lua_shdict.h             ../ngx_lua/src/ngx_http_lua_socket_tcp.h             ../ngx_lua/src/api/ngx_http_lua_api.h             ../ngx_lua/src/ngx_http_lua_logby.h             ../ngx_lua/src/ngx_http_lua_sleep.h             ../ngx_lua/src/ngx_http_lua_semaphore.h            ../ngx_lua/src/ngx_http_lua_coroutine.h             ../ngx_lua/src/ngx_http_lua_bodyfilterby.h             ../ngx_lua/src/ngx_http_lua_initby.h             ../ngx_lua/src/ngx_http_lua_initworkerby.h             ../ngx_lua/src/ngx_http_lua_socket_udp.h             ../ngx_lua/src/ngx_http_lua_req_method.h             ../ngx_lua/src/ngx_http_lua_phase.h             ../ngx_lua/src/ngx_http_lua_probe.h             ../ngx_lua/src/ngx_http_lua_uthread.h             ../ngx_lua/src/ngx_http_lua_timer.h             ../ngx_lua/src/ngx_http_lua_config.h             ../ngx_lua/src/ngx_http_lua_worker.h             ../ngx_lua/src/ngx_http_lua_ssl_certby.h             ../ngx_lua/src/ngx_http_lua_lex.h             ../ngx_lua/src/ngx_http_lua_balancer.h              ../headers-more-nginx-module-0.29/src/ddebug.h ../headers-more-nginx-module-0.29/src/ngx_http_headers_more_filter_module.h ../headers-more-nginx-module-0.29/src/ngx_http_headers_more_headers_in.h ../headers-more-nginx-module-0.29/src/ngx_http_headers_more_headers_out.h ../headers-more-nginx-module-0.29/src/ngx_http_headers_more_headers_in.h ../headers-more-nginx-module-0.29/src/ngx_http_headers_more_util.h                                                                            ../array-var-nginx-module-0.05/src/ddebug.h                                                 ../array-var-nginx-module-0.05/src/ngx_http_array_var_util.h                                 ../rds-json-nginx-module-0.14/src/ddebug.h ../rds-json-nginx-module-0.14/src/resty_dbd_stream.h ../rds-json-nginx-module-0.14/src/ngx_http_rds_json_filter_module.h ../rds-json-nginx-module-0.14/src/ngx_http_rds_json_processor.h ../rds-json-nginx-module-0.14/src/ngx_http_rds_json_util.h ../rds-json-nginx-module-0.14/src/ngx_http_rds.h ../rds-json-nginx-module-0.14/src/resty_dbd_stream.h ../rds-json-nginx-module-0.14/src/ngx_http_rds_json_output.h ../rds-json-nginx-module-0.14/src/ngx_http_rds_utils.h ../rds-json-nginx-module-0.14/src/ngx_http_rds_json_handler.h ../redis2-nginx-module-0.12/src/ddebug.h ../redis2-nginx-module-0.12/src/ngx_http_redis2_module.h ../redis2-nginx-module-0.12/src/ngx_http_redis2_handler.h ../redis2-nginx-module-0.12/src/ngx_http_redis2_reply.h ../redis2-nginx-module-0.12/src/ngx_http_redis2_util.h $(HTTP_DEPS) $(MAIL_DEPS) $(STREAM_DEPS)
 
+
+build:	binary modules manpage
+
+binary:	objs/nginx.exe
 
 objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/core/ngx_log.obj \
@@ -171,6 +177,7 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/core/ngx_rwlock.obj \
 	objs/src/core/ngx_cpuinfo.obj \
 	objs/src/core/ngx_conf_file.obj \
+	objs/src/core/ngx_module.obj \
 	objs/src/core/ngx_resolver.obj \
 	objs/src/core/ngx_open_file_cache.obj \
 	objs/src/core/ngx_crypt.obj \
@@ -194,9 +201,11 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/os/win32/ngx_wsarecv_chain.obj \
 	objs/src/os/win32/ngx_udp_wsarecv.obj \
 	objs/src/os/win32/ngx_wsasend.obj \
+	objs/src/os/win32/ngx_udp_wsasend.obj \
 	objs/src/os/win32/ngx_wsasend_chain.obj \
 	objs/src/os/win32/ngx_win32_init.obj \
 	objs/src/os/win32/ngx_user.obj \
+	objs/src/os/win32/ngx_dlopen.obj \
 	objs/src/os/win32/ngx_event_log.obj \
 	objs/src/os/win32/ngx_process_cycle.obj \
 	objs/src/event/ngx_event_acceptex.obj \
@@ -210,22 +219,18 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/http/ngx_http_special_response.obj \
 	objs/src/http/ngx_http_request.obj \
 	objs/src/http/ngx_http_parse.obj \
-	objs/src/http/ngx_http_header_filter_module.obj \
-	objs/src/http/ngx_http_write_filter_module.obj \
-	objs/src/http/ngx_http_copy_filter_module.obj \
 	objs/src/http/modules/ngx_http_log_module.obj \
 	objs/src/http/ngx_http_request_body.obj \
 	objs/src/http/ngx_http_variables.obj \
 	objs/src/http/ngx_http_script.obj \
 	objs/src/http/ngx_http_upstream.obj \
 	objs/src/http/ngx_http_upstream_round_robin.obj \
-	objs/src/http/modules/ngx_http_static_module.obj \
-	objs/src/http/modules/ngx_http_index_module.obj \
-	objs/src/http/modules/ngx_http_chunked_filter_module.obj \
-	objs/src/http/modules/ngx_http_range_filter_module.obj \
-	objs/src/http/modules/ngx_http_headers_filter_module.obj \
-	objs/src/http/modules/ngx_http_not_modified_filter_module.obj \
 	objs/src/http/ngx_http_file_cache.obj \
+	objs/src/http/ngx_http_write_filter_module.obj \
+	objs/src/http/ngx_http_header_filter_module.obj \
+	objs/src/http/modules/ngx_http_chunked_filter_module.obj \
+	objs/src/http/v2/ngx_http_v2_filter_module.obj \
+	objs/src/http/modules/ngx_http_range_filter_module.obj \
 	objs/src/http/modules/ngx_http_gzip_filter_module.obj \
 	objs/src/http/ngx_http_postpone_filter_module.obj \
 	objs/src/http/modules/ngx_http_ssi_filter_module.obj \
@@ -234,15 +239,20 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/http/modules/ngx_http_addition_filter_module.obj \
 	objs/src/http/modules/ngx_http_gunzip_filter_module.obj \
 	objs/src/http/modules/ngx_http_userid_filter_module.obj \
+	objs/src/http/modules/ngx_http_headers_filter_module.obj \
+	objs/src/http/ngx_http_copy_filter_module.obj \
+	objs/src/http/modules/ngx_http_not_modified_filter_module.obj \
+	objs/src/http/modules/ngx_http_slice_filter_module.obj \
 	objs/src/http/v2/ngx_http_v2.obj \
 	objs/src/http/v2/ngx_http_v2_table.obj \
 	objs/src/http/v2/ngx_http_v2_huff_decode.obj \
 	objs/src/http/v2/ngx_http_v2_huff_encode.obj \
 	objs/src/http/v2/ngx_http_v2_module.obj \
-	objs/src/http/v2/ngx_http_v2_filter_module.obj \
+	objs/src/http/modules/ngx_http_static_module.obj \
 	objs/src/http/modules/ngx_http_gzip_static_module.obj \
 	objs/src/http/modules/ngx_http_dav_module.obj \
 	objs/src/http/modules/ngx_http_autoindex_module.obj \
+	objs/src/http/modules/ngx_http_index_module.obj \
 	objs/src/http/modules/ngx_http_random_index_module.obj \
 	objs/src/http/modules/ngx_http_auth_request_module.obj \
 	objs/src/http/modules/ngx_http_auth_basic_module.obj \
@@ -379,6 +389,7 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/addon/src/ngx_http_lua_api.obj \
 	objs/addon/src/ngx_http_lua_logby.obj \
 	objs/addon/src/ngx_http_lua_sleep.obj \
+	objs/addon/src/ngx_http_lua_semaphore.obj \
 	objs/addon/src/ngx_http_lua_coroutine.obj \
 	objs/addon/src/ngx_http_lua_bodyfilterby.obj \
 	objs/addon/src/ngx_http_lua_initby.obj \
@@ -390,7 +401,10 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/addon/src/ngx_http_lua_timer.obj \
 	objs/addon/src/ngx_http_lua_config.obj \
 	objs/addon/src/ngx_http_lua_worker.obj \
+	objs/addon/src/ngx_http_lua_ssl_certby.obj \
+	objs/addon/src/ngx_http_lua_ssl_ocsp.obj \
 	objs/addon/src/ngx_http_lua_lex.obj \
+	objs/addon/src/ngx_http_lua_balancer.obj \
 	objs/addon/src/ngx_http_lua_upstream_module.obj \
 	objs/addon/src/ngx_http_headers_more_filter_module.obj \
 	objs/addon/src/ngx_http_headers_more_headers_out.obj \
@@ -410,8 +424,8 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/addon/src/ngx_http_redis2_util.obj \
 	objs/ngx_modules.obj \
 	objs/nginx.res \
-	objs/lib/pcre-8.37/pcre.lib \
-	objs/lib/zlib-1.2.8/zlib.lib
+	objs/lib/pcre/pcre.lib \
+	objs/lib/zlib/zlib.lib
 	$(LINK) @<<
 	-Feobjs/nginx
 	objs/src/core/nginx.obj 
@@ -442,6 +456,7 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/core/ngx_rwlock.obj 
 	objs/src/core/ngx_cpuinfo.obj 
 	objs/src/core/ngx_conf_file.obj 
+	objs/src/core/ngx_module.obj 
 	objs/src/core/ngx_resolver.obj 
 	objs/src/core/ngx_open_file_cache.obj 
 	objs/src/core/ngx_crypt.obj 
@@ -465,9 +480,11 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/os/win32/ngx_wsarecv_chain.obj 
 	objs/src/os/win32/ngx_udp_wsarecv.obj 
 	objs/src/os/win32/ngx_wsasend.obj 
+	objs/src/os/win32/ngx_udp_wsasend.obj 
 	objs/src/os/win32/ngx_wsasend_chain.obj 
 	objs/src/os/win32/ngx_win32_init.obj 
 	objs/src/os/win32/ngx_user.obj 
+	objs/src/os/win32/ngx_dlopen.obj 
 	objs/src/os/win32/ngx_event_log.obj 
 	objs/src/os/win32/ngx_process_cycle.obj 
 	objs/src/event/ngx_event_acceptex.obj 
@@ -481,22 +498,18 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/http/ngx_http_special_response.obj 
 	objs/src/http/ngx_http_request.obj 
 	objs/src/http/ngx_http_parse.obj 
-	objs/src/http/ngx_http_header_filter_module.obj 
-	objs/src/http/ngx_http_write_filter_module.obj 
-	objs/src/http/ngx_http_copy_filter_module.obj 
 	objs/src/http/modules/ngx_http_log_module.obj 
 	objs/src/http/ngx_http_request_body.obj 
 	objs/src/http/ngx_http_variables.obj 
 	objs/src/http/ngx_http_script.obj 
 	objs/src/http/ngx_http_upstream.obj 
 	objs/src/http/ngx_http_upstream_round_robin.obj 
-	objs/src/http/modules/ngx_http_static_module.obj 
-	objs/src/http/modules/ngx_http_index_module.obj 
-	objs/src/http/modules/ngx_http_chunked_filter_module.obj 
-	objs/src/http/modules/ngx_http_range_filter_module.obj 
-	objs/src/http/modules/ngx_http_headers_filter_module.obj 
-	objs/src/http/modules/ngx_http_not_modified_filter_module.obj 
 	objs/src/http/ngx_http_file_cache.obj 
+	objs/src/http/ngx_http_write_filter_module.obj 
+	objs/src/http/ngx_http_header_filter_module.obj 
+	objs/src/http/modules/ngx_http_chunked_filter_module.obj 
+	objs/src/http/v2/ngx_http_v2_filter_module.obj 
+	objs/src/http/modules/ngx_http_range_filter_module.obj 
 	objs/src/http/modules/ngx_http_gzip_filter_module.obj 
 	objs/src/http/ngx_http_postpone_filter_module.obj 
 	objs/src/http/modules/ngx_http_ssi_filter_module.obj 
@@ -505,15 +518,20 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/http/modules/ngx_http_addition_filter_module.obj 
 	objs/src/http/modules/ngx_http_gunzip_filter_module.obj 
 	objs/src/http/modules/ngx_http_userid_filter_module.obj 
+	objs/src/http/modules/ngx_http_headers_filter_module.obj 
+	objs/src/http/ngx_http_copy_filter_module.obj 
+	objs/src/http/modules/ngx_http_not_modified_filter_module.obj 
+	objs/src/http/modules/ngx_http_slice_filter_module.obj 
 	objs/src/http/v2/ngx_http_v2.obj 
 	objs/src/http/v2/ngx_http_v2_table.obj 
 	objs/src/http/v2/ngx_http_v2_huff_decode.obj 
 	objs/src/http/v2/ngx_http_v2_huff_encode.obj 
 	objs/src/http/v2/ngx_http_v2_module.obj 
-	objs/src/http/v2/ngx_http_v2_filter_module.obj 
+	objs/src/http/modules/ngx_http_static_module.obj 
 	objs/src/http/modules/ngx_http_gzip_static_module.obj 
 	objs/src/http/modules/ngx_http_dav_module.obj 
 	objs/src/http/modules/ngx_http_autoindex_module.obj 
+	objs/src/http/modules/ngx_http_index_module.obj 
 	objs/src/http/modules/ngx_http_random_index_module.obj 
 	objs/src/http/modules/ngx_http_auth_request_module.obj 
 	objs/src/http/modules/ngx_http_auth_basic_module.obj 
@@ -650,6 +668,7 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/addon/src/ngx_http_lua_api.obj 
 	objs/addon/src/ngx_http_lua_logby.obj 
 	objs/addon/src/ngx_http_lua_sleep.obj 
+	objs/addon/src/ngx_http_lua_semaphore.obj 
 	objs/addon/src/ngx_http_lua_coroutine.obj 
 	objs/addon/src/ngx_http_lua_bodyfilterby.obj 
 	objs/addon/src/ngx_http_lua_initby.obj 
@@ -661,7 +680,10 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/addon/src/ngx_http_lua_timer.obj 
 	objs/addon/src/ngx_http_lua_config.obj 
 	objs/addon/src/ngx_http_lua_worker.obj 
+	objs/addon/src/ngx_http_lua_ssl_certby.obj 
+	objs/addon/src/ngx_http_lua_ssl_ocsp.obj 
 	objs/addon/src/ngx_http_lua_lex.obj 
+	objs/addon/src/ngx_http_lua_balancer.obj 
 	objs/addon/src/ngx_http_lua_upstream_module.obj 
 	objs/addon/src/ngx_http_headers_more_filter_module.obj 
 	objs/addon/src/ngx_http_headers_more_headers_out.obj 
@@ -680,13 +702,15 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/addon/src/ngx_http_redis2_reply.obj 
 	objs/addon/src/ngx_http_redis2_util.obj 
 	objs/ngx_modules.obj 
-	-L../luajit-root-debug/luajit/lib kernel32.lib user32.lib advapi32.lib ws2_32.lib ../ngx_postgres-1.0rc7/lib/libpq.lib -L../luajit-root-debug/luajit/lib ../luajit-root-debug/luajit/lib/lua51.lib objs/lib/pcre-8.37/pcre.lib objs/lib/openssl-1.0.2d/openssl/lib/ssleay32.lib objs/lib/openssl-1.0.2d/openssl/lib/libeay32.lib gdi32.lib crypt32.lib objs/lib/zlib-1.2.8/zlib.lib 
+	-L../luajit-root-debug/luajit/lib kernel32.lib user32.lib advapi32.lib ws2_32.lib ../ngx_postgres-1.0rc7/lib/libpq.lib -L../luajit-root-debug/luajit/lib ../luajit-root-debug/luajit/lib/lua51.lib objs/lib/pcre/pcre.lib objs/lib/openssl/openssl/lib/ssleay32.lib objs/lib/openssl/openssl/lib/libeay32.lib gdi32.lib crypt32.lib objs/lib/zlib/zlib.lib 
 	objs/nginx.res -link -verbose:lib -def:nginx.def -debug
 	
 <<
 
+
 	mt -manifest objs/crt.xml -outputresource:$@;1
 
+modules:
 
 objs/ngx_modules.obj:	$(CORE_DEPS) \
 	objs/ngx_modules.c
@@ -891,6 +915,13 @@ objs/src/core/ngx_conf_file.obj:	$(CORE_DEPS) \
 		src/core/ngx_conf_file.c
 
 
+objs/src/core/ngx_module.obj:	$(CORE_DEPS) \
+	src/core/ngx_module.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) \
+		-Foobjs/src/core/ngx_module.obj \
+		src/core/ngx_module.c
+
+
 objs/src/core/ngx_resolver.obj:	$(CORE_DEPS) \
 	src/core/ngx_resolver.c
 	$(CC) -c $(CFLAGS) $(CORE_INCS) \
@@ -1052,6 +1083,13 @@ objs/src/os/win32/ngx_wsasend.obj:	$(CORE_DEPS) \
 		src/os/win32/ngx_wsasend.c
 
 
+objs/src/os/win32/ngx_udp_wsasend.obj:	$(CORE_DEPS) \
+	src/os/win32/ngx_udp_wsasend.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) \
+		-Foobjs/src/os/win32/ngx_udp_wsasend.obj \
+		src/os/win32/ngx_udp_wsasend.c
+
+
 objs/src/os/win32/ngx_wsasend_chain.obj:	$(CORE_DEPS) \
 	src/os/win32/ngx_wsasend_chain.c
 	$(CC) -c $(CFLAGS) $(CORE_INCS) \
@@ -1071,6 +1109,13 @@ objs/src/os/win32/ngx_user.obj:	$(CORE_DEPS) \
 	$(CC) -c $(CFLAGS) $(CORE_INCS) \
 		-Foobjs/src/os/win32/ngx_user.obj \
 		src/os/win32/ngx_user.c
+
+
+objs/src/os/win32/ngx_dlopen.obj:	$(CORE_DEPS) \
+	src/os/win32/ngx_dlopen.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) \
+		-Foobjs/src/os/win32/ngx_dlopen.obj \
+		src/os/win32/ngx_dlopen.c
 
 
 objs/src/os/win32/ngx_event_log.obj:	$(CORE_DEPS) \
@@ -1164,27 +1209,6 @@ objs/src/http/ngx_http_parse.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
 		src/http/ngx_http_parse.c
 
 
-objs/src/http/ngx_http_header_filter_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
-	src/http/ngx_http_header_filter_module.c
-	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
-		-Foobjs/src/http/ngx_http_header_filter_module.obj \
-		src/http/ngx_http_header_filter_module.c
-
-
-objs/src/http/ngx_http_write_filter_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
-	src/http/ngx_http_write_filter_module.c
-	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
-		-Foobjs/src/http/ngx_http_write_filter_module.obj \
-		src/http/ngx_http_write_filter_module.c
-
-
-objs/src/http/ngx_http_copy_filter_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
-	src/http/ngx_http_copy_filter_module.c
-	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
-		-Foobjs/src/http/ngx_http_copy_filter_module.obj \
-		src/http/ngx_http_copy_filter_module.c
-
-
 objs/src/http/modules/ngx_http_log_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
 	src/http/modules/ngx_http_log_module.c
 	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
@@ -1227,18 +1251,25 @@ objs/src/http/ngx_http_upstream_round_robin.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
 		src/http/ngx_http_upstream_round_robin.c
 
 
-objs/src/http/modules/ngx_http_static_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
-	src/http/modules/ngx_http_static_module.c
+objs/src/http/ngx_http_file_cache.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
+	src/http/ngx_http_file_cache.c
 	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
-		-Foobjs/src/http/modules/ngx_http_static_module.obj \
-		src/http/modules/ngx_http_static_module.c
+		-Foobjs/src/http/ngx_http_file_cache.obj \
+		src/http/ngx_http_file_cache.c
 
 
-objs/src/http/modules/ngx_http_index_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
-	src/http/modules/ngx_http_index_module.c
+objs/src/http/ngx_http_write_filter_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
+	src/http/ngx_http_write_filter_module.c
 	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
-		-Foobjs/src/http/modules/ngx_http_index_module.obj \
-		src/http/modules/ngx_http_index_module.c
+		-Foobjs/src/http/ngx_http_write_filter_module.obj \
+		src/http/ngx_http_write_filter_module.c
+
+
+objs/src/http/ngx_http_header_filter_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
+	src/http/ngx_http_header_filter_module.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
+		-Foobjs/src/http/ngx_http_header_filter_module.obj \
+		src/http/ngx_http_header_filter_module.c
 
 
 objs/src/http/modules/ngx_http_chunked_filter_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
@@ -1248,32 +1279,18 @@ objs/src/http/modules/ngx_http_chunked_filter_module.obj:	$(CORE_DEPS) $(HTTP_DE
 		src/http/modules/ngx_http_chunked_filter_module.c
 
 
+objs/src/http/v2/ngx_http_v2_filter_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
+	src/http/v2/ngx_http_v2_filter_module.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
+		-Foobjs/src/http/v2/ngx_http_v2_filter_module.obj \
+		src/http/v2/ngx_http_v2_filter_module.c
+
+
 objs/src/http/modules/ngx_http_range_filter_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
 	src/http/modules/ngx_http_range_filter_module.c
 	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
 		-Foobjs/src/http/modules/ngx_http_range_filter_module.obj \
 		src/http/modules/ngx_http_range_filter_module.c
-
-
-objs/src/http/modules/ngx_http_headers_filter_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
-	src/http/modules/ngx_http_headers_filter_module.c
-	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
-		-Foobjs/src/http/modules/ngx_http_headers_filter_module.obj \
-		src/http/modules/ngx_http_headers_filter_module.c
-
-
-objs/src/http/modules/ngx_http_not_modified_filter_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
-	src/http/modules/ngx_http_not_modified_filter_module.c
-	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
-		-Foobjs/src/http/modules/ngx_http_not_modified_filter_module.obj \
-		src/http/modules/ngx_http_not_modified_filter_module.c
-
-
-objs/src/http/ngx_http_file_cache.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
-	src/http/ngx_http_file_cache.c
-	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
-		-Foobjs/src/http/ngx_http_file_cache.obj \
-		src/http/ngx_http_file_cache.c
 
 
 objs/src/http/modules/ngx_http_gzip_filter_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
@@ -1332,6 +1349,34 @@ objs/src/http/modules/ngx_http_userid_filter_module.obj:	$(CORE_DEPS) $(HTTP_DEP
 		src/http/modules/ngx_http_userid_filter_module.c
 
 
+objs/src/http/modules/ngx_http_headers_filter_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
+	src/http/modules/ngx_http_headers_filter_module.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
+		-Foobjs/src/http/modules/ngx_http_headers_filter_module.obj \
+		src/http/modules/ngx_http_headers_filter_module.c
+
+
+objs/src/http/ngx_http_copy_filter_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
+	src/http/ngx_http_copy_filter_module.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
+		-Foobjs/src/http/ngx_http_copy_filter_module.obj \
+		src/http/ngx_http_copy_filter_module.c
+
+
+objs/src/http/modules/ngx_http_not_modified_filter_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
+	src/http/modules/ngx_http_not_modified_filter_module.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
+		-Foobjs/src/http/modules/ngx_http_not_modified_filter_module.obj \
+		src/http/modules/ngx_http_not_modified_filter_module.c
+
+
+objs/src/http/modules/ngx_http_slice_filter_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
+	src/http/modules/ngx_http_slice_filter_module.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
+		-Foobjs/src/http/modules/ngx_http_slice_filter_module.obj \
+		src/http/modules/ngx_http_slice_filter_module.c
+
+
 objs/src/http/v2/ngx_http_v2.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
 	src/http/v2/ngx_http_v2.c
 	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
@@ -1367,11 +1412,11 @@ objs/src/http/v2/ngx_http_v2_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
 		src/http/v2/ngx_http_v2_module.c
 
 
-objs/src/http/v2/ngx_http_v2_filter_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
-	src/http/v2/ngx_http_v2_filter_module.c
+objs/src/http/modules/ngx_http_static_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
+	src/http/modules/ngx_http_static_module.c
 	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
-		-Foobjs/src/http/v2/ngx_http_v2_filter_module.obj \
-		src/http/v2/ngx_http_v2_filter_module.c
+		-Foobjs/src/http/modules/ngx_http_static_module.obj \
+		src/http/modules/ngx_http_static_module.c
 
 
 objs/src/http/modules/ngx_http_gzip_static_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
@@ -1393,6 +1438,13 @@ objs/src/http/modules/ngx_http_autoindex_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
 	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
 		-Foobjs/src/http/modules/ngx_http_autoindex_module.obj \
 		src/http/modules/ngx_http_autoindex_module.c
+
+
+objs/src/http/modules/ngx_http_index_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
+	src/http/modules/ngx_http_index_module.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
+		-Foobjs/src/http/modules/ngx_http_index_module.obj \
+		src/http/modules/ngx_http_index_module.c
 
 
 objs/src/http/modules/ngx_http_random_index_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
@@ -1886,115 +1938,115 @@ objs/addon/src/ngx_coolkit_variables.obj:	$(ADDON_DEPS) \
 
 
 objs/addon/src/ngx_http_set_base32.obj:	$(ADDON_DEPS) \
-	../set-misc-nginx-module-0.29/src/ngx_http_set_base32.c
+	../set-misc-nginx-module-0.30/src/ngx_http_set_base32.c
 	$(CC) -c $(CFLAGS)  $(ALL_INCS) \
 		-Foobjs/addon/src/ngx_http_set_base32.obj \
-		../set-misc-nginx-module-0.29/src/ngx_http_set_base32.c
+		../set-misc-nginx-module-0.30/src/ngx_http_set_base32.c
 
 
 objs/addon/src/ngx_http_set_default_value.obj:	$(ADDON_DEPS) \
-	../set-misc-nginx-module-0.29/src/ngx_http_set_default_value.c
+	../set-misc-nginx-module-0.30/src/ngx_http_set_default_value.c
 	$(CC) -c $(CFLAGS)  $(ALL_INCS) \
 		-Foobjs/addon/src/ngx_http_set_default_value.obj \
-		../set-misc-nginx-module-0.29/src/ngx_http_set_default_value.c
+		../set-misc-nginx-module-0.30/src/ngx_http_set_default_value.c
 
 
 objs/addon/src/ngx_http_set_hashed_upstream.obj:	$(ADDON_DEPS) \
-	../set-misc-nginx-module-0.29/src/ngx_http_set_hashed_upstream.c
+	../set-misc-nginx-module-0.30/src/ngx_http_set_hashed_upstream.c
 	$(CC) -c $(CFLAGS)  $(ALL_INCS) \
 		-Foobjs/addon/src/ngx_http_set_hashed_upstream.obj \
-		../set-misc-nginx-module-0.29/src/ngx_http_set_hashed_upstream.c
+		../set-misc-nginx-module-0.30/src/ngx_http_set_hashed_upstream.c
 
 
 objs/addon/src/ngx_http_set_quote_sql.obj:	$(ADDON_DEPS) \
-	../set-misc-nginx-module-0.29/src/ngx_http_set_quote_sql.c
+	../set-misc-nginx-module-0.30/src/ngx_http_set_quote_sql.c
 	$(CC) -c $(CFLAGS)  $(ALL_INCS) \
 		-Foobjs/addon/src/ngx_http_set_quote_sql.obj \
-		../set-misc-nginx-module-0.29/src/ngx_http_set_quote_sql.c
+		../set-misc-nginx-module-0.30/src/ngx_http_set_quote_sql.c
 
 
 objs/addon/src/ngx_http_set_quote_json.obj:	$(ADDON_DEPS) \
-	../set-misc-nginx-module-0.29/src/ngx_http_set_quote_json.c
+	../set-misc-nginx-module-0.30/src/ngx_http_set_quote_json.c
 	$(CC) -c $(CFLAGS)  $(ALL_INCS) \
 		-Foobjs/addon/src/ngx_http_set_quote_json.obj \
-		../set-misc-nginx-module-0.29/src/ngx_http_set_quote_json.c
+		../set-misc-nginx-module-0.30/src/ngx_http_set_quote_json.c
 
 
 objs/addon/src/ngx_http_set_unescape_uri.obj:	$(ADDON_DEPS) \
-	../set-misc-nginx-module-0.29/src/ngx_http_set_unescape_uri.c
+	../set-misc-nginx-module-0.30/src/ngx_http_set_unescape_uri.c
 	$(CC) -c $(CFLAGS)  $(ALL_INCS) \
 		-Foobjs/addon/src/ngx_http_set_unescape_uri.obj \
-		../set-misc-nginx-module-0.29/src/ngx_http_set_unescape_uri.c
+		../set-misc-nginx-module-0.30/src/ngx_http_set_unescape_uri.c
 
 
 objs/addon/src/ngx_http_set_misc_module.obj:	$(ADDON_DEPS) \
-	../set-misc-nginx-module-0.29/src/ngx_http_set_misc_module.c
+	../set-misc-nginx-module-0.30/src/ngx_http_set_misc_module.c
 	$(CC) -c $(CFLAGS)  $(ALL_INCS) \
 		-Foobjs/addon/src/ngx_http_set_misc_module.obj \
-		../set-misc-nginx-module-0.29/src/ngx_http_set_misc_module.c
+		../set-misc-nginx-module-0.30/src/ngx_http_set_misc_module.c
 
 
 objs/addon/src/ngx_http_set_escape_uri.obj:	$(ADDON_DEPS) \
-	../set-misc-nginx-module-0.29/src/ngx_http_set_escape_uri.c
+	../set-misc-nginx-module-0.30/src/ngx_http_set_escape_uri.c
 	$(CC) -c $(CFLAGS)  $(ALL_INCS) \
 		-Foobjs/addon/src/ngx_http_set_escape_uri.obj \
-		../set-misc-nginx-module-0.29/src/ngx_http_set_escape_uri.c
+		../set-misc-nginx-module-0.30/src/ngx_http_set_escape_uri.c
 
 
 objs/addon/src/ngx_http_set_hash.obj:	$(ADDON_DEPS) \
-	../set-misc-nginx-module-0.29/src/ngx_http_set_hash.c
+	../set-misc-nginx-module-0.30/src/ngx_http_set_hash.c
 	$(CC) -c $(CFLAGS)  $(ALL_INCS) \
 		-Foobjs/addon/src/ngx_http_set_hash.obj \
-		../set-misc-nginx-module-0.29/src/ngx_http_set_hash.c
+		../set-misc-nginx-module-0.30/src/ngx_http_set_hash.c
 
 
 objs/addon/src/ngx_http_set_local_today.obj:	$(ADDON_DEPS) \
-	../set-misc-nginx-module-0.29/src/ngx_http_set_local_today.c
+	../set-misc-nginx-module-0.30/src/ngx_http_set_local_today.c
 	$(CC) -c $(CFLAGS)  $(ALL_INCS) \
 		-Foobjs/addon/src/ngx_http_set_local_today.obj \
-		../set-misc-nginx-module-0.29/src/ngx_http_set_local_today.c
+		../set-misc-nginx-module-0.30/src/ngx_http_set_local_today.c
 
 
 objs/addon/src/ngx_http_set_hex.obj:	$(ADDON_DEPS) \
-	../set-misc-nginx-module-0.29/src/ngx_http_set_hex.c
+	../set-misc-nginx-module-0.30/src/ngx_http_set_hex.c
 	$(CC) -c $(CFLAGS)  $(ALL_INCS) \
 		-Foobjs/addon/src/ngx_http_set_hex.obj \
-		../set-misc-nginx-module-0.29/src/ngx_http_set_hex.c
+		../set-misc-nginx-module-0.30/src/ngx_http_set_hex.c
 
 
 objs/addon/src/ngx_http_set_base64.obj:	$(ADDON_DEPS) \
-	../set-misc-nginx-module-0.29/src/ngx_http_set_base64.c
+	../set-misc-nginx-module-0.30/src/ngx_http_set_base64.c
 	$(CC) -c $(CFLAGS)  $(ALL_INCS) \
 		-Foobjs/addon/src/ngx_http_set_base64.obj \
-		../set-misc-nginx-module-0.29/src/ngx_http_set_base64.c
+		../set-misc-nginx-module-0.30/src/ngx_http_set_base64.c
 
 
 objs/addon/src/ngx_http_set_random.obj:	$(ADDON_DEPS) \
-	../set-misc-nginx-module-0.29/src/ngx_http_set_random.c
+	../set-misc-nginx-module-0.30/src/ngx_http_set_random.c
 	$(CC) -c $(CFLAGS)  $(ALL_INCS) \
 		-Foobjs/addon/src/ngx_http_set_random.obj \
-		../set-misc-nginx-module-0.29/src/ngx_http_set_random.c
+		../set-misc-nginx-module-0.30/src/ngx_http_set_random.c
 
 
 objs/addon/src/ngx_http_set_secure_random.obj:	$(ADDON_DEPS) \
-	../set-misc-nginx-module-0.29/src/ngx_http_set_secure_random.c
+	../set-misc-nginx-module-0.30/src/ngx_http_set_secure_random.c
 	$(CC) -c $(CFLAGS)  $(ALL_INCS) \
 		-Foobjs/addon/src/ngx_http_set_secure_random.obj \
-		../set-misc-nginx-module-0.29/src/ngx_http_set_secure_random.c
+		../set-misc-nginx-module-0.30/src/ngx_http_set_secure_random.c
 
 
 objs/addon/src/ngx_http_set_rotate.obj:	$(ADDON_DEPS) \
-	../set-misc-nginx-module-0.29/src/ngx_http_set_rotate.c
+	../set-misc-nginx-module-0.30/src/ngx_http_set_rotate.c
 	$(CC) -c $(CFLAGS)  $(ALL_INCS) \
 		-Foobjs/addon/src/ngx_http_set_rotate.obj \
-		../set-misc-nginx-module-0.29/src/ngx_http_set_rotate.c
+		../set-misc-nginx-module-0.30/src/ngx_http_set_rotate.c
 
 
 objs/addon/src/ngx_http_set_hmac.obj:	$(ADDON_DEPS) \
-	../set-misc-nginx-module-0.29/src/ngx_http_set_hmac.c
+	../set-misc-nginx-module-0.30/src/ngx_http_set_hmac.c
 	$(CC) -c $(CFLAGS)  $(ALL_INCS) \
 		-Foobjs/addon/src/ngx_http_set_hmac.obj \
-		../set-misc-nginx-module-0.29/src/ngx_http_set_hmac.c
+		../set-misc-nginx-module-0.30/src/ngx_http_set_hmac.c
 
 
 objs/addon/src/ngx_postgres_escape.obj:	$(ADDON_DEPS) \
@@ -2347,6 +2399,13 @@ objs/addon/src/ngx_http_lua_sleep.obj:	$(ADDON_DEPS) \
 		../ngx_lua/src/ngx_http_lua_sleep.c
 
 
+objs/addon/src/ngx_http_lua_semaphore.obj:	$(ADDON_DEPS) \
+	../ngx_lua/src/ngx_http_lua_semaphore.c
+	$(CC) -c $(CFLAGS)  $(ALL_INCS) \
+		-Foobjs/addon/src/ngx_http_lua_semaphore.obj \
+		../ngx_lua/src/ngx_http_lua_semaphore.c
+
+
 objs/addon/src/ngx_http_lua_coroutine.obj:	$(ADDON_DEPS) \
 	../ngx_lua/src/ngx_http_lua_coroutine.c
 	$(CC) -c $(CFLAGS)  $(ALL_INCS) \
@@ -2424,6 +2483,20 @@ objs/addon/src/ngx_http_lua_worker.obj:	$(ADDON_DEPS) \
 		../ngx_lua/src/ngx_http_lua_worker.c
 
 
+objs/addon/src/ngx_http_lua_ssl_certby.obj:	$(ADDON_DEPS) \
+	../ngx_lua/src/ngx_http_lua_ssl_certby.c
+	$(CC) -c $(CFLAGS)  $(ALL_INCS) \
+		-Foobjs/addon/src/ngx_http_lua_ssl_certby.obj \
+		../ngx_lua/src/ngx_http_lua_ssl_certby.c
+
+
+objs/addon/src/ngx_http_lua_ssl_ocsp.obj:	$(ADDON_DEPS) \
+	../ngx_lua/src/ngx_http_lua_ssl_ocsp.c
+	$(CC) -c $(CFLAGS)  $(ALL_INCS) \
+		-Foobjs/addon/src/ngx_http_lua_ssl_ocsp.obj \
+		../ngx_lua/src/ngx_http_lua_ssl_ocsp.c
+
+
 objs/addon/src/ngx_http_lua_lex.obj:	$(ADDON_DEPS) \
 	../ngx_lua/src/ngx_http_lua_lex.c
 	$(CC) -c $(CFLAGS)  $(ALL_INCS) \
@@ -2431,53 +2504,60 @@ objs/addon/src/ngx_http_lua_lex.obj:	$(ADDON_DEPS) \
 		../ngx_lua/src/ngx_http_lua_lex.c
 
 
+objs/addon/src/ngx_http_lua_balancer.obj:	$(ADDON_DEPS) \
+	../ngx_lua/src/ngx_http_lua_balancer.c
+	$(CC) -c $(CFLAGS)  $(ALL_INCS) \
+		-Foobjs/addon/src/ngx_http_lua_balancer.obj \
+		../ngx_lua/src/ngx_http_lua_balancer.c
+
+
 objs/addon/src/ngx_http_lua_upstream_module.obj:	$(ADDON_DEPS) \
-	../ngx_lua_upstream-0.04/src/ngx_http_lua_upstream_module.c
+	../ngx_lua_upstream-0.05/src/ngx_http_lua_upstream_module.c
 	$(CC) -c $(CFLAGS)  $(ALL_INCS) \
 		-Foobjs/addon/src/ngx_http_lua_upstream_module.obj \
-		../ngx_lua_upstream-0.04/src/ngx_http_lua_upstream_module.c
+		../ngx_lua_upstream-0.05/src/ngx_http_lua_upstream_module.c
 
 
 objs/addon/src/ngx_http_headers_more_filter_module.obj:	$(ADDON_DEPS) \
-	../headers-more-nginx-module-0.28/src/ngx_http_headers_more_filter_module.c
+	../headers-more-nginx-module-0.29/src/ngx_http_headers_more_filter_module.c
 	$(CC) -c $(CFLAGS)  $(ALL_INCS) \
 		-Foobjs/addon/src/ngx_http_headers_more_filter_module.obj \
-		../headers-more-nginx-module-0.28/src/ngx_http_headers_more_filter_module.c
+		../headers-more-nginx-module-0.29/src/ngx_http_headers_more_filter_module.c
 
 
 objs/addon/src/ngx_http_headers_more_headers_out.obj:	$(ADDON_DEPS) \
-	../headers-more-nginx-module-0.28/src/ngx_http_headers_more_headers_out.c
+	../headers-more-nginx-module-0.29/src/ngx_http_headers_more_headers_out.c
 	$(CC) -c $(CFLAGS)  $(ALL_INCS) \
 		-Foobjs/addon/src/ngx_http_headers_more_headers_out.obj \
-		../headers-more-nginx-module-0.28/src/ngx_http_headers_more_headers_out.c
+		../headers-more-nginx-module-0.29/src/ngx_http_headers_more_headers_out.c
 
 
 objs/addon/src/ngx_http_headers_more_headers_in.obj:	$(ADDON_DEPS) \
-	../headers-more-nginx-module-0.28/src/ngx_http_headers_more_headers_in.c
+	../headers-more-nginx-module-0.29/src/ngx_http_headers_more_headers_in.c
 	$(CC) -c $(CFLAGS)  $(ALL_INCS) \
 		-Foobjs/addon/src/ngx_http_headers_more_headers_in.obj \
-		../headers-more-nginx-module-0.28/src/ngx_http_headers_more_headers_in.c
+		../headers-more-nginx-module-0.29/src/ngx_http_headers_more_headers_in.c
 
 
 objs/addon/src/ngx_http_headers_more_util.obj:	$(ADDON_DEPS) \
-	../headers-more-nginx-module-0.28/src/ngx_http_headers_more_util.c
+	../headers-more-nginx-module-0.29/src/ngx_http_headers_more_util.c
 	$(CC) -c $(CFLAGS)  $(ALL_INCS) \
 		-Foobjs/addon/src/ngx_http_headers_more_util.obj \
-		../headers-more-nginx-module-0.28/src/ngx_http_headers_more_util.c
+		../headers-more-nginx-module-0.29/src/ngx_http_headers_more_util.c
 
 
 objs/addon/src/ngx_http_array_var_module.obj:	$(ADDON_DEPS) \
-	../array-var-nginx-module-0.04/src/ngx_http_array_var_module.c
+	../array-var-nginx-module-0.05/src/ngx_http_array_var_module.c
 	$(CC) -c $(CFLAGS)  $(ALL_INCS) \
 		-Foobjs/addon/src/ngx_http_array_var_module.obj \
-		../array-var-nginx-module-0.04/src/ngx_http_array_var_module.c
+		../array-var-nginx-module-0.05/src/ngx_http_array_var_module.c
 
 
 objs/addon/src/ngx_http_array_var_util.obj:	$(ADDON_DEPS) \
-	../array-var-nginx-module-0.04/src/ngx_http_array_var_util.c
+	../array-var-nginx-module-0.05/src/ngx_http_array_var_util.c
 	$(CC) -c $(CFLAGS)  $(ALL_INCS) \
 		-Foobjs/addon/src/ngx_http_array_var_util.obj \
-		../array-var-nginx-module-0.04/src/ngx_http_array_var_util.c
+		../array-var-nginx-module-0.05/src/ngx_http_array_var_util.c
 
 
 objs/addon/nginx-http-concat-module/ngx_http_concat_module.obj:	$(ADDON_DEPS) \
@@ -2554,19 +2634,19 @@ objs/nginx.res:	 src/os/win32/nginx.ico
 	rc -foobjs/nginx.res $(CORE_INCS) src/os/win32/nginx.rc
 
 
-objs/lib/pcre-8.37/pcre.lib:	objs/lib/pcre-8.37/pcre.h objs/Makefile
-	$(MAKE) -f auto/lib/pcre/makefile.msvc PCRE="objs/lib/pcre-8.37" CPU_OPT="" LIBC=-MT
+objs/lib/pcre/pcre.lib:	objs/lib/pcre/pcre.h objs/Makefile
+	$(MAKE) -f auto/lib/pcre/makefile.msvc PCRE="objs/lib/pcre" CPU_OPT="" LIBC=-MT
 
-objs/lib/pcre-8.37/pcre.h:
-	$(MAKE) -f auto/lib/pcre/makefile.msvc PCRE="objs/lib/pcre-8.37" pcre.h
-
-
-objs/lib/openssl-1.0.2d/openssl/include/openssl/ssl.h:	objs/Makefile
-	$(MAKE) -f auto/lib/openssl/makefile.msvc					OPENSSL="objs/lib/openssl-1.0.2d" OPENSSL_OPT=""
+objs/lib/pcre/pcre.h:
+	$(MAKE) -f auto/lib/pcre/makefile.msvc PCRE="objs/lib/pcre" pcre.h
 
 
-objs/lib/zlib-1.2.8/zlib.lib:	objs/Makefile
-	$(MAKE) -f auto/lib/zlib/makefile.msvc CPU_OPT="" LIBC=-MT ZLIB="objs/lib/zlib-1.2.8"
+objs/lib/openssl/openssl/include/openssl/ssl.h:	objs/Makefile
+	$(MAKE) -f auto/lib/openssl/makefile.msvc					OPENSSL="objs/lib/openssl" OPENSSL_OPT=""
+
+
+objs/lib/zlib/zlib.lib:	objs/Makefile
+	$(MAKE) -f auto/lib/zlib/makefile.msvc CPU_OPT="" LIBC=-MT ZLIB="objs/lib/zlib"
 
 
 manpage:	objs/nginx.8
@@ -2578,41 +2658,58 @@ objs/nginx.8:	man/nginx.8 objs/ngx_auto_config.h
 		-e "s|%%ERROR_LOG_PATH%%|/logs/error.log|" \
 		< man/nginx.8 > $@
 
-install:	objs/nginx.exe 		
+install:	build 
 	test -d '$(DESTDIR)' || mkdir -p '$(DESTDIR)'
 
-	test -d '$(DESTDIR)/' 		|| mkdir -p '$(DESTDIR)/'
-	test ! -f '$(DESTDIR)/nginx.exe' 		|| mv '$(DESTDIR)/nginx.exe' 			'$(DESTDIR)/nginx.exe.old'
+	test -d '$(DESTDIR)/' \
+		|| mkdir -p '$(DESTDIR)/'
+	test ! -f '$(DESTDIR)/nginx.exe' \
+		|| mv '$(DESTDIR)/nginx.exe' \
+			'$(DESTDIR)/nginx.exe.old'
 	cp objs/nginx '$(DESTDIR)/nginx.exe'
 
-	test -d '$(DESTDIR)/conf' 		|| mkdir -p '$(DESTDIR)/conf'
+	test -d '$(DESTDIR)/conf' \
+		|| mkdir -p '$(DESTDIR)/conf'
 
 	cp conf/koi-win '$(DESTDIR)/conf'
 	cp conf/koi-utf '$(DESTDIR)/conf'
 	cp conf/win-utf '$(DESTDIR)/conf'
 
-	test -f '$(DESTDIR)/conf/mime.types' 		|| cp conf/mime.types '$(DESTDIR)/conf'
+	test -f '$(DESTDIR)/conf/mime.types' \
+		|| cp conf/mime.types '$(DESTDIR)/conf'
 	cp conf/mime.types '$(DESTDIR)/conf/mime.types.default'
 
-	test -f '$(DESTDIR)/conf/fastcgi_params' 		|| cp conf/fastcgi_params '$(DESTDIR)/conf'
-	cp conf/fastcgi_params 		'$(DESTDIR)/conf/fastcgi_params.default'
+	test -f '$(DESTDIR)/conf/fastcgi_params' \
+		|| cp conf/fastcgi_params '$(DESTDIR)/conf'
+	cp conf/fastcgi_params \
+		'$(DESTDIR)/conf/fastcgi_params.default'
 
-	test -f '$(DESTDIR)/conf/fastcgi.conf' 		|| cp conf/fastcgi.conf '$(DESTDIR)/conf'
+	test -f '$(DESTDIR)/conf/fastcgi.conf' \
+		|| cp conf/fastcgi.conf '$(DESTDIR)/conf'
 	cp conf/fastcgi.conf '$(DESTDIR)/conf/fastcgi.conf.default'
 
-	test -f '$(DESTDIR)/conf/uwsgi_params' 		|| cp conf/uwsgi_params '$(DESTDIR)/conf'
-	cp conf/uwsgi_params 		'$(DESTDIR)/conf/uwsgi_params.default'
+	test -f '$(DESTDIR)/conf/uwsgi_params' \
+		|| cp conf/uwsgi_params '$(DESTDIR)/conf'
+	cp conf/uwsgi_params \
+		'$(DESTDIR)/conf/uwsgi_params.default'
 
-	test -f '$(DESTDIR)/conf/scgi_params' 		|| cp conf/scgi_params '$(DESTDIR)/conf'
-	cp conf/scgi_params 		'$(DESTDIR)/conf/scgi_params.default'
+	test -f '$(DESTDIR)/conf/scgi_params' \
+		|| cp conf/scgi_params '$(DESTDIR)/conf'
+	cp conf/scgi_params \
+		'$(DESTDIR)/conf/scgi_params.default'
 
-	test -f '$(DESTDIR)/conf/nginx.conf' 		|| cp conf/nginx.conf '$(DESTDIR)/conf/nginx.conf'
+	test -f '$(DESTDIR)/conf/nginx.conf' \
+		|| cp conf/nginx.conf '$(DESTDIR)/conf/nginx.conf'
 	cp conf/nginx.conf '$(DESTDIR)/conf/nginx.conf.default'
 
-	test -d '$(DESTDIR)/logs' 		|| mkdir -p '$(DESTDIR)/logs'
+	test -d '$(DESTDIR)/logs' \
+		|| mkdir -p '$(DESTDIR)/logs'
 
-	test -d '$(DESTDIR)/logs' || 		mkdir -p '$(DESTDIR)/logs'
+	test -d '$(DESTDIR)/logs' \
+		|| mkdir -p '$(DESTDIR)/logs'
 
-	test -d '$(DESTDIR)/html' 		|| cp -R html '$(DESTDIR)'
+	test -d '$(DESTDIR)/html' \
+		|| cp -R html '$(DESTDIR)'
 
-	test -d '$(DESTDIR)/logs' || 		mkdir -p '$(DESTDIR)/logs'
+	test -d '$(DESTDIR)/logs' \
+		|| mkdir -p '$(DESTDIR)/logs'

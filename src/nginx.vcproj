@@ -1351,6 +1351,14 @@
 						>
 					</File>
 					<File
+						RelativePath=".\nginx\src\os\win32\ngx_dlopen.c"
+						>
+					</File>
+					<File
+						RelativePath=".\nginx\src\os\win32\ngx_dlopen.h"
+						>
+					</File>
+					<File
 						RelativePath=".\nginx\src\os\win32\ngx_errno.c"
 						>
 					</File>
@@ -1440,6 +1448,10 @@
 					</File>
 					<File
 						RelativePath=".\nginx\src\os\win32\ngx_udp_wsarecv.c"
+						>
+					</File>
+					<File
+						RelativePath=".\nginx\src\os\win32\ngx_udp_wsasend.c"
 						>
 					</File>
 					<File
@@ -1688,6 +1700,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ngx_lua\src\ngx_http_lua_balancer.c"
+					>
+				</File>
+				<File
+					RelativePath=".\ngx_lua\src\ngx_http_lua_balancer.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ngx_lua\src\ngx_http_lua_bodyfilterby.c"
 					>
 				</File>
@@ -1836,6 +1856,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ngx_lua\src\ngx_http_lua_lex.c"
+					>
+				</File>
+				<File
+					RelativePath=".\ngx_lua\src\ngx_http_lua_lex.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ngx_lua\src\ngx_http_lua_log.c"
 					>
 				</File>
@@ -1940,6 +1968,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\ngx_lua\src\ngx_http_lua_semaphore.c"
+					>
+				</File>
+				<File
+					RelativePath=".\ngx_lua\src\ngx_http_lua_semaphore.h"
+					>
+				</File>
+				<File
 					RelativePath=".\ngx_lua\src\ngx_http_lua_setby.c"
 					>
 				</File>
@@ -1977,6 +2013,18 @@
 				</File>
 				<File
 					RelativePath=".\ngx_lua\src\ngx_http_lua_socket_udp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ngx_lua\src\ngx_http_lua_ssl_certby.c"
+					>
+				</File>
+				<File
+					RelativePath=".\ngx_lua\src\ngx_http_lua_ssl_certby.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ngx_lua\src\ngx_http_lua_ssl_ocsp.c"
 					>
 				</File>
 				<File
