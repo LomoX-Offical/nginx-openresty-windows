@@ -140,6 +140,8 @@ typedef struct {
 
 ngx_int_t ngx_ssl_init(ngx_log_t *log);
 ngx_int_t ngx_ssl_create(ngx_ssl_t *ssl, ngx_uint_t protocols, void *data);
+ngx_int_t ngx_ssl_certificates(ngx_conf_t *cf, ngx_ssl_t *ssl,
+    ngx_array_t *certs, ngx_array_t *keys, ngx_array_t *passwords);
 ngx_int_t ngx_ssl_certificate(ngx_conf_t *cf, ngx_ssl_t *ssl,
     ngx_str_t *cert, ngx_str_t *key, ngx_array_t *passwords);
 ngx_int_t ngx_ssl_client_certificate(ngx_conf_t *cf, ngx_ssl_t *ssl,
@@ -227,6 +229,7 @@ extern int  ngx_ssl_server_conf_index;
 extern int  ngx_ssl_session_cache_index;
 extern int  ngx_ssl_session_ticket_keys_index;
 extern int  ngx_ssl_certificate_index;
+extern int  ngx_ssl_next_certificate_index;
 extern int  ngx_ssl_stapling_index;
 
 
