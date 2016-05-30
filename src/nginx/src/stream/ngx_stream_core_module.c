@@ -248,18 +248,11 @@ ngx_stream_core_server(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 static char *
 ngx_stream_core_listen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 {
-    size_t                        len, off;
-    in_port_t                     port;
     ngx_str_t                    *value;
     ngx_url_t                     u;
     ngx_uint_t                    i, backlog;
-    struct sockaddr              *sa;
-    struct sockaddr_in           *sin;
-    ngx_stream_listen_t          *ls;
+    ngx_stream_listen_t          *ls, *als;
     ngx_stream_core_main_conf_t  *cmcf;
-#if (NGX_HAVE_INET6)
-    struct sockaddr_in6          *sin6;
-#endif
 
     value = cf->args->elts;
 
@@ -280,58 +273,6 @@ ngx_stream_core_listen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     cmcf = ngx_stream_conf_get_module_main_conf(cf, ngx_stream_core_module);
 
-    ls = cmcf->listen.elts;
-
-    for (i = 0; i < cmcf->listen.nelts; i++) {
-
-        sa = &ls[i].u.sockaddr;
-
-        if (sa->sa_family != u.family) {
-            continue;
-        }
-
-        switch (sa->sa_family) {
-
-#if (NGX_HAVE_INET6)
-        case AF_INET6:
-            off = offsetof(struct sockaddr_in6, sin6_addr);
-            len = 16;
-            sin6 = &ls[i].u.sockaddr_in6;
-            port = sin6->sin6_port;
-            break;
-#endif
-
-#if (NGX_HAVE_UNIX_DOMAIN)
-        case AF_UNIX:
-            off = offsetof(struct sockaddr_un, sun_path);
-            len = sizeof(((struct sockaddr_un *) sa)->sun_path);
-            port = 0;
-            break;
-#endif
-
-        default: /* AF_INET */
-            off = offsetof(struct sockaddr_in, sin_addr);
-            len = 4;
-            sin = &ls[i].u.sockaddr_in;
-            port = sin->sin_port;
-            break;
-        }
-
-        if (ngx_memcmp(ls[i].u.sockaddr_data + off, u.sockaddr + off, len)
-            != 0)
-        {
-            continue;
-        }
-
-        if (port != u.port) {
-            continue;
-        }
-
-        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                           "duplicate \"%V\" address and port pair", &u.url);
-        return NGX_CONF_ERROR;
-    }
-
     ls = ngx_array_push(&cmcf->listen);
     if (ls == NULL) {
         return NGX_CONF_ERROR;
@@ -339,7 +280,7 @@ ngx_stream_core_listen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     ngx_memzero(ls, sizeof(ngx_stream_listen_t));
 
-    ngx_memcpy(&ls->u.sockaddr, u.sockaddr, u.socklen);
+    ngx_memcpy(&ls->sockaddr.sockaddr, &u.sockaddr, u.socklen);
 
     ls->socklen = u.socklen;
     ls->backlog = NGX_LISTEN_BACKLOG;
@@ -384,11 +325,10 @@ ngx_stream_core_listen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
         if (ngx_strncmp(value[i].data, "ipv6only=o", 10) == 0) {
 #if (NGX_HAVE_INET6 && defined IPV6_V6ONLY)
+            size_t  len;
             u_char  buf[NGX_SOCKADDR_STRLEN];
 
-            sa = &ls->u.sockaddr;
-
-            if (sa->sa_family == AF_INET6) {
+            if (ls->sockaddr.sockaddr.sa_family == AF_INET6) {
 
                 if (ngx_strcmp(&value[i].data[10], "n") == 0) {
                     ls->ipv6only = 1;
@@ -406,7 +346,7 @@ ngx_stream_core_listen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
                 ls->bind = 1;
 
             } else {
-                len = ngx_sock_ntop(sa, ls->socklen, buf,
+                len = ngx_sock_ntop(&ls->sockaddr.sockaddr, ls->socklen, buf,
                                     NGX_SOCKADDR_STRLEN, 1);
 
                 ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
@@ -556,6 +496,25 @@ ngx_stream_core_listen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         if (ls->so_keepalive) {
             return "\"so_keepalive\" parameter is incompatible with \"udp\"";
         }
+    }
+
+    als = cmcf->listen.elts;
+
+    for (i = 0; i < cmcf->listen.nelts - 1; i++) {
+        if (ls->type != als[i].type) {
+            continue;
+        }
+
+        if (ngx_cmp_sockaddr(&als[i].sockaddr.sockaddr, als[i].socklen,
+                             &ls->sockaddr.sockaddr, ls->socklen, 1)
+            != NGX_OK)
+        {
+            continue;
+        }
+
+        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
+                           "duplicate \"%V\" address and port pair", &u.url);
+        return NGX_CONF_ERROR;
     }
 
     return NGX_CONF_OK;
