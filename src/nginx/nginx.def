@@ -75,11 +75,11 @@ EXPORTS
     ngx_http_lua_ffi_ssl_validate_ocsp_response @55
     ngx_http_lua_ffi_ssl_set_ocsp_status_resp @56
     
-    ngx_http_lua_ffi_semaphore_new @57
-    ngx_http_lua_ffi_semaphore_post @58
-    ngx_http_lua_ffi_semaphore_count @59
-    ngx_http_lua_ffi_semaphore_wait @60
-    ngx_http_lua_ffi_semaphore_gc @61
+    ngx_http_lua_ffi_sema_new @57
+    ngx_http_lua_ffi_sema_post @58
+    ngx_http_lua_ffi_sema_count @59
+    ngx_http_lua_ffi_sema_wait @60
+    ngx_http_lua_ffi_sema_gc @61
     
     
     ngx_http_lua_ffi_ssl_set_der_certificate @62

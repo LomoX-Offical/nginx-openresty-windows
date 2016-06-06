@@ -27,7 +27,7 @@ if [ -n "$LUAJIT_INC" -o -n "$LUAJIT_LIB" ]; then
         NGX_TEST_LD_OPT="$ngx_lua_opt_L $NGX_TEST_LD_OPT"
 
         # LuaJIT's win32 build uses the library file name lua51.dll.
-        ngx_feature_libs="$ngx_lua_opt_L -llua51"
+        ngx_feature_libs="$ngx_lua_opt_L $LUAJIT_LIB/lua51.lib"
 
         . auto/feature
 

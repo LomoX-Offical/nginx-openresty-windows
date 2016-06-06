@@ -56,6 +56,8 @@ extern ngx_module_t  ndk_http_module;
 extern ngx_module_t  ngx_coolkit_module;
 extern ngx_module_t  ngx_http_set_misc_module;
 extern ngx_module_t  ngx_postgres_module;
+extern ngx_module_t  ngx_http_form_input_module;
+extern ngx_module_t  ngx_http_encrypted_session_module;
 extern ngx_module_t  ngx_http_lua_upstream_module;
 extern ngx_module_t  ngx_http_array_var_module;
 extern ngx_module_t  ngx_http_concat_module;
@@ -75,8 +77,6 @@ extern ngx_module_t  ngx_http_gunzip_filter_module;
 extern ngx_module_t  ngx_http_userid_filter_module;
 extern ngx_module_t  ngx_http_headers_filter_module;
 extern ngx_module_t  ngx_http_echo_module;
-extern ngx_module_t  ngx_http_form_input_module;
-extern ngx_module_t  ngx_http_encrypted_session_module;
 extern ngx_module_t  ngx_http_lua_module;
 extern ngx_module_t  ngx_http_headers_more_filter_module;
 extern ngx_module_t  ngx_http_rds_json_filter_module;
@@ -156,6 +156,8 @@ ngx_module_t *ngx_modules[] = {
     &ngx_coolkit_module,
     &ngx_http_set_misc_module,
     &ngx_postgres_module,
+    &ngx_http_form_input_module,
+    &ngx_http_encrypted_session_module,
     &ngx_http_lua_upstream_module,
     &ngx_http_array_var_module,
     &ngx_http_concat_module,
@@ -175,8 +177,6 @@ ngx_module_t *ngx_modules[] = {
     &ngx_http_userid_filter_module,
     &ngx_http_headers_filter_module,
     &ngx_http_echo_module,
-    &ngx_http_form_input_module,
-    &ngx_http_encrypted_session_module,
     &ngx_http_lua_module,
     &ngx_http_headers_more_filter_module,
     &ngx_http_rds_json_filter_module,
@@ -258,6 +258,8 @@ char *ngx_module_names[] = {
     "ngx_coolkit_module",
     "ngx_http_set_misc_module",
     "ngx_postgres_module",
+    "ngx_http_form_input_module",
+    "ngx_http_encrypted_session_module",
     "ngx_http_lua_upstream_module",
     "ngx_http_array_var_module",
     "ngx_http_concat_module",
@@ -277,8 +279,6 @@ char *ngx_module_names[] = {
     "ngx_http_userid_filter_module",
     "ngx_http_headers_filter_module",
     "ngx_http_echo_module",
-    "ngx_http_form_input_module",
-    "ngx_http_encrypted_session_module",
     "ngx_http_lua_module",
     "ngx_http_headers_more_filter_module",
     "ngx_http_rds_json_filter_module",
