@@ -1,11 +1,11 @@
 export LUA_LIB_DIR=objs
-export CORE_LIB=../lua-resty-core-0.1.5/
-export DNS_LIB=../lua-resty-dns-0.15/
+export CORE_LIB=../lua-resty-core-0.1.6/
+export DNS_LIB=../lua-resty-dns-0.16/
 export LOCK_LIB=../lua-resty-lock-0.04/
 export LRUCACHE_LIB=../lua-resty-lrucache-0.04/
-export MEMCACHED_LIB=../lua-resty-memcached-0.13/
-export MYSQL_LIB=../lua-resty-mysql-0.15/
-export REDIS_LIB=../lua-resty-redis-0.22/
+export MEMCACHED_LIB=../lua-resty-memcached-0.14/
+export MYSQL_LIB=../lua-resty-mysql-0.16/
+export REDIS_LIB=../lua-resty-redis-0.24/
 export STRING_LIB=../lua-resty-string-0.09/
 export UPLOAD_LIB=../lua-resty-upload-0.09/
 export UPSTREAM_HEALTHCHECK_LIB=../lua-resty-upstream-healthcheck-0.04/

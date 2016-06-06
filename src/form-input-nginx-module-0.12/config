@@ -1,0 +1,37 @@
+if test -n "$ngx_module_link"; then
+    if test -n "$NDK_SRCS"; then
+        echo "found ngx_devel_kit for ngx_form_input; looks good."
+    else
+        echo "error: ngx_devel_kit is required to build ngx_form_input; please put it before ngx_form_input." 1>&2
+        exit 1
+    fi
+else
+    if echo $HTTP_MODULES | grep " ndk_http_module" > /dev/null; then
+        echo "found ngx_devel_kit for ngx_form_input; looks good."
+    else
+        echo "error: ngx_devel_kit is required to build ngx_form_input; please put it before ngx_form_input." 1>&2
+        exit 1
+    fi
+fi
+
+HTTP_FORM_INPUT_SRCS="$ngx_addon_dir/src/ngx_http_form_input_module.c"
+HTTP_FORM_INPUT_DEPS="$ngx_addon_dir/src/ddebug.h"
+
+ngx_addon_name=ngx_http_form_input_module
+
+if test -n "$ngx_module_link"; then
+    ngx_module_type=HTTP
+    ngx_module_name=$ngx_addon_name
+    ngx_module_incs=
+    ngx_module_deps="$HTTP_FORM_INPUT_DEPS"
+    ngx_module_srcs="$HTTP_FORM_INPUT_SRCS"
+    ngx_module_libs=
+
+    . auto/module
+else
+    HTTP_MODULES="$HTTP_MODULES $ngx_addon_name"
+    NGX_ADDON_SRCS="$NGX_ADDON_SRCS $HTTP_FORM_INPUT_SRCS"
+    NGX_ADDON_DEPS="$NGX_ADDON_DEPS $HTTP_FORM_INPUT_DEPS"
+fi
+
+CFLAGS="$CFLAGS -DNDK_SET_VAR"

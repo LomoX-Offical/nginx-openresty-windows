@@ -29,7 +29,7 @@ struct ngx_http_lua_balancer_peer_data_s {
     struct sockaddr                    *sockaddr;
     socklen_t                           socklen;
 
-    ngx_str_t                           host;
+    ngx_str_t                          *host;
     in_port_t                           port;
 
     int                                 last_peer_state;
@@ -322,9 +322,9 @@ ngx_http_lua_balancer_get_peer(ngx_peer_connection_t *pc, void *data)
     if (bp->sockaddr && bp->socklen) {
         pc->sockaddr = bp->sockaddr;
         pc->socklen = bp->socklen;
-        pc->name = &bp->host;
         pc->cached = 0;
         pc->connection = NULL;
+        pc->name = bp->host;
 
         bp->rrp.peers->single = 0;
 
@@ -525,7 +525,7 @@ ngx_http_lua_ffi_balancer_set_current_peer(ngx_http_request_t *r,
     if (url.addrs && url.addrs[0].sockaddr) {
         bp->sockaddr = url.addrs[0].sockaddr;
         bp->socklen = url.addrs[0].socklen;
-        bp->host = url.addrs[0].name;
+        bp->host = &url.addrs[0].name;
 
     } else {
         *err = "no host allowed";
