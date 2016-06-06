@@ -3,7 +3,7 @@ SET nginxpath=%~dp0
 setlocal EnableDelayedExpansion
 
 cd /d %~dp0
-cd /d ..\LuaJIT-2.1-20160108\src\
+cd /d ..\LuaJIT-2.1-20160517\src\
 
 SET objspath=!cd!
 
