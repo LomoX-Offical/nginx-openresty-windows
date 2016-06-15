@@ -5,6 +5,11 @@
 #endif
 
 
+#ifndef NGX_HAVE_KEEPALIVE_TUNABLE
+#define NGX_HAVE_KEEPALIVE_TUNABLE  1
+#endif
+
+
 #ifndef NGX_HAVE_INET6
 #define NGX_HAVE_INET6  1
 #endif

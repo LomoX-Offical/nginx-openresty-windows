@@ -699,6 +699,7 @@ ngx_configure_listening_sockets(ngx_cycle_t *cycle)
 
 #if (NGX_HAVE_KEEPALIVE_TUNABLE)
 
+#if !(NGX_WIN32)
         if (ls[i].keepidle) {
             value = ls[i].keepidle;
 
@@ -743,6 +744,32 @@ ngx_configure_listening_sockets(ngx_cycle_t *cycle)
                               ls[i].keepcnt, &ls[i].addr_text);
             }
         }
+#else
+        if (ls[i].keepidle && ls[i].keepintvl) {
+            struct tcp_keepalive alive_in;
+            struct tcp_keepalive alive_out;
+            DWORD size_ret;
+
+            alive_in.onoff             = 1;
+            alive_in.keepalivetime     = ls[i].keepidle  * 1000;
+            alive_in.keepaliveinterval = ls[i].keepintvl * 1000;
+
+            if (WSAIoctl(ls[i].fd, SIO_KEEPALIVE_VALS, &alive_in, sizeof(alive_in),
+                &alive_out, sizeof(alive_out), &size_ret, NULL, NULL) == SOCKET_ERROR)
+            {
+                ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_socket_errno,
+                    "WSAIoctl(SIO_KEEPALIVE_VALS, %d, %d) %V failed, ignored",
+                    alive_in.keepalivetime, alive_in.keepaliveinterval, &ls[i].addr_text);
+            }
+        }
+
+        if (ls[i].keepcnt) {
+            ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_socket_errno,
+                "WSAIoctl(SIO_KEEPALIVE_VALS) %V ignored parameter keepcnt (%d)",
+                &ls[i].addr_text, ls[i].keepcnt);
+        }
+
+#endif
 
 #endif
 
