@@ -3424,7 +3424,9 @@ ngx_http_v2_run_request(ngx_http_request_t *r)
         return;
     }
 
-    r->headers_in.chunked = (r->headers_in.content_length_n == -1);
+    if (r->headers_in.content_length_n == -1 && !r->stream->in_closed) {
+        r->headers_in.chunked = 1;
+    }
 
     ngx_http_process_request(r);
 }
@@ -3638,7 +3640,7 @@ ngx_http_v2_process_request_body(ngx_http_request_t *r, u_char *pos,
             rb->buf = NULL;
         }
 
-        if (r->headers_in.content_length_n == -1) {
+        if (r->headers_in.chunked) {
             r->headers_in.content_length_n = rb->received;
         }
 
@@ -3890,6 +3892,10 @@ ngx_http_v2_terminate_stream(ngx_http_v2_connection_t *h2c,
     ngx_event_t       *rev;
     ngx_connection_t  *fc;
 
+    if (stream->rst_sent) {
+        return NGX_OK;
+    }
+
     if (ngx_http_v2_send_rst_stream(h2c, stream->node->id, status)
         == NGX_ERROR)
     {
@@ -3897,6 +3903,7 @@ ngx_http_v2_terminate_stream(ngx_http_v2_connection_t *h2c,
     }
 
     stream->rst_sent = 1;
+    stream->skip_data = 1;
 
     fc = stream->request->connection;
     fc->error = 1;
@@ -3928,6 +3935,7 @@ ngx_http_v2_close_stream(ngx_http_v2_stream_t *stream, ngx_int_t rc)
 
     if (stream->queued) {
         fc->write->handler = ngx_http_v2_close_stream_handler;
+        fc->read->handler = ngx_http_empty_handler;
         return;
     }
 
@@ -4168,10 +4176,6 @@ ngx_http_v2_finalize_connection(ngx_http_v2_connection_t *h2c,
     }
 
     c->error = 1;
-
-    if (h2c->state.stream) {
-        ngx_http_v2_close_stream(h2c->state.stream, NGX_HTTP_BAD_REQUEST);
-    }
 
     if (!h2c->processing) {
         ngx_http_close_connection(c);
