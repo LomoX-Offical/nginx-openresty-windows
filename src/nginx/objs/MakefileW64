@@ -140,6 +140,8 @@ MAIL_INCS = -I src/mail
 
 
 STREAM_DEPS = src/stream/ngx_stream.h \
+	src/stream/ngx_stream_variables.h \
+	src/stream/ngx_stream_script.h \
 	src/stream/ngx_stream_upstream.h \
 	src/stream/ngx_stream_upstream_round_robin.h \
 	src/stream/ngx_stream_ssl_module.h
@@ -172,6 +174,7 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/core/ngx_crc32.obj \
 	objs/src/core/ngx_murmurhash.obj \
 	objs/src/core/ngx_md5.obj \
+	objs/src/core/ngx_sha1.obj \
 	objs/src/core/ngx_rbtree.obj \
 	objs/src/core/ngx_radix_tree.obj \
 	objs/src/core/ngx_slab.obj \
@@ -302,6 +305,8 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/mail/ngx_mail_auth_http_module.obj \
 	objs/src/mail/ngx_mail_proxy_module.obj \
 	objs/src/stream/ngx_stream.obj \
+	objs/src/stream/ngx_stream_variables.obj \
+	objs/src/stream/ngx_stream_script.obj \
 	objs/src/stream/ngx_stream_handler.obj \
 	objs/src/stream/ngx_stream_core_module.obj \
 	objs/src/stream/ngx_stream_proxy_module.obj \
@@ -310,6 +315,8 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/stream/ngx_stream_ssl_module.obj \
 	objs/src/stream/ngx_stream_limit_conn_module.obj \
 	objs/src/stream/ngx_stream_access_module.obj \
+	objs/src/stream/ngx_stream_map_module.obj \
+	objs/src/stream/ngx_stream_return_module.obj \
 	objs/src/stream/ngx_stream_upstream_hash_module.obj \
 	objs/src/stream/ngx_stream_upstream_least_conn_module.obj \
 	objs/src/stream/ngx_stream_upstream_zone_module.obj \
@@ -451,6 +458,7 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/core/ngx_crc32.obj 
 	objs/src/core/ngx_murmurhash.obj 
 	objs/src/core/ngx_md5.obj 
+	objs/src/core/ngx_sha1.obj 
 	objs/src/core/ngx_rbtree.obj 
 	objs/src/core/ngx_radix_tree.obj 
 	objs/src/core/ngx_slab.obj 
@@ -581,6 +589,8 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/mail/ngx_mail_auth_http_module.obj 
 	objs/src/mail/ngx_mail_proxy_module.obj 
 	objs/src/stream/ngx_stream.obj 
+	objs/src/stream/ngx_stream_variables.obj 
+	objs/src/stream/ngx_stream_script.obj 
 	objs/src/stream/ngx_stream_handler.obj 
 	objs/src/stream/ngx_stream_core_module.obj 
 	objs/src/stream/ngx_stream_proxy_module.obj 
@@ -589,6 +599,8 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/stream/ngx_stream_ssl_module.obj 
 	objs/src/stream/ngx_stream_limit_conn_module.obj 
 	objs/src/stream/ngx_stream_access_module.obj 
+	objs/src/stream/ngx_stream_map_module.obj 
+	objs/src/stream/ngx_stream_return_module.obj 
 	objs/src/stream/ngx_stream_upstream_hash_module.obj 
 	objs/src/stream/ngx_stream_upstream_least_conn_module.obj 
 	objs/src/stream/ngx_stream_upstream_zone_module.obj 
@@ -840,6 +852,13 @@ objs/src/core/ngx_md5.obj:	$(CORE_DEPS) \
 	$(CC) -c $(CFLAGS) $(CORE_INCS) \
 		-Foobjs/src/core/ngx_md5.obj \
 		src/core/ngx_md5.c
+
+
+objs/src/core/ngx_sha1.obj:	$(CORE_DEPS) \
+	src/core/ngx_sha1.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) \
+		-Foobjs/src/core/ngx_sha1.obj \
+		src/core/ngx_sha1.c
 
 
 objs/src/core/ngx_rbtree.obj:	$(CORE_DEPS) \
@@ -1752,6 +1771,20 @@ objs/src/stream/ngx_stream.obj:	$(CORE_DEPS) $(STREAM_DEPS) \
 		src/stream/ngx_stream.c
 
 
+objs/src/stream/ngx_stream_variables.obj:	$(CORE_DEPS) $(STREAM_DEPS) \
+	src/stream/ngx_stream_variables.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) $(STREAM_INCS) \
+		-Foobjs/src/stream/ngx_stream_variables.obj \
+		src/stream/ngx_stream_variables.c
+
+
+objs/src/stream/ngx_stream_script.obj:	$(CORE_DEPS) $(STREAM_DEPS) \
+	src/stream/ngx_stream_script.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) $(STREAM_INCS) \
+		-Foobjs/src/stream/ngx_stream_script.obj \
+		src/stream/ngx_stream_script.c
+
+
 objs/src/stream/ngx_stream_handler.obj:	$(CORE_DEPS) $(STREAM_DEPS) \
 	src/stream/ngx_stream_handler.c
 	$(CC) -c $(CFLAGS) $(CORE_INCS) $(STREAM_INCS) \
@@ -1806,6 +1839,20 @@ objs/src/stream/ngx_stream_access_module.obj:	$(CORE_DEPS) $(STREAM_DEPS) \
 	$(CC) -c $(CFLAGS) $(CORE_INCS) $(STREAM_INCS) \
 		-Foobjs/src/stream/ngx_stream_access_module.obj \
 		src/stream/ngx_stream_access_module.c
+
+
+objs/src/stream/ngx_stream_map_module.obj:	$(CORE_DEPS) $(STREAM_DEPS) \
+	src/stream/ngx_stream_map_module.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) $(STREAM_INCS) \
+		-Foobjs/src/stream/ngx_stream_map_module.obj \
+		src/stream/ngx_stream_map_module.c
+
+
+objs/src/stream/ngx_stream_return_module.obj:	$(CORE_DEPS) $(STREAM_DEPS) \
+	src/stream/ngx_stream_return_module.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) $(STREAM_INCS) \
+		-Foobjs/src/stream/ngx_stream_return_module.obj \
+		src/stream/ngx_stream_return_module.c
 
 
 objs/src/stream/ngx_stream_upstream_hash_module.obj:	$(CORE_DEPS) $(STREAM_DEPS) \
