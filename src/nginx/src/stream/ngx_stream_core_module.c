@@ -10,7 +10,9 @@
 #include <ngx_stream.h>
 
 
+static ngx_int_t ngx_stream_core_preconfiguration(ngx_conf_t *cf);
 static void *ngx_stream_core_create_main_conf(ngx_conf_t *cf);
+static char *ngx_stream_core_init_main_conf(ngx_conf_t *cf, void *conf);
 static void *ngx_stream_core_create_srv_conf(ngx_conf_t *cf);
 static char *ngx_stream_core_merge_srv_conf(ngx_conf_t *cf, void *parent,
     void *child);
@@ -23,6 +25,20 @@ static char *ngx_stream_core_listen(ngx_conf_t *cf, ngx_command_t *cmd,
 
 
 static ngx_command_t  ngx_stream_core_commands[] = {
+
+    { ngx_string("variables_hash_max_size"),
+      NGX_STREAM_MAIN_CONF|NGX_CONF_TAKE1,
+      ngx_conf_set_num_slot,
+      NGX_STREAM_MAIN_CONF_OFFSET,
+      offsetof(ngx_stream_core_main_conf_t, variables_hash_max_size),
+      NULL },
+
+    { ngx_string("variables_hash_bucket_size"),
+      NGX_STREAM_MAIN_CONF|NGX_CONF_TAKE1,
+      ngx_conf_set_num_slot,
+      NGX_STREAM_MAIN_CONF_OFFSET,
+      offsetof(ngx_stream_core_main_conf_t, variables_hash_bucket_size),
+      NULL },
 
     { ngx_string("server"),
       NGX_STREAM_MAIN_CONF|NGX_CONF_BLOCK|NGX_CONF_NOARGS,
@@ -57,10 +73,11 @@ static ngx_command_t  ngx_stream_core_commands[] = {
 
 
 static ngx_stream_module_t  ngx_stream_core_module_ctx = {
+    ngx_stream_core_preconfiguration,      /* preconfiguration */
     NULL,                                  /* postconfiguration */
 
     ngx_stream_core_create_main_conf,      /* create main configuration */
-    NULL,                                  /* init main configuration */
+    ngx_stream_core_init_main_conf,        /* init main configuration */
 
     ngx_stream_core_create_srv_conf,       /* create server configuration */
     ngx_stream_core_merge_srv_conf         /* merge server configuration */
@@ -81,6 +98,13 @@ ngx_module_t  ngx_stream_core_module = {
     NULL,                                  /* exit master */
     NGX_MODULE_V1_PADDING
 };
+
+
+static ngx_int_t
+ngx_stream_core_preconfiguration(ngx_conf_t *cf)
+{
+    return ngx_stream_variables_add_core_vars(cf);
+}
 
 
 static void *
@@ -106,7 +130,29 @@ ngx_stream_core_create_main_conf(ngx_conf_t *cf)
         return NULL;
     }
 
+    cmcf->variables_hash_max_size = NGX_CONF_UNSET_UINT;
+    cmcf->variables_hash_bucket_size = NGX_CONF_UNSET_UINT;
+
     return cmcf;
+}
+
+
+static char *
+ngx_stream_core_init_main_conf(ngx_conf_t *cf, void *conf)
+{
+    ngx_stream_core_main_conf_t *cmcf = conf;
+
+    ngx_conf_init_uint_value(cmcf->variables_hash_max_size, 1024);
+    ngx_conf_init_uint_value(cmcf->variables_hash_bucket_size, 64);
+
+    cmcf->variables_hash_bucket_size =
+               ngx_align(cmcf->variables_hash_bucket_size, ngx_cacheline_size);
+
+    if (cmcf->ncaptures) {
+        cmcf->ncaptures = (cmcf->ncaptures + 1) * 3;
+    }
+
+    return NGX_CONF_OK;
 }
 
 
@@ -248,18 +294,11 @@ ngx_stream_core_server(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 static char *
 ngx_stream_core_listen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 {
-    size_t                        len, off;
-    in_port_t                     port;
     ngx_str_t                    *value;
     ngx_url_t                     u;
     ngx_uint_t                    i, backlog;
-    struct sockaddr              *sa;
-    struct sockaddr_in           *sin;
-    ngx_stream_listen_t          *ls;
+    ngx_stream_listen_t          *ls, *als;
     ngx_stream_core_main_conf_t  *cmcf;
-#if (NGX_HAVE_INET6)
-    struct sockaddr_in6          *sin6;
-#endif
 
     value = cf->args->elts;
 
@@ -280,58 +319,6 @@ ngx_stream_core_listen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     cmcf = ngx_stream_conf_get_module_main_conf(cf, ngx_stream_core_module);
 
-    ls = cmcf->listen.elts;
-
-    for (i = 0; i < cmcf->listen.nelts; i++) {
-
-        sa = &ls[i].u.sockaddr;
-
-        if (sa->sa_family != u.family) {
-            continue;
-        }
-
-        switch (sa->sa_family) {
-
-#if (NGX_HAVE_INET6)
-        case AF_INET6:
-            off = offsetof(struct sockaddr_in6, sin6_addr);
-            len = 16;
-            sin6 = &ls[i].u.sockaddr_in6;
-            port = sin6->sin6_port;
-            break;
-#endif
-
-#if (NGX_HAVE_UNIX_DOMAIN)
-        case AF_UNIX:
-            off = offsetof(struct sockaddr_un, sun_path);
-            len = sizeof(((struct sockaddr_un *) sa)->sun_path);
-            port = 0;
-            break;
-#endif
-
-        default: /* AF_INET */
-            off = offsetof(struct sockaddr_in, sin_addr);
-            len = 4;
-            sin = &ls[i].u.sockaddr_in;
-            port = sin->sin_port;
-            break;
-        }
-
-        if (ngx_memcmp(ls[i].u.sockaddr_data + off, u.sockaddr + off, len)
-            != 0)
-        {
-            continue;
-        }
-
-        if (port != u.port) {
-            continue;
-        }
-
-        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                           "duplicate \"%V\" address and port pair", &u.url);
-        return NGX_CONF_ERROR;
-    }
-
     ls = ngx_array_push(&cmcf->listen);
     if (ls == NULL) {
         return NGX_CONF_ERROR;
@@ -339,7 +326,7 @@ ngx_stream_core_listen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     ngx_memzero(ls, sizeof(ngx_stream_listen_t));
 
-    ngx_memcpy(&ls->u.sockaddr, u.sockaddr, u.socklen);
+    ngx_memcpy(&ls->sockaddr.sockaddr, &u.sockaddr, u.socklen);
 
     ls->socklen = u.socklen;
     ls->backlog = NGX_LISTEN_BACKLOG;
@@ -382,11 +369,10 @@ ngx_stream_core_listen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
         if (ngx_strncmp(value[i].data, "ipv6only=o", 10) == 0) {
 #if (NGX_HAVE_INET6 && defined IPV6_V6ONLY)
+            size_t  len;
             u_char  buf[NGX_SOCKADDR_STRLEN];
 
-            sa = &ls->u.sockaddr;
-
-            if (sa->sa_family == AF_INET6) {
+            if (ls->sockaddr.sockaddr.sa_family == AF_INET6) {
 
                 if (ngx_strcmp(&value[i].data[10], "n") == 0) {
                     ls->ipv6only = 1;
@@ -404,7 +390,7 @@ ngx_stream_core_listen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
                 ls->bind = 1;
 
             } else {
-                len = ngx_sock_ntop(sa, ls->socklen, buf,
+                len = ngx_sock_ntop(&ls->sockaddr.sockaddr, ls->socklen, buf,
                                     NGX_SOCKADDR_STRLEN, 1);
 
                 ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
@@ -554,6 +540,25 @@ ngx_stream_core_listen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         if (ls->so_keepalive) {
             return "\"so_keepalive\" parameter is incompatible with \"udp\"";
         }
+    }
+
+    als = cmcf->listen.elts;
+
+    for (i = 0; i < cmcf->listen.nelts - 1; i++) {
+        if (ls->type != als[i].type) {
+            continue;
+        }
+
+        if (ngx_cmp_sockaddr(&als[i].sockaddr.sockaddr, als[i].socklen,
+                             &ls->sockaddr.sockaddr, ls->socklen, 1)
+            != NGX_OK)
+        {
+            continue;
+        }
+
+        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
+                           "duplicate \"%V\" address and port pair", &u.url);
+        return NGX_CONF_ERROR;
     }
 
     return NGX_CONF_OK;

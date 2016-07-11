@@ -1417,20 +1417,8 @@ ngx_http_lua_conf_lua_block_parse(ngx_conf_t *cf, ngx_command_t *cmd)
             break;
 
         case FOUND_LBRACKET_STR:
-
-            break;
-
         case FOUND_LBRACKET_CMT:
-
-            break;
-
         case FOUND_RIGHT_LBRACKET:
-            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                               "unexpected lua closing long-bracket");
-            goto failed;
-
-            break;
-
         case FOUND_COMMENT_LINE:
         case FOUND_DOUBLE_QUOTED:
         case FOUND_SINGLE_QUOTED:
@@ -1492,7 +1480,10 @@ ngx_http_lua_conf_read_lua_token(ngx_conf_t *cf,
 
     for ( ;; ) {
 
-        if (b->pos >= b->last) {
+        if (b->pos >= b->last
+            || (b->last - b->pos < (b->end - b->start) / 3
+                && cf->conf_file->file.offset < file_size))
+        {
 
             if (cf->conf_file->file.offset >= file_size) {
 
@@ -1505,7 +1496,7 @@ ngx_http_lua_conf_read_lua_token(ngx_conf_t *cf,
                 return NGX_ERROR;
             }
 
-            len = b->pos - start;
+            len = b->last - start;
 
             if (len == buf_size) {
 
@@ -1543,8 +1534,8 @@ ngx_http_lua_conf_read_lua_token(ngx_conf_t *cf,
                 return NGX_ERROR;
             }
 
-            b->pos = b->start + len;
-            b->last = b->pos + n;
+            b->pos = b->start + (b->pos - start);
+            b->last = b->start + len + n;
             start = b->start;
 
 #if nginx_version >= 1009002

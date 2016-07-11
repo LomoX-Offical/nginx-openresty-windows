@@ -4,6 +4,7 @@
 
 
 have=NGX_WIN32 . auto/have_headers
+have=NGX_HAVE_KEEPALIVE_TUNABLE value="1" . auto/define
 
 CORE_INCS="$WIN32_INCS"
 CORE_DEPS="$WIN32_DEPS"

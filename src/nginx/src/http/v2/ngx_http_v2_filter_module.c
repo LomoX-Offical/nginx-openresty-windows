@@ -137,10 +137,6 @@ ngx_http_v2_header_filter(ngx_http_request_t *r)
     ngx_http_v2_out_frame_t   *frame;
     ngx_http_core_loc_conf_t  *clcf;
     ngx_http_core_srv_conf_t  *cscf;
-    struct sockaddr_in        *sin;
-#if (NGX_HAVE_INET6)
-    struct sockaddr_in6       *sin6;
-#endif
     u_char                     addr[NGX_SOCKADDR_STRLEN];
 
     static const u_char nginx[5] = "\x84\xaa\x63\x55\xe7";
@@ -280,24 +276,7 @@ ngx_http_v2_header_filter(ngx_http_request_t *r)
                 }
             }
 
-            switch (fc->local_sockaddr->sa_family) {
-
-#if (NGX_HAVE_INET6)
-            case AF_INET6:
-                sin6 = (struct sockaddr_in6 *) fc->local_sockaddr;
-                port = ntohs(sin6->sin6_port);
-                break;
-#endif
-#if (NGX_HAVE_UNIX_DOMAIN)
-            case AF_UNIX:
-                port = 0;
-                break;
-#endif
-            default: /* AF_INET */
-                sin = (struct sockaddr_in *) fc->local_sockaddr;
-                port = ntohs(sin->sin_port);
-                break;
-            }
+            port = ngx_inet_get_port(fc->local_sockaddr);
 
             location.len = sizeof("https://") - 1 + host.len
                            + r->headers_out.location->value.len;
@@ -995,11 +974,10 @@ static ngx_http_v2_out_frame_t *
 ngx_http_v2_filter_get_data_frame(ngx_http_v2_stream_t *stream,
     size_t len, ngx_chain_t *first, ngx_chain_t *last)
 {
-    u_char                      flags;
-    ngx_buf_t                  *buf;
-    ngx_chain_t                *cl;
+    u_char                    flags;
+    ngx_buf_t                *buf;
+    ngx_chain_t              *cl;
     ngx_http_v2_out_frame_t  *frame;
-
 
     frame = stream->free_frames;
 
@@ -1028,7 +1006,7 @@ ngx_http_v2_filter_get_data_frame(ngx_http_v2_stream_t *stream,
 
     buf = cl->buf;
 
-    if (!buf->start) {
+    if (buf->start == NULL) {
         buf->start = ngx_palloc(stream->request->pool,
                                 NGX_HTTP_V2_FRAME_HEADER_SIZE);
         if (buf->start == NULL) {
@@ -1203,7 +1181,6 @@ ngx_http_v2_data_frame_handler(ngx_http_v2_connection_t *h2c,
     ngx_http_v2_stream_t  *stream;
 
     stream = frame->stream;
-
     cl = frame->first;
 
     if (cl->buf->tag == (ngx_buf_tag_t) &ngx_http_v2_module) {

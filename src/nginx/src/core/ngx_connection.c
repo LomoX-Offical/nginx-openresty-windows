@@ -17,7 +17,8 @@ static void ngx_drain_connections(void);
 
 
 ngx_listening_t *
-ngx_create_listening(ngx_conf_t *cf, void *sockaddr, socklen_t socklen)
+ngx_create_listening(ngx_conf_t *cf, struct sockaddr *sockaddr,
+    socklen_t socklen)
 {
     size_t            len;
     ngx_listening_t  *ls;
@@ -150,12 +151,12 @@ ngx_set_inherited_sockets(ngx_cycle_t *cycle)
     ls = cycle->listening.elts;
     for (i = 0; i < cycle->listening.nelts; i++) {
 
-        ls[i].sockaddr = ngx_palloc(cycle->pool, NGX_SOCKADDRLEN);
+        ls[i].sockaddr = ngx_palloc(cycle->pool, sizeof(ngx_sockaddr_t));
         if (ls[i].sockaddr == NULL) {
             return NGX_ERROR;
         }
 
-        ls[i].socklen = NGX_SOCKADDRLEN;
+        ls[i].socklen = sizeof(ngx_sockaddr_t);
         if (getsockname(ls[i].fd, ls[i].sockaddr, &ls[i].socklen) == -1) {
             ngx_log_error(NGX_LOG_CRIT, cycle->log, ngx_socket_errno,
                           "getsockname() of the inherited "
@@ -698,6 +699,7 @@ ngx_configure_listening_sockets(ngx_cycle_t *cycle)
 
 #if (NGX_HAVE_KEEPALIVE_TUNABLE)
 
+#if !(NGX_WIN32)
         if (ls[i].keepidle) {
             value = ls[i].keepidle;
 
@@ -742,6 +744,32 @@ ngx_configure_listening_sockets(ngx_cycle_t *cycle)
                               ls[i].keepcnt, &ls[i].addr_text);
             }
         }
+#else
+        if (ls[i].keepidle && ls[i].keepintvl) {
+            struct tcp_keepalive alive_in;
+            struct tcp_keepalive alive_out;
+            DWORD size_ret;
+
+            alive_in.onoff             = 1;
+            alive_in.keepalivetime     = ls[i].keepidle  * 1000;
+            alive_in.keepaliveinterval = ls[i].keepintvl * 1000;
+
+            if (WSAIoctl(ls[i].fd, SIO_KEEPALIVE_VALS, &alive_in, sizeof(alive_in),
+                &alive_out, sizeof(alive_out), &size_ret, NULL, NULL) == SOCKET_ERROR)
+            {
+                ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_socket_errno,
+                    "WSAIoctl(SIO_KEEPALIVE_VALS, %d, %d) %V failed, ignored",
+                    alive_in.keepalivetime, alive_in.keepaliveinterval, &ls[i].addr_text);
+            }
+        }
+
+        if (ls[i].keepcnt) {
+            ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_socket_errno,
+                "WSAIoctl(SIO_KEEPALIVE_VALS) %V ignored parameter keepcnt (%d)",
+                &ls[i].addr_text, ls[i].keepcnt);
+        }
+
+#endif
 
 #endif
 
@@ -1277,7 +1305,7 @@ ngx_connection_local_sockaddr(ngx_connection_t *c, ngx_str_t *s,
 {
     socklen_t             len;
     ngx_uint_t            addr;
-    u_char                sa[NGX_SOCKADDRLEN];
+    ngx_sockaddr_t        sa;
     struct sockaddr_in   *sin;
 #if (NGX_HAVE_INET6)
     ngx_uint_t            i;
@@ -1315,9 +1343,9 @@ ngx_connection_local_sockaddr(ngx_connection_t *c, ngx_str_t *s,
 
     if (addr == 0) {
 
-        len = NGX_SOCKADDRLEN;
+        len = sizeof(ngx_sockaddr_t);
 
-        if (getsockname(c->fd, (struct sockaddr *) &sa, &len) == -1) {
+        if (getsockname(c->fd, &sa.sockaddr, &len) == -1) {
             ngx_connection_error(c, ngx_socket_errno, "getsockname() failed");
             return NGX_ERROR;
         }

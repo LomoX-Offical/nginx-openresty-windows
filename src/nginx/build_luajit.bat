@@ -1,9 +1,10 @@
+SET sourcepath=%CD%
 SET nginxpath=%~dp0
 
 setlocal EnableDelayedExpansion
 
 cd /d %~dp0
-cd /d ..\LuaJIT-2.1-20160108\src\
+cd /d ..\LuaJIT-2.1-20160517\src\
 
 SET objspath=!cd!
 
@@ -32,4 +33,4 @@ copy /Y %objspath%\luaconf.h  %rootpath%\include\luajit-2.1\
 copy /Y %objspath%\luajit.h   %rootpath%\include\luajit-2.1\
 copy /Y %objspath%\lualib.h   %rootpath%\include\luajit-2.1\
 
-cd %nginxpath%
+cd %sourcepath%

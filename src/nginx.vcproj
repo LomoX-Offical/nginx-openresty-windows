@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="nginx_1_9_4"
+	Name="nginx_1_11_1"
 	ProjectGUID="{1C469FB4-7E6E-4AB3-8440-FB6E4C9B510A}"
 	RootNamespace="nginx"
 	Keyword="Win32Proj"

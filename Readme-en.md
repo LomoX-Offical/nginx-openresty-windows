@@ -3,18 +3,20 @@
 
 ### lastest release ###
 
-version:1.9.15.1002
+version:1.11.2.1001
 
-32 bit: http://pan.baidu.com/s/1bpsjbAJ
+32 bit: http://pan.baidu.com/s/1cIBUbW
         
-64 bit: http://pan.baidu.com/s/1slw0ppN
+64 bit: http://pan.baidu.com/s/1miETFQw
 
->Publish Time: 2016-05-26
+>Publish Time: 2016-07-11
 
 >Changelog:  
 
-- ngx_stream_proxy_module support udp(Thanks to lihui0213）
-- upgrade openssl to 1.0.2h
+- update nginx core to 1.11.2
+- update pcre to 8.39
+- update LuaJIT to 2.1-20160517
+- support so_keepalive parameter in listen directive
 
 
 
@@ -388,3 +390,17 @@ version:1.9.15.1001
 - upgraded nginx core to 1.9.15
 - upgraded cjson dll
 - support for the function ngx.worker.id in ngx_lua_module
+
+
+version:1.9.15.1002
+
+32 bit: http://pan.baidu.com/s/1bpsjbAJ
+        
+64 bit: http://pan.baidu.com/s/1slw0ppN
+
+>Publish Time: 2016-05-26
+
+>Changelog:  
+
+- ngx_stream_proxy_module support udp(Thanks to lihui0213）
+- upgrade openssl to 1.0.2h

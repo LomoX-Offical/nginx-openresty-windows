@@ -38,6 +38,7 @@
 
 #include <winsock2.h>
 #include <ws2tcpip.h>  /* ipv6 */
+#include <mstcpip.h>
 #include <mswsock.h>
 #include <shellapi.h>
 #include <stddef.h>    /* offsetof() */

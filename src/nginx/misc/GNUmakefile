@@ -5,9 +5,9 @@ NGINX =		nginx-$(VER)
 TEMP =		tmp
 
 OBJS =		objs.msvc8
-OPENSSL =	openssl-1.0.2g
+OPENSSL =	openssl-1.0.2h
 ZLIB =		zlib-1.2.8
-PCRE =		pcre-8.38
+PCRE =		pcre-8.39
 
 
 release: export
