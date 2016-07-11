@@ -3,18 +3,19 @@
 
 ### 最新版本 ###
 
-版本号:1.9.15.1002
+版本号:1.11.2.1001
 
-32 位下载地址: http://pan.baidu.com/s/1bpsjbAJ
+32 位下载地址: http://pan.baidu.com/s/1cIBUbW
 
-64 位下载地址: http://pan.baidu.com/s/1slw0ppN
+64 位下载地址: http://pan.baidu.com/s/1miETFQw
 
->发布时间: 2016-05-26
+>发布时间: 2016-07-11
 
->修改日志:  
-- ngx_stream_proxy_module模块支持udp(感谢 lihui0213 贡献的代码）
-- openssl更新到1.0.2h
-
+>修改日志:
+- 更新nginx core 到1.11.2
+- 更新pcre到8.39
+- 更新LuaJIT 2.1-20160517
+- 在listen指令中支持so_keepalive参数
 
 
 ### 关于 ###
@@ -390,3 +391,16 @@ Version:1.9.7.1001
 - 更新 nginx 版本到 1.9.15
 - 更新 cjson dll
 - 适配ngx_lua_module的ngx.worker.id函数，现在windows上ngx_lua模块也可以使用这个函数了
+
+
+版本号:1.9.15.1002
+
+32 位下载地址: http://pan.baidu.com/s/1bpsjbAJ
+
+64 位下载地址: http://pan.baidu.com/s/1slw0ppN
+
+>发布时间: 2016-05-26
+
+>修改日志:  
+- ngx_stream_proxy_module模块支持udp(感谢 lihui0213 贡献的代码）
+- openssl更新到1.0.2h
