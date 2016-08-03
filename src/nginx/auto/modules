@@ -43,6 +43,7 @@ fi
 if [ $NGX_TEST_BUILD_EPOLL = YES ]; then
     have=NGX_HAVE_EPOLL . auto/have
     have=NGX_HAVE_EPOLLRDHUP . auto/have
+    have=NGX_HAVE_EPOLLEXCLUSIVE . auto/have
     have=NGX_HAVE_EVENTFD . auto/have
     have=NGX_TEST_BUILD_EPOLL . auto/have
     EVENT_MODULES="$EVENT_MODULES $EPOLL_MODULE"
@@ -965,8 +966,6 @@ if [ $STREAM != NO ]; then
     STREAM_INCS=
 
     ngx_module_type=STREAM
-    ngx_module_libs=
-    ngx_module_link=YES
 
     ngx_module_order=
 
@@ -1000,6 +999,8 @@ if [ $STREAM != NO ]; then
         ngx_module_name=ngx_stream_ssl_module
         ngx_module_deps=src/stream/ngx_stream_ssl_module.h
         ngx_module_srcs=src/stream/ngx_stream_ssl_module.c
+        ngx_module_libs=
+        ngx_module_link=$STREAM_SSL
 
         . auto/module
     fi
@@ -1008,6 +1009,8 @@ if [ $STREAM != NO ]; then
         ngx_module_name=ngx_stream_limit_conn_module
         ngx_module_deps=
         ngx_module_srcs=src/stream/ngx_stream_limit_conn_module.c
+        ngx_module_libs=
+        ngx_module_link=$STREAM_LIMIT_CONN
 
         . auto/module
     fi
@@ -1016,6 +1019,28 @@ if [ $STREAM != NO ]; then
         ngx_module_name=ngx_stream_access_module
         ngx_module_deps=
         ngx_module_srcs=src/stream/ngx_stream_access_module.c
+        ngx_module_libs=
+        ngx_module_link=$STREAM_ACCESS
+
+        . auto/module
+    fi
+
+    if [ $STREAM_GEO = YES ]; then
+        ngx_module_name=ngx_stream_geo_module
+        ngx_module_deps=
+        ngx_module_srcs=src/stream/ngx_stream_geo_module.c
+        ngx_module_libs=
+        ngx_module_link=$STREAM_GEO
+
+        . auto/module
+    fi
+
+    if [ $STREAM_GEOIP != NO ]; then
+        ngx_module_name=ngx_stream_geoip_module
+        ngx_module_deps=
+        ngx_module_srcs=src/stream/ngx_stream_geoip_module.c
+        ngx_module_libs=GEOIP
+        ngx_module_link=$STREAM_GEOIP
 
         . auto/module
     fi
@@ -1024,6 +1049,18 @@ if [ $STREAM != NO ]; then
         ngx_module_name=ngx_stream_map_module
         ngx_module_deps=
         ngx_module_srcs=src/stream/ngx_stream_map_module.c
+        ngx_module_libs=
+        ngx_module_link=$STREAM_MAP
+
+        . auto/module
+    fi
+
+    if [ $STREAM_SPLIT_CLIENTS = YES ]; then
+        ngx_module_name=ngx_stream_split_clients_module
+        ngx_module_deps=
+        ngx_module_srcs=src/stream/ngx_stream_split_clients_module.c
+        ngx_module_libs=
+        ngx_module_link=$STREAM_SPLIT_CLIENTS
 
         . auto/module
     fi
@@ -1032,6 +1069,8 @@ if [ $STREAM != NO ]; then
         ngx_module_name=ngx_stream_return_module
         ngx_module_deps=
         ngx_module_srcs=src/stream/ngx_stream_return_module.c
+        ngx_module_libs=
+        ngx_module_link=$STREAM_RETURN
 
         . auto/module
     fi
@@ -1040,6 +1079,8 @@ if [ $STREAM != NO ]; then
         ngx_module_name=ngx_stream_upstream_hash_module
         ngx_module_deps=
         ngx_module_srcs=src/stream/ngx_stream_upstream_hash_module.c
+        ngx_module_libs=
+        ngx_module_link=$STREAM_UPSTREAM_HASH
 
         . auto/module
     fi
@@ -1048,6 +1089,8 @@ if [ $STREAM != NO ]; then
         ngx_module_name=ngx_stream_upstream_least_conn_module
         ngx_module_deps=
         ngx_module_srcs=src/stream/ngx_stream_upstream_least_conn_module.c
+        ngx_module_libs=
+        ngx_module_link=$STREAM_UPSTREAM_LEAST_CONN
 
         . auto/module
     fi
@@ -1058,6 +1101,8 @@ if [ $STREAM != NO ]; then
         ngx_module_name=ngx_stream_upstream_zone_module
         ngx_module_deps=
         ngx_module_srcs=src/stream/ngx_stream_upstream_zone_module.c
+        ngx_module_libs=
+        ngx_module_link=$STREAM_UPSTREAM_ZONE
 
         . auto/module
     fi
