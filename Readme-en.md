@@ -3,20 +3,17 @@
 
 ### lastest release ###
 
-version:1.11.2.1001
+version:1.11.3.1001
 
-32 bit: http://pan.baidu.com/s/1cIBUbW
+32 bit: http://pan.baidu.com/s/1skNscCt
         
-64 bit: http://pan.baidu.com/s/1miETFQw
+64 bit: http://pan.baidu.com/s/1nuP2ixj
 
->Publish Time: 2016-07-11
+>Publish Time: 2016-08-03
 
 >Changelog:  
 
-- update nginx core to 1.11.2
-- update pcre to 8.39
-- update LuaJIT to 2.1-20160517
-- support so_keepalive parameter in listen directive
+- update nginx core to 1.11.3
 
 
 
@@ -404,3 +401,19 @@ version:1.9.15.1002
 
 - ngx_stream_proxy_module support udp(Thanks to lihui0213）
 - upgrade openssl to 1.0.2h
+
+
+version:1.11.2.1001
+
+32 bit: http://pan.baidu.com/s/1cIBUbW
+        
+64 bit: http://pan.baidu.com/s/1miETFQw
+
+>Publish Time: 2016-07-11
+
+>Changelog:  
+
+- update nginx core to 1.11.2
+- update pcre to 8.39
+- update LuaJIT to 2.1-20160517
+- support so_keepalive parameter in listen directive

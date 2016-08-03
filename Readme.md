@@ -3,19 +3,16 @@
 
 ### 最新版本 ###
 
-版本号:1.11.2.1001
+版本号:1.11.3.1001
 
-32 位下载地址: http://pan.baidu.com/s/1cIBUbW
+32 位下载地址: http://pan.baidu.com/s/1skNscCt
 
-64 位下载地址: http://pan.baidu.com/s/1miETFQw
+64 位下载地址: http://pan.baidu.com/s/1nuP2ixj
 
->发布时间: 2016-07-11
+>发布时间: 2016-08-03
 
 >修改日志:
-- 更新nginx core 到1.11.2
-- 更新pcre到8.39
-- 更新LuaJIT 2.1-20160517
-- 在listen指令中支持so_keepalive参数
+- 更新nginx core 到1.11.3
 
 
 ### 关于 ###
@@ -404,3 +401,18 @@ Version:1.9.7.1001
 >修改日志:  
 - ngx_stream_proxy_module模块支持udp(感谢 lihui0213 贡献的代码）
 - openssl更新到1.0.2h
+
+
+版本号:1.11.2.1001
+
+32 位下载地址: http://pan.baidu.com/s/1cIBUbW
+
+64 位下载地址: http://pan.baidu.com/s/1miETFQw
+
+>发布时间: 2016-07-11
+
+>修改日志:
+- 更新nginx core 到1.11.2
+- 更新pcre到8.39
+- 更新LuaJIT 2.1-20160517
+- 在listen指令中支持so_keepalive参数
