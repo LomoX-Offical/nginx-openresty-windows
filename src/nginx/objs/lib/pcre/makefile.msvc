@@ -1,6 +1,6 @@
 # Copyright (C) Igor Sysoev
 # Copyright (C) Nginx, Inc.
-
+# must use VS2008 x86 本机工具命令提示符 without mingw or cygwin
 
 CFLAGS =    -O2 -Ob1 -Oi -Gs $(LIBC) $(CPU_OPT)
 PCREFLAGS = -DHAVE_CONFIG_H -DPCRE_STATIC -DPOSIX_MALLOC_THRESHOLD=10 \
@@ -8,7 +8,7 @@ PCREFLAGS = -DHAVE_CONFIG_H -DPCRE_STATIC -DPOSIX_MALLOC_THRESHOLD=10 \
 
 default: pcre.lib
 
-pcre.lib: pcre.h
+pcre.lib:
     cd $(PCRE)
 
     copy /y pcre.h.generic pcre.h
@@ -18,3 +18,6 @@ pcre.lib: pcre.h
     cl -nologo -c $(CFLAGS) -I . $(PCREFLAGS) pcre_*.c
 
     link -lib -out:pcre.lib -verbose:lib pcre_*.obj
+
+clean:
+    del /Q pcre.h config.h pcre_chartables.c pcre_*.obj pcre.lib    
