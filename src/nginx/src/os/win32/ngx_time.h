@@ -37,6 +37,7 @@ typedef FILETIME              ngx_mtime_t;
 
 
 #define ngx_msleep            Sleep
+#define ngx_sleep(s)          Sleep((s) * 1000)
 
 #define NGX_HAVE_GETTIMEZONE  1
 

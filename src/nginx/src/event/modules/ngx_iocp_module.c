@@ -12,15 +12,20 @@
 
 
 static ngx_int_t ngx_iocp_init(ngx_cycle_t *cycle, ngx_msec_t timer);
-static ngx_thread_value_t __stdcall ngx_iocp_timer(void *data);
 static void ngx_iocp_done(ngx_cycle_t *cycle);
 static ngx_int_t ngx_iocp_add_event(ngx_event_t *ev, ngx_int_t event,
-    ngx_uint_t key);
-static ngx_int_t ngx_iocp_del_connection(ngx_connection_t *c, ngx_uint_t flags);
+									ngx_uint_t flags);
+static ngx_int_t ngx_iocp_del_event(ngx_event_t *ev, ngx_int_t event,
+									ngx_uint_t flags);
+static ngx_int_t ngx_iocp_add_connection(ngx_connection_t *c);
+static ngx_int_t ngx_iocp_del_connection(ngx_connection_t *c,
+										 ngx_uint_t flags);
 static ngx_int_t ngx_iocp_process_events(ngx_cycle_t *cycle, ngx_msec_t timer,
-    ngx_uint_t flags);
+										 ngx_uint_t flags);
+
 static void *ngx_iocp_create_conf(ngx_cycle_t *cycle);
 static char *ngx_iocp_init_conf(ngx_cycle_t *cycle, void *conf);
+
 
 
 static ngx_str_t      iocp_name = ngx_string("iocp");
@@ -52,327 +57,335 @@ static ngx_command_t  ngx_iocp_commands[] = {
 };
 
 
-ngx_event_module_t  ngx_iocp_module_ctx = {
+
+static ngx_event_module_t  ngx_iocp_module_ctx = {
     &iocp_name,
-    ngx_iocp_create_conf,                  /* create configuration */
-    ngx_iocp_init_conf,                    /* init configuration */
+    ngx_iocp_create_conf,                /* create configuration */
+    ngx_iocp_init_conf,                  /* init configuration */
 
     {
-        ngx_iocp_add_event,                /* add an event */
-        NULL,                              /* delete an event */
-        NULL,                              /* enable an event */
-        NULL,                              /* disable an event */
-        NULL,                              /* add an connection */
-        ngx_iocp_del_connection,           /* delete an connection */
-        NULL,                              /* trigger a notify */
-        ngx_iocp_process_events,           /* process the events */
-        ngx_iocp_init,                     /* init the events */
-        ngx_iocp_done                      /* done the events */
+        ngx_iocp_add_event,              /* add an event */
+        ngx_iocp_del_event,              /* delete an event */
+        ngx_iocp_add_event,              /* enable an event */
+        ngx_iocp_del_event,              /* disable an event */
+        ngx_iocp_add_connection,         /* add an connection */
+        ngx_iocp_del_connection,         /* delete an connection */
+        NULL,                            /* process the changes */
+        ngx_iocp_process_events,         /* process the events */
+        ngx_iocp_init,                   /* init the events */
+        ngx_iocp_done,                   /* done the events */
     }
-
 };
 
 ngx_module_t  ngx_iocp_module = {
-    NGX_MODULE_V1,
-    &ngx_iocp_module_ctx,                  /* module context */
-    ngx_iocp_commands,                     /* module directives */
-    NGX_EVENT_MODULE,                      /* module type */
-    NULL,                                  /* init master */
-    NULL,                                  /* init module */
-    NULL,                                  /* init process */
-    NULL,                                  /* init thread */
-    NULL,                                  /* exit thread */
-    NULL,                                  /* exit process */
-    NULL,                                  /* exit master */
-    NGX_MODULE_V1_PADDING
+	NGX_MODULE_V1,
+	&ngx_iocp_module_ctx,                /* module context */
+	ngx_iocp_commands,                   /* module directives */
+	NGX_EVENT_MODULE,                    /* module type */
+	NULL,                                /* init master */
+	NULL,                                /* init module */
+	NULL,                                /* init process */
+	NULL,                                /* init thread */
+	NULL,                                /* exit thread */
+	NULL,                                /* exit process */
+	NULL,                                /* exit master */
+	NGX_MODULE_V1_PADDING
 };
 
 
-ngx_os_io_t ngx_iocp_io = {
-    ngx_overlapped_wsarecv,
-    NULL,
-    ngx_udp_overlapped_wsarecv,
-    NULL,
-    ngx_overlapped_wsasend_chain,
-    0
+static struct sockaddr_in  sa;
+HANDLE                     iocp;
+static OVERLAPPED_ENTRY   *event_list;
+static ngx_uint_t          nevents;
+
+ngx_addr_t                 ngx_iocp_local_addr;
+
+ngx_os_io_t  ngx_iocp_io = {
+	ngx_overlapped_wsarecv,
+	ngx_overlapped_wsarecv_chain,
+	NULL,
+	ngx_overlapped_wsasend,
+	NULL,
+	ngx_overlapped_wsasend_chain,
+	0
 };
-
-
-static HANDLE      iocp;
-static ngx_tid_t   timer_thread;
-static ngx_msec_t  msec;
-
 
 static ngx_int_t
 ngx_iocp_init(ngx_cycle_t *cycle, ngx_msec_t timer)
 {
-    ngx_iocp_conf_t  *cf;
+	ngx_iocp_conf_t  *cf;
 
-    cf = ngx_event_get_conf(cycle->conf_ctx, ngx_iocp_module);
+	sa.sin_family = AF_INET;
+	sa.sin_addr.s_addr = htonl(INADDR_ANY);
+	sa.sin_port = htons(0);
 
-    if (iocp == NULL) {
-        iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0,
-                                      cf->threads);
-    }
+	ngx_iocp_local_addr.sockaddr  = (struct sockaddr *) &sa;
+	ngx_iocp_local_addr.socklen   = sizeof(struct sockaddr_in);
+	ngx_iocp_local_addr.name.len  = sizeof("INADDR_ANY") - 1;
+	ngx_iocp_local_addr.name.data = (u_char *) "INADDR_ANY";
 
-    if (iocp == NULL) {
-        ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
-                      "CreateIoCompletionPort() failed");
-        return NGX_ERROR;
-    }
+	cf = ngx_event_get_conf(cycle->conf_ctx, ngx_iocp_module);
 
-    ngx_io = ngx_iocp_io;
+	if (iocp == NULL) {
+		iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0,
+			(DWORD) cf->threads);
 
-    ngx_event_actions = ngx_iocp_module_ctx.actions;
+		if (iocp == NULL) {
+			ngx_log_error(NGX_LOG_EMERG, cycle->log, ngx_errno,
+				"INVALID_HANDLE_VALUE CreateIoCompletionPort() failed");
+			return NGX_ERROR;
+		}
 
-    ngx_event_flags = NGX_USE_IOCP_EVENT;
+		ngx_log_debug0(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
+			"CreateIoCompletionPort() init success");
+	}
 
-    if (timer == 0) {
-        return NGX_OK;
-    }
+	if (nevents < cf->events) {
+		if (event_list) {
+			ngx_free(event_list);
+		}
 
-    /*
-     * The waitable timer could not be used, because
-     * GetQueuedCompletionStatus() does not set a thread to alertable state
-     */
+		event_list = ngx_alloc(sizeof(OVERLAPPED_ENTRY) * cf->events,
+			cycle->log);
+		if (event_list == NULL) {
+			return NGX_ERROR;
+		}
+	}
 
-    if (timer_thread == NULL) {
+	nevents = cf->events;
 
-        msec = timer;
+	ngx_io = ngx_iocp_io;
 
-        if (ngx_create_thread(&timer_thread, ngx_iocp_timer, &msec, cycle->log)
-            != 0)
-        {
-            return NGX_ERROR;
-        }
-    }
+	ngx_event_actions = ngx_iocp_module_ctx.actions;
 
-    ngx_event_flags |= NGX_USE_TIMER_EVENT;
+	ngx_event_flags = NGX_USE_IOCP_EVENT|NGX_USE_AIO_EVENT;
 
-    return NGX_OK;
-}
-
-
-static ngx_thread_value_t __stdcall
-ngx_iocp_timer(void *data)
-{
-    ngx_msec_t  timer = *(ngx_msec_t *) data;
-
-    ngx_log_debug2(NGX_LOG_DEBUG_EVENT, ngx_cycle->log, 0,
-                   "THREAD %p %p", &msec, data);
-
-    for ( ;; ) {
-        Sleep(timer);
-
-        ngx_time_update();
-#if 1
-        ngx_log_debug0(NGX_LOG_DEBUG_EVENT, ngx_cycle->log, 0, "timer");
-#endif
-    }
-
-#if defined(__WATCOMC__) || defined(__GNUC__)
-    return 0;
-#endif
+	return NGX_OK;
 }
 
 
 static void
 ngx_iocp_done(ngx_cycle_t *cycle)
 {
-    if (CloseHandle(iocp) == -1) {
+    if (CloseHandle(iocp) == 0) {
         ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
                       "iocp CloseHandle() failed");
     }
 
     iocp = NULL;
+
+    ngx_free(event_list);
+    event_list = NULL;
+    nevents = 0;
+}
+
+static ngx_int_t
+ngx_iocp_add_event(ngx_event_t *ev, ngx_int_t event, ngx_uint_t flags)
+{
+	ngx_connection_t  *c;
+
+	c = ev->data;
+
+	if (ev->accept) {
+		ngx_log_debug2(NGX_LOG_DEBUG_EVENT, ev->log, 0,
+			"overlap accept add: fd:%d, ov:%p", c->fd, &ev->ovlp);
+		
+		ev->ovlp.event = ev;
+
+		return NGX_OK;
+	}
+
+
+	ev->ovlp.event = ev;
+
+	ngx_log_debug2(NGX_LOG_DEBUG_EVENT, ev->log, 0,
+		"iocp add: fd:%d k:%ui, ov:%p", c->fd, &ev->ovlp);
+
+	if (CreateIoCompletionPort((HANDLE) c->fd, iocp, (ULONG_PTR) c, 0) == NULL)
+	{
+		ngx_log_error(NGX_LOG_ALERT, ev->log, ngx_errno,
+			"add event %d CreateIoCompletionPort() failed",  c->fd);
+		return NGX_ERROR;
+	}
+
+	ngx_log_debug1(NGX_LOG_DEBUG_EVENT, ev->log, 0,
+		"add event %d  CreateIoCompletionPort() success", c->fd);
+
+	return NGX_OK;
+}
+
+static ngx_int_t
+ngx_iocp_del_event(ngx_event_t *ev, ngx_int_t event, ngx_uint_t flags)
+{
+	return NGX_OK;
 }
 
 
 static ngx_int_t
-ngx_iocp_add_event(ngx_event_t *ev, ngx_int_t event, ngx_uint_t key)
+ngx_iocp_add_connection(ngx_connection_t *c)
 {
-    ngx_connection_t  *c;
+	ngx_event_t  *rev, *wev;
 
-    c = (ngx_connection_t *) ev->data;
+	rev = c->read;
+	wev = c->write;
 
-    c->read->active = 1;
-    c->write->active = 1;
+	rev->ovlp.event = rev;
+	wev->ovlp.event = wev;
 
-    ngx_log_debug3(NGX_LOG_DEBUG_EVENT, ev->log, 0,
-                   "iocp add: fd:%d k:%ui ov:%p", c->fd, key, &ev->ovlp);
+	if (CreateIoCompletionPort((HANDLE) c->fd, iocp, (ULONG_PTR) c, 0) == NULL)
+	{
+		ngx_log_error(NGX_LOG_ALERT, c->log, ngx_errno,
+			"add connection %d CreateIoCompletionPort() failed", c->fd);
+		return NGX_ERROR;
+	}
+	
+	ngx_log_debug1(NGX_LOG_DEBUG_EVENT, c->log, 0,
+		"add connection %d  CreateIoCompletionPort() success", c->fd);
 
-    if (CreateIoCompletionPort((HANDLE) c->fd, iocp, key, 0) == NULL) {
-        ngx_log_error(NGX_LOG_ALERT, c->log, ngx_errno,
-                      "CreateIoCompletionPort() failed");
-        return NGX_ERROR;
-    }
-
-    return NGX_OK;
+	return NGX_OK;
 }
-
 
 static ngx_int_t
 ngx_iocp_del_connection(ngx_connection_t *c, ngx_uint_t flags)
 {
-#if 0
-    if (flags & NGX_CLOSE_EVENT) {
-        return NGX_OK;
-    }
-
-    if (CancelIo((HANDLE) c->fd) == 0) {
-        ngx_log_error(NGX_LOG_ALERT, c->log, ngx_errno, "CancelIo() failed");
-        return NGX_ERROR;
-    }
-#endif
-
-    return NGX_OK;
+	return NGX_OK;
 }
 
-
-static
-ngx_int_t ngx_iocp_process_events(ngx_cycle_t *cycle, ngx_msec_t timer,
-    ngx_uint_t flags)
+static ngx_int_t
+ngx_iocp_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
 {
-    int                rc;
-    u_int              key;
-    u_long             bytes;
+    int                rc, events;
+    size_t             n;
+    ngx_int_t          i;
     ngx_err_t          err;
-    ngx_msec_t         delta;
     ngx_event_t       *ev;
+    ngx_queue_t       *queue;
+
+	ngx_connection_t  *c;
     ngx_event_ovlp_t  *ovlp;
 
-    if (timer == NGX_TIMER_INFINITE) {
-        timer = INFINITE;
-    }
+    ngx_set_errno(0);
 
-    ngx_log_debug1(NGX_LOG_DEBUG_EVENT, cycle->log, 0, "iocp timer: %M", timer);
+    if (ngx_win32_version >= NGX_WIN32_VER_600) {
+        events = 0;
 
-    rc = GetQueuedCompletionStatus(iocp, &bytes, (PULONG_PTR) &key,
-                                   (LPOVERLAPPED *) &ovlp, (u_long) timer);
+        rc = ngx_get_queued_completion_status_ex(iocp, event_list,
+                                                 (ULONG) nevents,
+                                                 (PULONG) &events,
+                                                 (DWORD) timer, FALSE);
 
-    if (rc == 0) {
-        err = ngx_errno;
     } else {
-        err = 0;
+
+        c = NULL;
+
+        rc = GetQueuedCompletionStatus(iocp, (LPDWORD) &n, (ULONG_PTR *) &c,
+                                       (OVERLAPPED **) &ovlp, (DWORD) timer);
+
+        if (ovlp != NULL) {
+            events = 1;
+
+            event_list[0].lpCompletionKey = (ULONG_PTR) c;
+            event_list[0].lpOverlapped = (OVERLAPPED *) ovlp;
+            event_list[0].dwNumberOfBytesTransferred = (DWORD) n;
+
+        } else {
+            events = 0;
+        }
     }
 
-    delta = ngx_current_msec;
+    err = ngx_errno;
 
     if (flags & NGX_UPDATE_TIME) {
         ngx_time_update();
     }
 
-    ngx_log_debug4(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
-                   "iocp: %d b:%d k:%d ov:%p", rc, bytes, key, ovlp);
+    /* TODO: err == ERROR_SEM_TIMEOUT */
 
-    if (timer != INFINITE) {
-        delta = ngx_current_msec - delta;
-
-        ngx_log_debug2(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
-                       "iocp timer: %M, delta: %M", timer, delta);
-    }
-
-    if (err) {
-        if (ovlp == NULL) {
-            if (err != WAIT_TIMEOUT) {
-                ngx_log_error(NGX_LOG_ALERT, cycle->log, err,
-                              "GetQueuedCompletionStatus() failed");
-
-                return NGX_ERROR;
-            }
-
-            return NGX_OK;
-        }
-
-        ovlp->error = err;
-    }
-
-    if (ovlp == NULL) {
-        ngx_log_error(NGX_LOG_ALERT, cycle->log, 0,
-                      "GetQueuedCompletionStatus() returned no operation");
-        return NGX_ERROR;
-    }
-
-
-    ev = ovlp->event;
-
-    ngx_log_debug1(NGX_LOG_DEBUG_EVENT, cycle->log, err, "iocp event:%p", ev);
-
-
-    if (err == ERROR_NETNAME_DELETED /* the socket was closed */
-        || err == ERROR_OPERATION_ABORTED /* the operation was canceled */)
-    {
-
-        /*
-         * the WSA_OPERATION_ABORTED completion notification
-         * for a file descriptor that was closed
-         */
-
-        ngx_log_debug1(NGX_LOG_DEBUG_EVENT, cycle->log, err,
-                       "iocp: aborted event %p", ev);
-
+    if (err == WAIT_TIMEOUT) {
         return NGX_OK;
     }
 
-    if (err) {
-        ngx_log_error(NGX_LOG_ALERT, cycle->log, err,
-                      "GetQueuedCompletionStatus() returned operation error");
-    }
+    for (i = 0; i < events; i++) {
 
-    switch (key) {
+        c = (ngx_connection_t *) event_list[i].lpCompletionKey;
+        ovlp = (ngx_event_ovlp_t *) event_list[i].lpOverlapped;
+        n = event_list[i].dwNumberOfBytesTransferred;
 
-    case NGX_IOCP_ACCEPT:
-        if (bytes) {
-            ev->ready = 1;
+        if ((c != NULL && c->fd == -1) || (ovlp != NULL && ovlp->event == NULL))
+        {
+			continue;
         }
-        break;
 
-    case NGX_IOCP_IO:
+        ev = ovlp->event;
         ev->complete = 1;
+
+		if (rc != 0) {
+            ev->available = (int) n;
+            ev->error = 0;
+
+            if (n == 0 && !ev->accept && !ev->write && !ovlp->posted_zero_byte)
+            {
+                ev->eof = 1;
+
+            } else {
+                ev->eof = 0;
+            }
+
+        } else {
+
+            ev->available = 0;
+            ev->error = 1;
+
+            ev->ovlp.error = err;
+        }
+
         ev->ready = 1;
-        break;
 
-    case NGX_IOCP_CONNECT:
-        ev->ready = 1;
-    }
 
-    ev->available = bytes;
+        if (flags & NGX_POST_EVENTS) {
 
-    ngx_log_debug1(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
-                   "iocp event handler: %p", ev->handler);
+			queue = ev->accept ? &ngx_posted_accept_events
+				: &ngx_posted_events;
 
-    ev->handler(ev);
+            ngx_post_event(ev, queue);
+
+        } else {
+            ev->handler(ev);
+        }
+	}
 
     return NGX_OK;
 }
 
-
 static void *
 ngx_iocp_create_conf(ngx_cycle_t *cycle)
 {
-    ngx_iocp_conf_t  *cf;
+	ngx_iocp_conf_t  *cf;
 
-    cf = ngx_palloc(cycle->pool, sizeof(ngx_iocp_conf_t));
-    if (cf == NULL) {
-        return NGX_CONF_ERROR;
-    }
+	cf = ngx_palloc(cycle->pool, sizeof(ngx_iocp_conf_t));
+	if (cf == NULL) {
+		return NULL;
+	}
 
-    cf->threads = NGX_CONF_UNSET;
-    cf->post_acceptex = NGX_CONF_UNSET;
-    cf->acceptex_read = NGX_CONF_UNSET;
+	cf->threads = NGX_CONF_UNSET_UINT;
+	cf->events = NGX_CONF_UNSET_UINT;
+	cf->post_acceptex = NGX_CONF_UNSET_UINT;
+	cf->acceptex_read = NGX_CONF_UNSET_UINT;
 
-    return cf;
+	return cf;
 }
+
 
 
 static char *
 ngx_iocp_init_conf(ngx_cycle_t *cycle, void *conf)
 {
-    ngx_iocp_conf_t *cf = conf;
+	ngx_iocp_conf_t *cf = conf;
 
-    ngx_conf_init_value(cf->threads, 0);
-    ngx_conf_init_value(cf->post_acceptex, 10);
-    ngx_conf_init_value(cf->acceptex_read, 1);
+	ngx_conf_init_uint_value(cf->threads, 0);
+	ngx_conf_init_uint_value(cf->events, 512);
+	ngx_conf_init_uint_value(cf->post_acceptex, 100);
+	ngx_conf_init_uint_value(cf->acceptex_read, 0);
 
-    return NGX_CONF_OK;
+	return NGX_CONF_OK;
 }

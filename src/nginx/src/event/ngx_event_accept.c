@@ -674,7 +674,7 @@ void ngx_event_recvmsg(ngx_event_t *ev)
 
         flags = 0;
         bytes = 0;        
-        n = WSARecvFrom(lc->fd, &wsabuf, 1, &bytes, &flags,
+        n = WSARecvFrom(lc->fd, (LPWSABUF)&wsabuf, 1, &bytes, &flags,
                      (struct sockaddr *) sa,
                      (LPINT) &socklen, NULL, NULL);
 

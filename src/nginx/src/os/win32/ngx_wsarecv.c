@@ -62,113 +62,95 @@ ngx_wsarecv(ngx_connection_t *c, u_char *buf, size_t size)
     return bytes;
 }
 
-
 ssize_t
 ngx_overlapped_wsarecv(ngx_connection_t *c, u_char *buf, size_t size)
 {
-    int               rc;
-    u_long            bytes, flags;
-    WSABUF            wsabuf[1];
-    ngx_err_t         err;
-    ngx_int_t         n;
-    ngx_event_t      *rev;
-    LPWSAOVERLAPPED   ovlp;
+    int             flags, rc;
+    WSABUF          wsabuf;
+    ssize_t         n;
+    ngx_err_t       err;
+    ngx_event_t    *rev;
+    WSAOVERLAPPED  *ovlp;
 
     rev = c->read;
 
-    if (!rev->ready) {
-        ngx_log_error(NGX_LOG_ALERT, c->log, 0, "second wsa post");
-        return NGX_AGAIN;
+    if (rev->eof || rev->closed) {
+        return 0;
     }
 
-    ngx_log_debug1(NGX_LOG_DEBUG_EVENT, c->log, 0,
-                   "rev->complete: %d", rev->complete);
-
-    if (rev->complete) {
-        rev->complete = 0;
-
-        if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
-            if (rev->ovlp.error) {
-                ngx_connection_error(c, rev->ovlp.error, "WSARecv() failed");
-                return NGX_ERROR;
-            }
-
-            ngx_log_debug3(NGX_LOG_DEBUG_EVENT, c->log, 0,
-                           "WSARecv ovlp: fd:%d %ul of %z",
-                           c->fd, rev->available, size);
-
-            return rev->available;
-        }
-
-        if (WSAGetOverlappedResult(c->fd, (LPWSAOVERLAPPED) &rev->ovlp,
-                                   &bytes, 0, NULL)
-            == 0)
-        {
-            ngx_connection_error(c, ngx_socket_errno,
-                               "WSARecv() or WSAGetOverlappedResult() failed");
-            return NGX_ERROR;
-        }
-
-        ngx_log_debug3(NGX_LOG_DEBUG_EVENT, c->log, 0,
-                       "WSARecv: fd:%d %ul of %z", c->fd, bytes, size);
-
-        return bytes;
+    if (rev->error) {
+        return NGX_ERROR;
     }
 
-    ovlp = (LPWSAOVERLAPPED) &rev->ovlp;
-    ngx_memzero(ovlp, sizeof(WSAOVERLAPPED));
-    wsabuf[0].buf = (char *) buf;
-    wsabuf[0].len = size;
+retry:
+
+    if (ngx_event_flags & NGX_USE_IOCP_EVENT && !rev->ovlp.posted_zero_byte) {
+        ovlp = (WSAOVERLAPPED *) &rev->ovlp;
+
+        wsabuf.buf = NULL;
+        wsabuf.len = 0;
+
+    } else {
+        ovlp = NULL;
+
+        wsabuf.buf = (CHAR *) buf;
+        wsabuf.len = (ULONG) size;
+    }
+
+    n = 0;
     flags = 0;
-    bytes = 0;
 
-    rc = WSARecv(c->fd, wsabuf, 1, &bytes, &flags, ovlp, NULL);
+    rc = WSARecv(c->fd, &wsabuf, 1, (DWORD *) &n, (LPDWORD) &flags, ovlp, NULL);
 
-    rev->complete = 0;
+    err = ngx_socket_errno;
 
-    ngx_log_debug4(NGX_LOG_DEBUG_EVENT, c->log, 0,
-                   "WSARecv ovlp: fd:%d rc:%d %ul of %z",
-                   c->fd, rc, bytes, size);
-
-    if (rc == -1) {
-        err = ngx_socket_errno;
-        if (err == WSA_IO_PENDING) {
-            rev->active = 1;
-            ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err,
-                           "WSARecv() posted");
+    if (rc == 0) {
+        if (ovlp != NULL) {
+            rev->ovlp.posted_zero_byte = 1;
+            rev->ready = 0;
             return NGX_AGAIN;
         }
 
-        n = ngx_connection_error(c, err, "WSARecv() failed");
-
-        if (n == NGX_ERROR) {
-            rev->error = 1;
+#if 0
+        if ((size_t) n < size) {
+            rev->ready = 0;
         }
+#endif
+
+        if (n == 0) {
+            rev->eof = 1;
+        }
+
+        rev->ovlp.posted_zero_byte = 0;
 
         return n;
     }
 
-    if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
-
-        /*
-         * if a socket was bound with I/O completion port
-         * then GetQueuedCompletionStatus() would anyway return its status
-         * despite that WSARecv() was already complete
-         */
-
-        rev->active = 1;
+    if (err == WSA_IO_PENDING) {
+        ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err, "WSARecv() not ready");
+        rev->ovlp.posted_zero_byte = 1;
+        rev->ready = 0;
         return NGX_AGAIN;
     }
 
-    if (bytes == 0) {
-        rev->eof = 1;
-        rev->ready = 0;
+    if (err == WSAEWOULDBLOCK) {
+        ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err, "WSARecv() not ready");
 
-    } else {
-        rev->ready = 1;
+        if ((ngx_event_flags & NGX_USE_IOCP_EVENT) == 0) {
+            rev->ready = 0;
+            return NGX_AGAIN;
+        }
+
+        /* post another overlapped-io WSARecv() */
+        rev->ovlp.posted_zero_byte = 0;
+        goto retry;
     }
 
-    rev->active = 0;
+    ngx_connection_error(c, err, "WSARecv() failed");
 
-    return bytes;
+    rev->ready = 0;
+    rev->error = 1;
+
+    return NGX_ERROR;
 }
+

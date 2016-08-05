@@ -64,122 +64,93 @@ ngx_wsasend(ngx_connection_t *c, u_char *buf, size_t size)
     return NGX_ERROR;
 }
 
-
 ssize_t
 ngx_overlapped_wsasend(ngx_connection_t *c, u_char *buf, size_t size)
 {
-    int               n;
-    u_long            sent;
-    ngx_err_t         err;
-    ngx_event_t      *wev;
-    LPWSAOVERLAPPED   ovlp;
-    WSABUF            wsabuf;
+    int             rc;
+    WSABUF          wsabuf;
+    ssize_t         n;
+    ngx_err_t       err;
+    ngx_event_t    *wev;
+    WSAOVERLAPPED  *ovlp;
 
     wev = c->write;
 
-    if (!wev->ready) {
-        return NGX_AGAIN;
+    if (wev->closed) {
+        return 0;
     }
 
-    ngx_log_debug1(NGX_LOG_DEBUG_EVENT, c->log, 0,
-                   "wev->complete: %d", wev->complete);
-
-    if (!wev->complete) {
-
-        /* post the overlapped WSASend() */
-
-        /*
-         * WSABUFs must be 4-byte aligned otherwise
-         * WSASend() will return undocumented WSAEINVAL error.
-         */
-
-        wsabuf.buf = (char *) buf;
-        wsabuf.len = size;
-
-        sent = 0;
-
-        ovlp = (LPWSAOVERLAPPED) &c->write->ovlp;
-        ngx_memzero(ovlp, sizeof(WSAOVERLAPPED));
-
-        n = WSASend(c->fd, &wsabuf, 1, &sent, 0, ovlp, NULL);
-
-        ngx_log_debug4(NGX_LOG_DEBUG_EVENT, c->log, 0,
-                       "WSASend: fd:%d, %d, %ul of %uz", c->fd, n, sent, size);
-
-        wev->complete = 0;
-
-        if (n == 0) {
-            if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
-
-                /*
-                 * if a socket was bound with I/O completion port then
-                 * GetQueuedCompletionStatus() would anyway return its status
-                 * despite that WSASend() was already complete
-                 */
-
-                wev->active = 1;
-                return NGX_AGAIN;
-            }
-
-            if (sent < size) {
-                wev->ready = 0;
-            }
-
-            c->sent += sent;
-
-            return sent;
-        }
-
-        err = ngx_socket_errno;
-
-        if (err == WSA_IO_PENDING) {
-            ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err,
-                           "WSASend() posted");
-            wev->active = 1;
-            return NGX_AGAIN;
-        }
-
-        wev->error = 1;
-        ngx_connection_error(c, err, "WSASend() failed");
-
+    if (wev->error) {
         return NGX_ERROR;
     }
 
-    /* the overlapped WSASend() complete */
+retry:
 
-    wev->complete = 0;
-    wev->active = 0;
+    if (ngx_event_flags & NGX_USE_IOCP_EVENT && !wev->ovlp.posted_zero_byte) {
+        ovlp = (WSAOVERLAPPED *) &wev->ovlp;
 
-    if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
+        /* overlapped io */
 
-        if (wev->ovlp.error) {
-            ngx_connection_error(c, wev->ovlp.error, "WSASend() failed");
-            return NGX_ERROR;
-        }
-
-        sent = wev->available;
+        wsabuf.buf = NULL;
+        wsabuf.len = 0;
 
     } else {
-        if (WSAGetOverlappedResult(c->fd, (LPWSAOVERLAPPED) &wev->ovlp,
-                                   &sent, 0, NULL)
-            == 0)
-        {
-            ngx_connection_error(c, ngx_socket_errno,
-                           "WSASend() or WSAGetOverlappedResult() failed");
+        ovlp = NULL;
 
-            return NGX_ERROR;
+        /* non-blocking io */
+
+        wsabuf.buf = (CHAR *) buf;
+        wsabuf.len = (ULONG) size;
+    }
+
+    n = 0;
+
+    rc = WSASend(c->fd, &wsabuf, 1, (DWORD *) &n, 0, ovlp, NULL);
+
+    err = ngx_socket_errno;
+
+    if (rc == 0) {
+        if (ovlp != NULL) {
+            wev->ovlp.posted_zero_byte = 1;
+            wev->ready = 0;
+            return NGX_AGAIN;
         }
+
+#if 0
+        if ((size_t) n < size) {
+            wev->ready = 0;
+        }
+#endif
+
+        wev->ovlp.posted_zero_byte = 0;
+
+        return n;
     }
 
-    ngx_log_debug3(NGX_LOG_DEBUG_EVENT, c->log, 0,
-                   "WSAGetOverlappedResult: fd:%d, %ul of %uz",
-                   c->fd, sent, size);
-
-    if (sent < size) {
+    if (err == WSA_IO_PENDING) {
+        ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err, "WSASend() not ready");
+        wev->ovlp.posted_zero_byte = 1;
         wev->ready = 0;
+        return NGX_AGAIN;
     }
 
-    c->sent += sent;
+    if (err == WSAEWOULDBLOCK) {
+        ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err, "WSASend() not ready");
 
-    return sent;
+        if ((ngx_event_flags & NGX_USE_IOCP_EVENT) == 0) {
+            wev->ready = 0;
+            return NGX_AGAIN;
+        }
+
+        /* post another overlapped-io WSASend() */
+        wev->ovlp.posted_zero_byte = 0;
+        goto retry;
+    }
+
+    ngx_connection_error(c, err, "WSASend() failed");
+
+    wev->ready = 0;
+    wev->error = 1;
+
+    return NGX_ERROR;
 }

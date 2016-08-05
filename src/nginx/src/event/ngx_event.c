@@ -762,7 +762,7 @@ ngx_event_process_init(ngx_cycle_t *cycle)
 #endif
 
         if (!(ngx_event_flags & NGX_USE_IOCP_EVENT)) {
-            if (ls[i].previous) {
+            if (ls[i].previous && ls[i].previous->connection) {
 
                 /*
                  * delete the old accept events that were bound to

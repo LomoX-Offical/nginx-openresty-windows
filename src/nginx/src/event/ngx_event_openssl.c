@@ -49,6 +49,19 @@ static void ngx_ssl_expire_sessions(ngx_ssl_session_cache_t *cache,
 static void ngx_ssl_session_rbtree_insert_value(ngx_rbtree_node_t *temp,
     ngx_rbtree_node_t *node, ngx_rbtree_node_t *sentinel);
 
+#if (NGX_HAVE_IOCP)
+
+static int ngx_ssl_set_fd(ngx_ssl_conn_t *ssl_conn, ngx_connection_t *c);
+
+static int ngx_ssl_bio_create(BIO *bio);
+static int ngx_ssl_bio_destroy(BIO *bio);
+static long ngx_ssl_bio_ctrl(BIO *bio, int cmd, long num, void *ptr);
+static int ngx_ssl_bio_read(BIO *bio, char *buf, int size);
+static int ngx_ssl_bio_write(BIO *bio, const char *buf, int size);
+static int ngx_ssl_bio_puts(BIO *bio, const char *buf);
+
+#endif
+
 #ifdef SSL_CTRL_SET_TLSEXT_TICKET_KEY_CB
 static int ngx_ssl_session_ticket_key_callback(ngx_ssl_conn_t *ssl_conn,
     unsigned char *name, unsigned char *iv, EVP_CIPHER_CTX *ectx,
@@ -98,6 +111,24 @@ ngx_module_t  ngx_openssl_module = {
     ngx_openssl_exit,                      /* exit master */
     NGX_MODULE_V1_PADDING
 };
+
+#if (NGX_HAVE_IOCP)
+
+static BIO_METHOD  ngx_ssl_bio_method = {
+	BIO_TYPE_SOCKET,
+	"socket",
+	ngx_ssl_bio_write,
+	ngx_ssl_bio_read,
+	ngx_ssl_bio_puts,
+	NULL,
+	ngx_ssl_bio_ctrl,
+	ngx_ssl_bio_create,
+	ngx_ssl_bio_destroy,
+	NULL
+};
+
+#endif
+
 
 
 int  ngx_ssl_connection_index;
@@ -1143,10 +1174,32 @@ ngx_ssl_create_connection(ngx_ssl_t *ssl, ngx_connection_t *c, ngx_uint_t flags)
         return NGX_ERROR;
     }
 
-    if (SSL_set_fd(sc->connection, c->fd) == 0) {
-        ngx_ssl_error(NGX_LOG_ALERT, c->log, 0, "SSL_set_fd() failed");
-        return NGX_ERROR;
-    }
+
+#if !(NGX_HAVE_IOCP)
+
+	if (SSL_set_fd(sc->connection, c->fd) == 0) {
+		ngx_ssl_error(NGX_LOG_ALERT, c->log, 0, "SSL_set_fd() failed");
+		return NGX_ERROR;
+	}
+
+#else
+
+	if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
+		if (ngx_ssl_set_fd(sc->connection, c) == 0) {
+			ngx_ssl_error(NGX_LOG_ALERT, c->log, 0, "ngx_ssl_set_fd() failed");
+			return NGX_ERROR;
+		}
+
+	} else {
+		if (SSL_set_fd(sc->connection, c->fd) == 0) {
+			ngx_ssl_error(NGX_LOG_ALERT, c->log, 0, "SSL_set_fd() failed");
+			return NGX_ERROR;
+		}
+	}
+
+#endif
+
+
 
     if (flags & NGX_SSL_CLIENT) {
         SSL_set_connect_state(sc->connection);
@@ -3585,6 +3638,132 @@ ngx_ssl_get_client_verify(ngx_connection_t *c, ngx_pool_t *pool, ngx_str_t *s)
     return NGX_OK;
 }
 
+#if (NGX_HAVE_IOCP)
+
+static int
+ngx_ssl_set_fd(ngx_ssl_conn_t *ssl_conn, ngx_connection_t *c)
+{
+    BIO  *bio;
+
+    bio = BIO_new(&ngx_ssl_bio_method);
+    if (bio == NULL) {
+        SSLerr(SSL_F_SSL_SET_FD, ERR_R_BUF_LIB);
+        return 0;
+    }
+
+    BIO_set_fd(bio, c->fd, BIO_NOCLOSE);
+    SSL_set_bio(ssl_conn, bio, bio);
+
+    bio->ptr = c;
+
+    return 1;
+}
+
+
+static int
+ngx_ssl_bio_create(BIO *bio)
+{
+    bio->init = 0;
+    bio->num = 0;
+    bio->ptr = 0;
+    bio->flags = 0;
+
+    return 1;
+}
+
+
+static int
+ngx_ssl_bio_destroy(BIO *bio)
+{
+    return 1;
+}
+
+
+static long
+ngx_ssl_bio_ctrl(BIO *bio, int cmd, long num, void *ptr)
+{
+    switch (cmd) {
+
+    case BIO_C_SET_FD:
+        bio->num = *((int *) ptr);
+        bio->shutdown = num;
+        bio->init = 1;
+        break;
+    default:
+        return 0;
+    }
+
+    return 1;
+}
+
+
+static int
+ngx_ssl_bio_read(BIO *bio, char *buf, int size)
+{
+    ssize_t            n;
+    ngx_connection_t  *c;
+
+    c = bio->ptr;
+
+    ngx_set_socket_errno(0);
+
+    n = ngx_recv(c, (u_char*)buf, size);
+
+    if (n != NGX_AGAIN) {
+        ngx_log_error(NGX_LOG_ALERT, c->log, 0, "ngx_ssl_bio_read() n:%z", n);
+    }
+
+    BIO_clear_retry_flags(bio);
+
+    if (n == NGX_AGAIN) {
+        BIO_set_retry_read(bio);
+        return -1;
+    }
+
+    return n;
+}
+
+
+static int
+ngx_ssl_bio_write(BIO *bio, const char *buf, int size)
+{
+    ssize_t            n;
+    ngx_connection_t  *c;
+
+    c = bio->ptr;
+
+    ngx_set_socket_errno(0);
+
+    n = ngx_send(c, (u_char *) buf, size);
+
+    if (n != NGX_AGAIN) {
+        ngx_log_error(NGX_LOG_ALERT, c->log, 0, "ngx_ssl_bio_write() n:%z", n);
+    }
+
+    BIO_clear_retry_flags(bio);
+
+    if (n == NGX_AGAIN) {
+        BIO_set_retry_read(bio);
+        return -1;
+    }
+
+    return n;
+}
+
+
+static int
+ngx_ssl_bio_puts(BIO *bio, const char *buf)
+{
+    ngx_connection_t  *c;
+
+    c = bio->ptr;
+
+    ngx_log_error(NGX_LOG_ALERT, c->log, 0, "ngx_ssl_bio_puts()");
+
+    return 0;
+}
+
+#endif
 
 static void *
 ngx_openssl_create_conf(ngx_cycle_t *cycle)

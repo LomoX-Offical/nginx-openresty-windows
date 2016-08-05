@@ -80,6 +80,16 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
         goto failed;
     }
 
+#if (NGX_HAVE_IOCP)
+
+	if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
+		if (pc->local == NULL) {
+			pc->local = &ngx_iocp_local_addr;
+		}
+	}
+
+#endif
+
     if (pc->local) {
 
 #if (NGX_HAVE_TRANSPARENT_PROXY)
@@ -189,9 +199,23 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
     ngx_log_debug3(NGX_LOG_DEBUG_EVENT, pc->log, 0,
                    "connect to %V, fd:%d #%uA", pc->name, s, c->number);
 
-    rc = connect(s, pc->sockaddr, pc->socklen);
+#if (NGX_HAVE_IOCP)
 
-    if (rc == -1) {
+	if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
+		rc = ngx_connectex(s, pc->sockaddr, pc->socklen, NULL, 0, NULL,
+			(OVERLAPPED *) &wev->ovlp) != 0 ? 0 : -1;
+
+	} else {
+		rc = connect(s, pc->sockaddr, pc->socklen);
+	}
+
+#else
+
+	rc = connect(s, pc->sockaddr, pc->socklen);
+
+#endif
+
+	if (rc == -1) {
         err = ngx_socket_errno;
 
 
@@ -199,6 +223,9 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
 #if (NGX_WIN32)
             /* Winsock returns WSAEWOULDBLOCK (NGX_EAGAIN) */
             && err != NGX_EAGAIN
+#if (NGX_HAVE_IOCP)
+			&& err != WSA_IO_PENDING
+#endif
 #endif
             )
         {
@@ -233,7 +260,12 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
     }
 
     if (ngx_add_conn) {
-        if (rc == -1) {
+		if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
+			rev->ready = 1;
+			return NGX_AGAIN;
+		}
+
+		if (rc == -1) {
 
             /* NGX_EINPROGRESS */
 

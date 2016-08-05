@@ -114,7 +114,9 @@ struct ngx_event_s {
 
 
 #if (NGX_HAVE_IOCP)
-    ngx_event_ovlp_t ovlp;
+	ngx_event_ovlp_t ovlp;
+	HANDLE           wait_handle;
+	HANDLE           event_handle;
 #endif
 
     ngx_uint_t       index;

@@ -30,45 +30,97 @@ ngx_os_io_t ngx_os_io = {
     0
 };
 
-
 typedef struct {
-    WORD  wServicePackMinor;
-    WORD  wSuiteMask;
-    BYTE  wProductType;
+	WORD  wServicePackMinor;
+	WORD  wSuiteMask;
+	BYTE  wProductType;
 } ngx_osviex_stub_t;
 
 
-static u_int               osviex;
+static u_int               is_osviex;
 static OSVERSIONINFOEX     osvi;
 
 /* Should these pointers be per protocol ? */
-LPFN_ACCEPTEX              ngx_acceptex;
-LPFN_GETACCEPTEXSOCKADDRS  ngx_getacceptexsockaddrs;
-LPFN_TRANSMITFILE          ngx_transmitfile;
-LPFN_TRANSMITPACKETS       ngx_transmitpackets;
-LPFN_CONNECTEX             ngx_connectex;
-LPFN_DISCONNECTEX          ngx_disconnectex;
+LPFN_ACCEPTEX                     ngx_acceptex;
+LPFN_CONNECTEX                    ngx_connectex;
+LPFN_DISCONNECTEX                 ngx_disconnectex;
+LPFN_TRANSMITFILE                 ngx_transmitfile;
+LPFN_TRANSMITPACKETS              ngx_transmitpackets;
+LPFN_GETACCEPTEXSOCKADDRS         ngx_getacceptexsockaddrs;
+LPFN_GETQUEUEDCOMPLETIONSTATUSEX  ngx_get_queued_completion_status_ex;
 
-static GUID ax_guid = WSAID_ACCEPTEX;
-static GUID as_guid = WSAID_GETACCEPTEXSOCKADDRS;
-static GUID tf_guid = WSAID_TRANSMITFILE;
-static GUID tp_guid = WSAID_TRANSMITPACKETS;
-static GUID cx_guid = WSAID_CONNECTEX;
-static GUID dx_guid = WSAID_DISCONNECTEX;
+
+static struct {
+	GUID          guid;
+	u_long        glen;
+	void        **func;
+	u_long        flen;
+	ngx_uint_t    win_ver;
+	char         *func_name;
+}  ngx_wefs[] = {
+
+	{ WSAID_GETACCEPTEXSOCKADDRS,
+	sizeof(GUID),
+	(void **) &ngx_getacceptexsockaddrs,
+	sizeof(ngx_getacceptexsockaddrs),
+	NGX_WIN32_VER_400,
+	"GetAcceptExSockaddrs" },
+
+	{ WSAID_ACCEPTEX,
+	sizeof(GUID),
+	(void **) &ngx_acceptex,
+	sizeof(ngx_acceptex),
+	NGX_WIN32_VER_500,
+	"AcceptEx" },
+
+	{ WSAID_TRANSMITFILE,
+	sizeof(GUID),
+	(void **) &ngx_transmitfile,
+	sizeof(ngx_transmitfile),
+	NGX_WIN32_VER_500,
+	"TransmitFile" },
+
+	{ WSAID_CONNECTEX,
+	sizeof(GUID),
+	(void **) &ngx_connectex,
+	sizeof(ngx_connectex),
+	NGX_WIN32_VER_501,
+	"ConnectEx" },
+
+	{ WSAID_DISCONNECTEX,
+	sizeof(GUID),
+	(void **) &ngx_disconnectex,
+	sizeof(ngx_disconnectex),
+	NGX_WIN32_VER_501,
+	"DisconnectEx" },
+
+	{ WSAID_TRANSMITPACKETS,
+	sizeof(GUID),
+	(void **) &ngx_transmitpackets,
+	sizeof(ngx_transmitpackets),
+	NGX_WIN32_VER_501,
+	"TransmitPackets" },
+
+	{ {0,0,0,{0,0,0,0,0,0,0,0}}, 0, NULL, 0, 0, NULL }
+};
 
 
 ngx_int_t
 ngx_os_init(ngx_log_t *log)
 {
-    DWORD        bytes;
-    SOCKET       s;
-    WSADATA      wsd;
-    ngx_err_t    err;
-    ngx_uint_t   n;
-    SYSTEM_INFO  si;
+	void           *handle;
+	long            rc;
+	u_long          bytes;
+	SOCKET          s;
+	WSADATA         wsadata;
+	in_port_t       port;
+	ngx_err_t       err;
+	ngx_uint_t      n;
+	SOCKADDR_IN     sa;
+	SYSTEM_INFO     si;
 
-    /* get Windows version */
 
+    /* current windows version */
     ngx_memzero(&osvi, sizeof(OSVERSIONINFOEX));
     osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
 
@@ -76,9 +128,9 @@ ngx_os_init(ngx_log_t *log)
 #pragma warning(disable:4996)
 #endif
 
-    osviex = GetVersionEx((OSVERSIONINFO *) &osvi);
+    is_osviex = GetVersionEx((OSVERSIONINFO *) &osvi);
 
-    if (osviex == 0) {
+    if (is_osviex == 0) {
         osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
         if (GetVersionEx((OSVERSIONINFO *) &osvi) == 0) {
             ngx_log_error(NGX_LOG_EMERG, log, ngx_errno,
@@ -112,7 +164,7 @@ ngx_os_init(ngx_log_t *log)
                         + osvi.dwMajorVersion * 10000
                         + osvi.dwMinorVersion * 100;
 
-    if (osviex) {
+    if (is_osviex) {
         ngx_win32_version += osvi.wServicePackMajor * 10
                              + osvi.wServicePackMinor;
     }
@@ -129,97 +181,132 @@ ngx_os_init(ngx_log_t *log)
     setlocale(LC_ALL, "");
 
 
-    /* init Winsock */
+	if (ngx_win32_version >= NGX_WIN32_VER_600) {
+		handle = GetModuleHandle("kernel32.dll");
+		if (handle == NULL) {
+			ngx_log_error(NGX_LOG_ALERT, log, ngx_errno,
+				"GetModuleHandle(\"kernel32.dll\") failed");
+			return NGX_ERROR;
+		}
 
-    if (WSAStartup(MAKEWORD(2,2), &wsd) != 0) {
-        ngx_log_error(NGX_LOG_EMERG, log, ngx_socket_errno,
-                      "WSAStartup() failed");
-        return NGX_ERROR;
-    }
+		ngx_get_queued_completion_status_ex = (LPFN_GETQUEUEDCOMPLETIONSTATUSEX) GetProcAddress(handle,
+			"GetQueuedCompletionStatusEx");
+		if (ngx_get_queued_completion_status_ex == NULL) {
+			ngx_log_error(NGX_LOG_ALERT, log, ngx_errno,
+				"GetProcAddress(\"GetQueuedCompletionStatusEx\") failed");
+			return NGX_ERROR;
+		}
+	}
 
-    if (ngx_win32_version < NGX_WIN_NT) {
-        ngx_max_wsabufs = 16;
-        return NGX_OK;
-    }
 
-    /* STUB: ngx_uint_t max */
-    ngx_max_wsabufs = 1024 * 1024;
+	/* init Winsock */
 
-    /*
-     * get AcceptEx(), GetAcceptExSockAddrs(), TransmitFile(),
-     * TransmitPackets(), ConnectEx(), and DisconnectEx() addresses
-     */
+	rc = WSAStartup(MAKEWORD(2, 2), &wsadata);
+	if (rc != 0) {
+		ngx_log_error(NGX_LOG_EMERG, log, rc, "WSAStartup() failed");
+		return NGX_ERROR;
 
-    s = ngx_socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
-    if (s == (ngx_socket_t) -1) {
-        ngx_log_error(NGX_LOG_EMERG, log, ngx_socket_errno,
-                      ngx_socket_n " failed");
-        return NGX_ERROR;
-    }
+	} else if (LOBYTE(wsadata.wVersion) != 2
+		|| HIBYTE(wsadata.wVersion) != 2)
+	{
+		ngx_log_error(NGX_LOG_EMERG, log, 0,
+			"WinSock DLL doesn't supports V2.2");
+		WSACleanup();
+		return NGX_ERROR;
+	}
 
-    if (WSAIoctl(s, SIO_GET_EXTENSION_FUNCTION_POINTER, &ax_guid, sizeof(GUID),
-                 &ngx_acceptex, sizeof(LPFN_ACCEPTEX), &bytes, NULL, NULL)
-        == -1)
-    {
-        ngx_log_error(NGX_LOG_NOTICE, log, ngx_socket_errno,
-                      "WSAIoctl(SIO_GET_EXTENSION_FUNCTION_POINTER, "
-                               "WSAID_ACCEPTEX) failed");
-    }
+	s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (s == INVALID_SOCKET) {
+		ngx_log_error(NGX_LOG_EMERG, log, ngx_socket_errno,
+			"socket() failed");
+		WSACleanup();
+		return NGX_ERROR;
+	}
 
-    if (WSAIoctl(s, SIO_GET_EXTENSION_FUNCTION_POINTER, &as_guid, sizeof(GUID),
-                 &ngx_getacceptexsockaddrs, sizeof(LPFN_GETACCEPTEXSOCKADDRS),
-                 &bytes, NULL, NULL)
-        == -1)
-    {
-        ngx_log_error(NGX_LOG_NOTICE, log, ngx_socket_errno,
-                      "WSAIoctl(SIO_GET_EXTENSION_FUNCTION_POINTER, "
-                               "WSAID_GETACCEPTEXSOCKADDRS) failed");
-    }
+	if (ngx_win32_version < NGX_WIN_NT) {
+		ngx_max_wsabufs = 16;
+	} else {
+		/* STUB: ngx_uint_t max */
+		ngx_max_wsabufs = 1024 * 1024;
+	}
 
-    if (WSAIoctl(s, SIO_GET_EXTENSION_FUNCTION_POINTER, &tf_guid, sizeof(GUID),
-                 &ngx_transmitfile, sizeof(LPFN_TRANSMITFILE), &bytes,
-                 NULL, NULL)
-        == -1)
-    {
-        ngx_log_error(NGX_LOG_NOTICE, log, ngx_socket_errno,
-                      "WSAIoctl(SIO_GET_EXTENSION_FUNCTION_POINTER, "
-                               "WSAID_TRANSMITFILE) failed");
-    }
+	port = 0;
 
-    if (WSAIoctl(s, SIO_GET_EXTENSION_FUNCTION_POINTER, &tp_guid, sizeof(GUID),
-                 &ngx_transmitpackets, sizeof(LPFN_TRANSMITPACKETS), &bytes,
-                 NULL, NULL)
-        == -1)
-    {
-        ngx_log_error(NGX_LOG_NOTICE, log, ngx_socket_errno,
-                      "WSAIoctl(SIO_GET_EXTENSION_FUNCTION_POINTER, "
-                               "WSAID_TRANSMITPACKETS) failed");
-    }
+retry_bind:
 
-    if (WSAIoctl(s, SIO_GET_EXTENSION_FUNCTION_POINTER, &cx_guid, sizeof(GUID),
-                 &ngx_connectex, sizeof(LPFN_CONNECTEX), &bytes,
-                 NULL, NULL)
-        == -1)
-    {
-        ngx_log_error(NGX_LOG_NOTICE, log, ngx_socket_errno,
-                      "WSAIoctl(SIO_GET_EXTENSION_FUNCTION_POINTER, "
-                               "WSAID_CONNECTEX) failed");
-    }
+	sa.sin_family = AF_INET;
+	sa.sin_addr.s_addr = htonl(INADDR_ANY);
+	sa.sin_port = htons(port);
 
-    if (WSAIoctl(s, SIO_GET_EXTENSION_FUNCTION_POINTER, &dx_guid, sizeof(GUID),
-                 &ngx_disconnectex, sizeof(LPFN_DISCONNECTEX), &bytes,
-                 NULL, NULL)
-        == -1)
-    {
-        ngx_log_error(NGX_LOG_NOTICE, log, ngx_socket_errno,
-                      "WSAIoctl(SIO_GET_EXTENSION_FUNCTION_POINTER, "
-                               "WSAID_DISCONNECTEX) failed");
-    }
+	if (bind(s, (SOCKADDR *) &sa, sizeof(SOCKADDR_IN)) == SOCKET_ERROR) {
+		err = ngx_socket_errno;
 
-    if (ngx_close_socket(s) == -1) {
-        ngx_log_error(NGX_LOG_ALERT, log, ngx_socket_errno,
-                      ngx_close_socket_n " failed");
-    }
+		if (err == WSAEADDRINUSE) {
+			ngx_log_error(NGX_LOG_ALERT, log, err, "bind() failed: %s:%u",
+				inet_ntoa(sa.sin_addr), port);
+
+			port++;
+			goto retry_bind;
+		}
+
+		ngx_log_error(NGX_LOG_EMERG, log, err, "bind() failed");
+
+		closesocket(s);
+		WSACleanup();
+
+		return NGX_ERROR;
+	}
+
+	if (listen(s, NGX_LISTEN_BACKLOG) == SOCKET_ERROR) {
+		err = ngx_socket_errno;
+
+		if (err == WSAEADDRINUSE) {
+			ngx_log_error(NGX_LOG_ALERT, log, err, "listen() failed: %s:%u",
+				inet_ntoa(sa.sin_addr), port);
+			port++;
+			goto retry_bind;
+		}
+
+		ngx_log_error(NGX_LOG_EMERG, log, err, "listen() failed");
+		closesocket(s);
+		WSACleanup();
+		return NGX_ERROR;
+	}
+
+	for (n = 0; ngx_wefs[n].func; n++) {
+
+		if (ngx_win32_version >= ngx_wefs[n].win_ver) {
+			bytes = 0;
+
+			if (WSAIoctl(s, SIO_GET_EXTENSION_FUNCTION_POINTER,
+				&ngx_wefs[n].guid, ngx_wefs[n].glen,
+				ngx_wefs[n].func, ngx_wefs[n].flen, &bytes, NULL, NULL)
+				== SOCKET_ERROR)
+			{
+				err = ngx_socket_errno;
+
+				if (err != WSAEINVAL && err != WSAEOPNOTSUPP) {
+					ngx_log_error(NGX_LOG_EMERG, log, err,
+						"WSAIoctl(%s) failed", ngx_wefs[n].func_name);
+					closesocket(s);
+					WSACleanup();
+					return NGX_ERROR;
+				}
+
+				ngx_log_error(NGX_LOG_ALERT, log, err,
+					"WSAIoctl: %s", ngx_wefs[n].func_name);
+
+				continue;
+			}
+
+			ngx_log_debug1(NGX_LOG_DEBUG_CORE, log, 0,
+				"WSAIoctl(%s) successfully", ngx_wefs[n].func_name);
+		}
+	}
+
+	closesocket(s);
+
+
 
     if (GetEnvironmentVariable("ngx_unique", ngx_unique, NGX_INT32_LEN + 1)
         != 0)
@@ -238,7 +325,13 @@ ngx_os_init(ngx_log_t *log)
         ngx_sprintf((u_char *) ngx_unique, "%P%Z", ngx_pid);
     }
 
-    srand((ngx_pid << 16) ^ (unsigned) ngx_time());
+#if (NGX_HAVE_INHERITED_NONBLOCK)
+	ngx_inherited_nonblocking = 1;
+#else
+	ngx_inherited_nonblocking = 0;
+#endif
+
+	srand((ngx_pid << 16) ^ (unsigned) ngx_time());
 
     return NGX_OK;
 }
@@ -251,7 +344,7 @@ ngx_os_status(ngx_log_t *log)
 
     ngx_log_error(NGX_LOG_NOTICE, log, 0, NGINX_VER_BUILD);
 
-    if (osviex) {
+    if (is_osviex) {
 
         /*
          * the MSVC 6.0 SP2 defines wSuiteMask and wProductType

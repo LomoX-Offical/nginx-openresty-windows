@@ -527,7 +527,6 @@ ngx_read_glob(ngx_glob_t *gl, ngx_str_t *name)
 {
     size_t     len;
     ngx_err_t  err;
-    int        ret;
 
     if (gl->no_match) {
         return NGX_DONE;
