@@ -11,10 +11,10 @@
 
 typedef struct {
     ngx_uint_t    threads;
-	ngx_uint_t    events;
+    ngx_uint_t    events;
     ngx_uint_t    post_acceptex;
     ngx_uint_t    acceptex_read;
-	ngx_uint_t    post_udp_recv;
+    ngx_uint_t    post_udp_recv;
 } ngx_iocp_conf_t;
 
 

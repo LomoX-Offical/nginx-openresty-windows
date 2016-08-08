@@ -78,18 +78,18 @@ static ngx_event_module_t  ngx_iocp_module_ctx = {
 };
 
 ngx_module_t  ngx_iocp_module = {
-	NGX_MODULE_V1,
-	&ngx_iocp_module_ctx,                /* module context */
-	ngx_iocp_commands,                   /* module directives */
-	NGX_EVENT_MODULE,                    /* module type */
-	NULL,                                /* init master */
-	NULL,                                /* init module */
-	NULL,                                /* init process */
-	NULL,                                /* init thread */
-	NULL,                                /* exit thread */
-	NULL,                                /* exit process */
-	NULL,                                /* exit master */
-	NGX_MODULE_V1_PADDING
+    NGX_MODULE_V1,
+    &ngx_iocp_module_ctx,                /* module context */
+    ngx_iocp_commands,                   /* module directives */
+    NGX_EVENT_MODULE,                    /* module type */
+    NULL,                                /* init master */
+    NULL,                                /* init module */
+    NULL,                                /* init process */
+    NULL,                                /* init thread */
+    NULL,                                /* exit thread */
+    NULL,                                /* exit process */
+    NULL,                                /* exit master */
+    NGX_MODULE_V1_PADDING
 };
 
 
@@ -101,66 +101,66 @@ static ngx_uint_t          nevents;
 ngx_addr_t                 ngx_iocp_local_addr;
 
 ngx_os_io_t  ngx_iocp_io = {
-	ngx_overlapped_wsarecv,
-	ngx_overlapped_wsarecv_chain,
-	NULL,
-	ngx_overlapped_wsasend,
-	NULL,
-	ngx_overlapped_wsasend_chain,
-	0
+    ngx_overlapped_wsarecv,
+    ngx_overlapped_wsarecv_chain,
+    NULL,
+    ngx_overlapped_wsasend,
+    NULL,
+    ngx_overlapped_wsasend_chain,
+    0
 };
 
 static ngx_int_t
 ngx_iocp_init(ngx_cycle_t *cycle, ngx_msec_t timer)
 {
-	ngx_iocp_conf_t  *cf;
+    ngx_iocp_conf_t  *cf;
 
-	sa.sin_family = AF_INET;
-	sa.sin_addr.s_addr = htonl(INADDR_ANY);
-	sa.sin_port = htons(0);
+    sa.sin_family = AF_INET;
+    sa.sin_addr.s_addr = htonl(INADDR_ANY);
+    sa.sin_port = htons(0);
 
-	ngx_iocp_local_addr.sockaddr  = (struct sockaddr *) &sa;
-	ngx_iocp_local_addr.socklen   = sizeof(struct sockaddr_in);
-	ngx_iocp_local_addr.name.len  = sizeof("INADDR_ANY") - 1;
-	ngx_iocp_local_addr.name.data = (u_char *) "INADDR_ANY";
+    ngx_iocp_local_addr.sockaddr  = (struct sockaddr *) &sa;
+    ngx_iocp_local_addr.socklen   = sizeof(struct sockaddr_in);
+    ngx_iocp_local_addr.name.len  = sizeof("INADDR_ANY") - 1;
+    ngx_iocp_local_addr.name.data = (u_char *) "INADDR_ANY";
 
-	cf = ngx_event_get_conf(cycle->conf_ctx, ngx_iocp_module);
+    cf = ngx_event_get_conf(cycle->conf_ctx, ngx_iocp_module);
 
-	if (iocp == NULL) {
-		iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0,
-			(DWORD) cf->threads);
+    if (iocp == NULL) {
+        iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0,
+            (DWORD) cf->threads);
 
-		if (iocp == NULL) {
-			ngx_log_error(NGX_LOG_EMERG, cycle->log, ngx_errno,
-				"INVALID_HANDLE_VALUE CreateIoCompletionPort() failed");
-			return NGX_ERROR;
-		}
+        if (iocp == NULL) {
+            ngx_log_error(NGX_LOG_EMERG, cycle->log, ngx_errno,
+                "INVALID_HANDLE_VALUE CreateIoCompletionPort() failed");
+            return NGX_ERROR;
+        }
 
-		ngx_log_debug0(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
-			"CreateIoCompletionPort() init success");
-	}
+        ngx_log_debug0(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
+            "CreateIoCompletionPort() init success");
+    }
 
-	if (nevents < cf->events) {
-		if (event_list) {
-			ngx_free(event_list);
-		}
+    if (nevents < cf->events) {
+        if (event_list) {
+            ngx_free(event_list);
+        }
 
-		event_list = ngx_alloc(sizeof(OVERLAPPED_ENTRY) * cf->events,
-			cycle->log);
-		if (event_list == NULL) {
-			return NGX_ERROR;
-		}
-	}
+        event_list = ngx_alloc(sizeof(OVERLAPPED_ENTRY) * cf->events,
+            cycle->log);
+        if (event_list == NULL) {
+            return NGX_ERROR;
+        }
+    }
 
-	nevents = cf->events;
+    nevents = cf->events;
 
-	ngx_io = ngx_iocp_io;
+    ngx_io = ngx_iocp_io;
 
-	ngx_event_actions = ngx_iocp_module_ctx.actions;
+    ngx_event_actions = ngx_iocp_module_ctx.actions;
 
-	ngx_event_flags = NGX_USE_IOCP_EVENT|NGX_USE_AIO_EVENT;
+    ngx_event_flags = NGX_USE_IOCP_EVENT|NGX_USE_AIO_EVENT;
 
-	return NGX_OK;
+    return NGX_OK;
 }
 
 
@@ -169,7 +169,7 @@ ngx_iocp_done(ngx_cycle_t *cycle)
 {
     if (CloseHandle(iocp) == 0) {
         ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
-                      "iocp CloseHandle() failed");
+            "iocp CloseHandle() failed");
     }
 
     iocp = NULL;
@@ -182,73 +182,73 @@ ngx_iocp_done(ngx_cycle_t *cycle)
 static ngx_int_t
 ngx_iocp_add_event(ngx_event_t *ev, ngx_int_t event, ngx_uint_t flags)
 {
-	ngx_connection_t  *c;
+    ngx_connection_t  *c;
 
-	c = ev->data;
+    c = ev->data;
 
-	if (ev->accept) {
-		ngx_log_debug2(NGX_LOG_DEBUG_EVENT, ev->log, 0,
-			"overlap accept add: fd:%d, ov:%p", c->fd, &ev->ovlp);
-		
-		ev->ovlp.event = ev;
+    if (ev->accept) {
+        ngx_log_debug2(NGX_LOG_DEBUG_EVENT, ev->log, 0,
+            "overlap accept add: fd:%d, ov:%p", c->fd, &ev->ovlp);
 
-		return NGX_OK;
-	}
+        ev->ovlp.event = ev;
+
+        return NGX_OK;
+    }
 
 
-	ev->ovlp.event = ev;
+    ev->ovlp.event = ev;
 
-	ngx_log_debug2(NGX_LOG_DEBUG_EVENT, ev->log, 0,
-		"iocp add: fd:%d k:%ui, ov:%p", c->fd, &ev->ovlp);
+    ngx_log_debug2(NGX_LOG_DEBUG_EVENT, ev->log, 0,
+        "iocp add: fd:%d k:%ui, ov:%p", c->fd, &ev->ovlp);
 
-	if (CreateIoCompletionPort((HANDLE) c->fd, iocp, (ULONG_PTR) c, 0) == NULL)
-	{
-		ngx_log_error(NGX_LOG_ALERT, ev->log, ngx_errno,
-			"add event %d CreateIoCompletionPort() failed",  c->fd);
-		return NGX_ERROR;
-	}
+    if (CreateIoCompletionPort((HANDLE) c->fd, iocp, (ULONG_PTR) c, 0) == NULL)
+    {
+        ngx_log_error(NGX_LOG_ALERT, ev->log, ngx_errno,
+            "add event %d CreateIoCompletionPort() failed",  c->fd);
+        return NGX_ERROR;
+    }
 
-	ngx_log_debug1(NGX_LOG_DEBUG_EVENT, ev->log, 0,
-		"add event %d  CreateIoCompletionPort() success", c->fd);
+    ngx_log_debug1(NGX_LOG_DEBUG_EVENT, ev->log, 0,
+        "add event %d  CreateIoCompletionPort() success", c->fd);
 
-	return NGX_OK;
+    return NGX_OK;
 }
 
 static ngx_int_t
 ngx_iocp_del_event(ngx_event_t *ev, ngx_int_t event, ngx_uint_t flags)
 {
-	return NGX_OK;
+    return NGX_OK;
 }
 
 
 static ngx_int_t
 ngx_iocp_add_connection(ngx_connection_t *c)
 {
-	ngx_event_t  *rev, *wev;
+    ngx_event_t  *rev, *wev;
 
-	rev = c->read;
-	wev = c->write;
+    rev = c->read;
+    wev = c->write;
 
-	rev->ovlp.event = rev;
-	wev->ovlp.event = wev;
+    rev->ovlp.event = rev;
+    wev->ovlp.event = wev;
 
-	if (CreateIoCompletionPort((HANDLE) c->fd, iocp, (ULONG_PTR) c, 0) == NULL)
-	{
-		ngx_log_error(NGX_LOG_ALERT, c->log, ngx_errno,
-			"add connection %d CreateIoCompletionPort() failed", c->fd);
-		return NGX_ERROR;
-	}
-	
-	ngx_log_debug1(NGX_LOG_DEBUG_EVENT, c->log, 0,
-		"add connection %d  CreateIoCompletionPort() success", c->fd);
+    if (CreateIoCompletionPort((HANDLE) c->fd, iocp, (ULONG_PTR) c, 0) == NULL)
+    {
+        ngx_log_error(NGX_LOG_ALERT, c->log, ngx_errno,
+            "add connection %d CreateIoCompletionPort() failed", c->fd);
+        return NGX_ERROR;
+    }
 
-	return NGX_OK;
+    ngx_log_debug1(NGX_LOG_DEBUG_EVENT, c->log, 0,
+        "add connection %d  CreateIoCompletionPort() success", c->fd);
+
+    return NGX_OK;
 }
 
 static ngx_int_t
 ngx_iocp_del_connection(ngx_connection_t *c, ngx_uint_t flags)
 {
-	return NGX_OK;
+    return NGX_OK;
 }
 
 static ngx_int_t
@@ -261,7 +261,7 @@ ngx_iocp_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
     ngx_event_t       *ev;
     ngx_queue_t       *queue;
 
-	ngx_connection_t  *c;
+    ngx_connection_t  *c;
     ngx_event_ovlp_t  *ovlp;
 
     ngx_set_errno(0);
@@ -313,13 +313,13 @@ ngx_iocp_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
 
         if ((c != NULL && c->fd == -1) || (ovlp != NULL && ovlp->event == NULL))
         {
-			continue;
+            continue;
         }
 
         ev = ovlp->event;
         ev->complete = 1;
 
-		if (rc != 0) {
+        if (rc != 0) {
             ev->available = (int) n;
             ev->error = 0;
 
@@ -344,15 +344,15 @@ ngx_iocp_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
 
         if (flags & NGX_POST_EVENTS) {
 
-			queue = ev->accept ? &ngx_posted_accept_events
-				: &ngx_posted_events;
+            queue = ev->accept ? &ngx_posted_accept_events
+                : &ngx_posted_events;
 
             ngx_post_event(ev, queue);
 
         } else {
             ev->handler(ev);
         }
-	}
+    }
 
     return NGX_OK;
 }
@@ -360,19 +360,19 @@ ngx_iocp_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
 static void *
 ngx_iocp_create_conf(ngx_cycle_t *cycle)
 {
-	ngx_iocp_conf_t  *cf;
+    ngx_iocp_conf_t  *cf;
 
-	cf = ngx_palloc(cycle->pool, sizeof(ngx_iocp_conf_t));
-	if (cf == NULL) {
-		return NULL;
-	}
+    cf = ngx_palloc(cycle->pool, sizeof(ngx_iocp_conf_t));
+    if (cf == NULL) {
+        return NULL;
+    }
 
-	cf->threads = NGX_CONF_UNSET_UINT;
-	cf->events = NGX_CONF_UNSET_UINT;
-	cf->post_acceptex = NGX_CONF_UNSET_UINT;
-	cf->acceptex_read = NGX_CONF_UNSET_UINT;
+    cf->threads = NGX_CONF_UNSET_UINT;
+    cf->events = NGX_CONF_UNSET_UINT;
+    cf->post_acceptex = NGX_CONF_UNSET_UINT;
+    cf->acceptex_read = NGX_CONF_UNSET_UINT;
 
-	return cf;
+    return cf;
 }
 
 
@@ -380,12 +380,12 @@ ngx_iocp_create_conf(ngx_cycle_t *cycle)
 static char *
 ngx_iocp_init_conf(ngx_cycle_t *cycle, void *conf)
 {
-	ngx_iocp_conf_t *cf = conf;
+    ngx_iocp_conf_t *cf = conf;
 
-	ngx_conf_init_uint_value(cf->threads, 0);
-	ngx_conf_init_uint_value(cf->events, 512);
-	ngx_conf_init_uint_value(cf->post_acceptex, 100);
-	ngx_conf_init_uint_value(cf->acceptex_read, 0);
+    ngx_conf_init_uint_value(cf->threads, 0);
+    ngx_conf_init_uint_value(cf->events, 512);
+    ngx_conf_init_uint_value(cf->post_acceptex, 1);
+    ngx_conf_init_uint_value(cf->acceptex_read, 0);
 
-	return NGX_CONF_OK;
+    return NGX_CONF_OK;
 }

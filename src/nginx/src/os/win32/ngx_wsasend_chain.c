@@ -135,178 +135,178 @@ ngx_wsasend_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
 ngx_chain_t *
 ngx_overlapped_wsasend_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
 {
-	int             rc;
-	off_t           size, send;
-	u_char         *prev;
-	WSABUF         *buf, bufs[NGX_IOVS];
-	ssize_t         n;
-	ngx_err_t       err;
-	ngx_array_t     vec;
-	ngx_chain_t    *cl;
-	ngx_event_t    *wev;
-	WSAOVERLAPPED  *ovlp;
+    int             rc;
+    off_t           size, send;
+    u_char         *prev;
+    WSABUF         *buf, bufs[NGX_IOVS];
+    ssize_t         n;
+    ngx_err_t       err;
+    ngx_array_t     vec;
+    ngx_chain_t    *cl;
+    ngx_event_t    *wev;
+    WSAOVERLAPPED  *ovlp;
 
-	wev = c->write;
+    wev = c->write;
 
-	if (wev->closed) {
-		return NULL;
-	}
+    if (wev->closed) {
+        return NULL;
+    }
 
-	if (wev->error) {
-		return NGX_CHAIN_ERROR;
-	}
+    if (wev->error) {
+        return NGX_CHAIN_ERROR;
+    }
 
 retry:
 
-	vec.nelts = 0;
-	vec.elts = bufs;
-	vec.size = sizeof(WSABUF);
-	vec.nalloc = NGX_IOVS;
-	vec.pool = c->pool;
+    vec.nelts = 0;
+    vec.elts = bufs;
+    vec.size = sizeof(WSABUF);
+    vec.nalloc = NGX_IOVS;
+    vec.pool = c->pool;
 
-	if (ngx_event_flags & NGX_USE_IOCP_EVENT && !wev->ovlp.posted_zero_byte) {
-		ovlp = (WSAOVERLAPPED *) &wev->ovlp;
+    if (ngx_event_flags & NGX_USE_IOCP_EVENT && !wev->ovlp.posted_zero_byte) {
+        ovlp = (WSAOVERLAPPED *) &wev->ovlp;
 
-		/* overlapped io */
+        /* overlapped io */
 
-		buf = ngx_array_push(&vec);
-		if (buf == NULL) {
-			return NGX_CHAIN_ERROR;
-		}
+        buf = ngx_array_push(&vec);
+        if (buf == NULL) {
+            return NGX_CHAIN_ERROR;
+        }
 
-		buf->buf = NULL;
-		buf->len = 0;
+        buf->buf = NULL;
+        buf->len = 0;
 
-	} else {
-		ovlp = NULL;
+    } else {
+        ovlp = NULL;
 
-		/* non-blocking io */
+        /* non-blocking io */
 
-		/* the maximum limit size is the maximum size_t value - the page size */
+        /* the maximum limit size is the maximum size_t value - the page size */
 
-		if (limit == 0 || limit > (off_t) (NGX_MAX_SIZE_T_VALUE - ngx_pagesize))
-		{
-			limit = NGX_MAX_SIZE_T_VALUE - (off_t) ngx_pagesize;
-		}
+        if (limit == 0 || limit > (off_t) (NGX_MAX_SIZE_T_VALUE - ngx_pagesize))
+        {
+            limit = NGX_MAX_SIZE_T_VALUE - (off_t) ngx_pagesize;
+        }
 
-		/* create the WSABUF and coalesce the neighbouring bufs */
+        /* create the WSABUF and coalesce the neighbouring bufs */
 
-		prev = NULL;
-		buf = NULL;
-		send = 0;
+        prev = NULL;
+        buf = NULL;
+        send = 0;
 
-		for (cl = in; cl && vec.nelts < NGX_IOVS && send < limit; cl = cl->next)
-		{
-			if (ngx_buf_special(cl->buf)) {
-				continue;
-			}
+        for (cl = in; cl && vec.nelts < NGX_IOVS && send < limit; cl = cl->next)
+        {
+            if (ngx_buf_special(cl->buf)) {
+                continue;
+            }
 
-			size = (off_t) (cl->buf->last - cl->buf->pos);
+            size = (off_t) (cl->buf->last - cl->buf->pos);
 
-			if (send + size > limit) {
-				size = limit - send;
-			}
+            if (send + size > limit) {
+                size = limit - send;
+            }
 
-			if (prev == cl->buf->pos) {
-				buf->len += (ULONG) size;
+            if (prev == cl->buf->pos) {
+                buf->len += (ULONG) size;
 
-			} else {
-				buf = ngx_array_push(&vec);
-				if (buf == NULL) {
-					return NGX_CHAIN_ERROR;
-				}
+            } else {
+                buf = ngx_array_push(&vec);
+                if (buf == NULL) {
+                    return NGX_CHAIN_ERROR;
+                }
 
-				buf->buf = (CHAR *) cl->buf->pos;
-				buf->len = (ULONG) size;
-			}
+                buf->buf = (CHAR *) cl->buf->pos;
+                buf->len = (ULONG) size;
+            }
 
-			send += size;
-			prev = cl->buf->pos + size;
-		}
-	}
+            send += size;
+            prev = cl->buf->pos + size;
+        }
+    }
 
-	n = 0;
+    n = 0;
 
-	rc = WSASend(c->fd, vec.elts, (DWORD) vec.nelts, (DWORD *) &n, 0, ovlp,
-		NULL);
+    rc = WSASend(c->fd, vec.elts, (DWORD) vec.nelts, (DWORD *) &n, 0, ovlp,
+        NULL);
 
-	err = ngx_socket_errno;
+    err = ngx_socket_errno;
 
-	if (rc == 0) {
-		if (ovlp != NULL) {
-			wev->ovlp.posted_zero_byte = 1;
-			wev->ready = 0;
-			return in;
-		}
+    if (rc == 0) {
+        if (ovlp != NULL) {
+            wev->ovlp.posted_zero_byte = 1;
+            wev->ready = 0;
+            return in;
+        }
 
 #if 0
-		if (n < send) {
-			wev->ready = 0;
-		}
+        if (n < send) {
+            wev->ready = 0;
+        }
 #endif
 
-		c->sent += (off_t) n;
+        c->sent += (off_t) n;
 
-		for (cl = in; cl; cl = cl->next) {
+        for (cl = in; cl; cl = cl->next) {
 
-			if (ngx_buf_special(cl->buf)) {
-				continue;
-			}
+            if (ngx_buf_special(cl->buf)) {
+                continue;
+            }
 
-			if (n == 0) {
-				break;
-			}
+            if (n == 0) {
+                break;
+            }
 
-			size = (off_t) (cl->buf->last - cl->buf->pos);
+            size = (off_t) (cl->buf->last - cl->buf->pos);
 
-			if (n >= size) {
-				n -= (ssize_t) size;
-				cl->buf->pos = cl->buf->last;
+            if (n >= size) {
+                n -= (ssize_t) size;
+                cl->buf->pos = cl->buf->last;
 
-				continue;
-			}
+                continue;
+            }
 
-			cl->buf->pos += n;
+            cl->buf->pos += n;
 
-			break;
-		}
+            break;
+        }
 
-		wev->ovlp.posted_zero_byte = 0;
+        wev->ovlp.posted_zero_byte = 0;
 
-		if (cl != NULL) {
-			in = cl;
-			goto retry;
-		}
+        if (cl != NULL) {
+            in = cl;
+            goto retry;
+        }
 
-		return cl;
-	}
+        return cl;
+    }
 
-	if (err == WSA_IO_PENDING) {
-		ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err, "WSASend() not ready");
-		wev->ovlp.posted_zero_byte = 1;
-		wev->ready = 0;
-		return in;
-	}
+    if (err == WSA_IO_PENDING) {
+        ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err, "WSASend() not ready");
+        wev->ovlp.posted_zero_byte = 1;
+        wev->ready = 0;
+        return in;
+    }
 
-	if (err == WSAEWOULDBLOCK) {
-		ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err, "WSASend() not ready");
+    if (err == WSAEWOULDBLOCK) {
+        ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err, "WSASend() not ready");
 
-		if ((ngx_event_flags & NGX_USE_IOCP_EVENT) == 0) {
-			wev->ready = 0;
-			return in;
-		}
+        if ((ngx_event_flags & NGX_USE_IOCP_EVENT) == 0) {
+            wev->ready = 0;
+            return in;
+        }
 
-		/* post another overlapped-io WSASend() */
-		wev->ovlp.posted_zero_byte = 0;
-		goto retry;
-	}
+        /* post another overlapped-io WSASend() */
+        wev->ovlp.posted_zero_byte = 0;
+        goto retry;
+    }
 
-	ngx_connection_error(c, err, "WSASend() failed");
+    ngx_connection_error(c, err, "WSASend() failed");
 
-	wev->ready = 0;
-	wev->error = 1;
+    wev->ready = 0;
+    wev->error = 1;
 
-	return NGX_CHAIN_ERROR;
+    return NGX_CHAIN_ERROR;
 }
 
 

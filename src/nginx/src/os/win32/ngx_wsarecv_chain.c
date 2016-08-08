@@ -161,17 +161,17 @@ retry:
         /* coalesce the neighbouring bufs */
 
         while (cl && vec.nelts < NGX_IOVS) {
-			n = (cl->buf->end - cl->buf->last);
+            n = (cl->buf->end - cl->buf->last);
 
-			if (limit) {
-				if (size >= (size_t) limit) {
-					break;
-				}
+            if (limit) {
+                if (size >= (size_t) limit) {
+                    break;
+                }
 
-				if (size + n > (size_t) limit) {
-					n = (size_t) limit - size;
-				}
-			}
+                if (size + n > (size_t) limit) {
+                    n = (size_t) limit - size;
+                }
+            }
 
             if (prev == cl->buf->last) {
                 buf->len += (DWORD) n;

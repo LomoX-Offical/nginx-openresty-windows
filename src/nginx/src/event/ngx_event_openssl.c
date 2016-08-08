@@ -115,16 +115,16 @@ ngx_module_t  ngx_openssl_module = {
 #if (NGX_HAVE_IOCP)
 
 static BIO_METHOD  ngx_ssl_bio_method = {
-	BIO_TYPE_SOCKET,
-	"socket",
-	ngx_ssl_bio_write,
-	ngx_ssl_bio_read,
-	ngx_ssl_bio_puts,
-	NULL,
-	ngx_ssl_bio_ctrl,
-	ngx_ssl_bio_create,
-	ngx_ssl_bio_destroy,
-	NULL
+    BIO_TYPE_SOCKET,
+    "socket",
+    ngx_ssl_bio_write,
+    ngx_ssl_bio_read,
+    ngx_ssl_bio_puts,
+    NULL,
+    ngx_ssl_bio_ctrl,
+    ngx_ssl_bio_create,
+    ngx_ssl_bio_destroy,
+    NULL
 };
 
 #endif
@@ -1177,25 +1177,25 @@ ngx_ssl_create_connection(ngx_ssl_t *ssl, ngx_connection_t *c, ngx_uint_t flags)
 
 #if !(NGX_HAVE_IOCP)
 
-	if (SSL_set_fd(sc->connection, c->fd) == 0) {
-		ngx_ssl_error(NGX_LOG_ALERT, c->log, 0, "SSL_set_fd() failed");
-		return NGX_ERROR;
-	}
+    if (SSL_set_fd(sc->connection, c->fd) == 0) {
+        ngx_ssl_error(NGX_LOG_ALERT, c->log, 0, "SSL_set_fd() failed");
+        return NGX_ERROR;
+    }
 
 #else
 
-	if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
-		if (ngx_ssl_set_fd(sc->connection, c) == 0) {
-			ngx_ssl_error(NGX_LOG_ALERT, c->log, 0, "ngx_ssl_set_fd() failed");
-			return NGX_ERROR;
-		}
+    if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
+        if (ngx_ssl_set_fd(sc->connection, c) == 0) {
+            ngx_ssl_error(NGX_LOG_ALERT, c->log, 0, "ngx_ssl_set_fd() failed");
+            return NGX_ERROR;
+        }
 
-	} else {
-		if (SSL_set_fd(sc->connection, c->fd) == 0) {
-			ngx_ssl_error(NGX_LOG_ALERT, c->log, 0, "SSL_set_fd() failed");
-			return NGX_ERROR;
-		}
-	}
+    } else {
+        if (SSL_set_fd(sc->connection, c->fd) == 0) {
+            ngx_ssl_error(NGX_LOG_ALERT, c->log, 0, "SSL_set_fd() failed");
+            return NGX_ERROR;
+        }
+    }
 
 #endif
 

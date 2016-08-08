@@ -82,11 +82,11 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
 
 #if (NGX_HAVE_IOCP)
 
-	if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
-		if (pc->local == NULL) {
-			pc->local = &ngx_iocp_local_addr;
-		}
-	}
+    if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
+        if (pc->local == NULL) {
+            pc->local = &ngx_iocp_local_addr;
+        }
+    }
 
 #endif
 
@@ -201,17 +201,17 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
 
 #if (NGX_HAVE_IOCP)
 
-	if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
-		rc = ngx_connectex(s, pc->sockaddr, pc->socklen, NULL, 0, NULL,
-			(OVERLAPPED *) &wev->ovlp) != 0 ? 0 : -1;
+    if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
+        rc = ngx_connectex(s, pc->sockaddr, pc->socklen, NULL, 0, NULL,
+            (OVERLAPPED *) &wev->ovlp) != 0 ? 0 : -1;
 
-	} else {
-		rc = connect(s, pc->sockaddr, pc->socklen);
-	}
+    } else {
+        rc = connect(s, pc->sockaddr, pc->socklen);
+    }
 
 #else
 
-	rc = connect(s, pc->sockaddr, pc->socklen);
+    rc = connect(s, pc->sockaddr, pc->socklen);
 
 #endif
 
@@ -260,12 +260,12 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
     }
 
     if (ngx_add_conn) {
-		if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
-			rev->ready = 1;
-			return NGX_AGAIN;
-		}
+        if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
+            rev->ready = 1;
+            return NGX_AGAIN;
+        }
 
-		if (rc == -1) {
+        if (rc == -1) {
 
             /* NGX_EINPROGRESS */
 

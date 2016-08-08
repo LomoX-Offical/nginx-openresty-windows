@@ -83,9 +83,9 @@ ssize_t ngx_udp_wsarecv(ngx_connection_t *c, u_char *buf, size_t size);
 
 ssize_t ngx_overlapped_wsarecv(ngx_connection_t *c, u_char *buf, size_t size);
 ssize_t ngx_overlapped_wsarecv_chain(ngx_connection_t *c, ngx_chain_t *chain, 
-									 off_t limit);
+                                     off_t limit);
 ssize_t ngx_udp_overlapped_wsarecv(ngx_connection_t *c, u_char *buf,
-								   size_t size);
+                                   size_t size);
 
 ssize_t ngx_wsasend(ngx_connection_t *c, u_char *buf, size_t size);
 ssize_t ngx_udp_wsasend(ngx_connection_t *c, u_char *buf, size_t size);
