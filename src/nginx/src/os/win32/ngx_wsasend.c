@@ -106,6 +106,8 @@ retry:
     n = 0;
 
     rc = WSASend(c->fd, &wsabuf, 1, (DWORD *) &n, 0, ovlp, NULL);
+    ngx_log_debug2(NGX_LOG_DEBUG_EVENT, c->log, 0,
+        "WSASend: fd:%d, s:%ul", c->fd, n);
 
     err = ngx_socket_errno;
 

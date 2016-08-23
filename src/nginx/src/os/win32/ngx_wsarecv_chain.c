@@ -197,6 +197,8 @@ retry:
 
     rc = WSARecv(c->fd, vec.elts, (DWORD) vec.nelts, (DWORD *) &n,
                  (LPDWORD) &flags, ovlp, NULL);
+    ngx_log_debug4(NGX_LOG_DEBUG_EVENT, c->log, 0,
+        "do WSARecv chain: fd:%d rc:%d %ul of %z", c->fd, rc, n, size);
 
     err = ngx_socket_errno;
 

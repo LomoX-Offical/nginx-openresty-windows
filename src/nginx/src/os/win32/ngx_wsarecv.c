@@ -62,6 +62,72 @@ ngx_wsarecv(ngx_connection_t *c, u_char *buf, size_t size)
     return bytes;
 }
 
+
+ssize_t
+ngx_post_overlapped_wsarecv(ngx_connection_t *c, u_char *buf, size_t size) 
+{
+    int             flags, rc;
+    WSABUF          wsabuf;
+    ssize_t         n;
+    ngx_err_t       err;
+    ngx_event_t    *rev;
+    WSAOVERLAPPED  *ovlp;
+
+    rev = c->read;
+
+    if (rev->eof || rev->closed) {
+        return 0;
+    }
+
+    if (rev->error) {
+        return NGX_ERROR;
+    }
+
+retry:
+    ovlp = (WSAOVERLAPPED *) &rev->ovlp;
+
+    wsabuf.buf = NULL;
+    wsabuf.len = 0;
+
+    n = 0;
+    flags = 0;
+
+    rc = WSARecv(c->fd, &wsabuf, 1, (DWORD *) &n, (LPDWORD) &flags, ovlp, NULL);
+
+    ngx_log_debug4(NGX_LOG_DEBUG_EVENT, c->log, 0,
+        "Post WSARecv: fd:%d rc:%d %ul of %z", c->fd, rc, n, size);
+
+    err = ngx_socket_errno;
+
+    if (rc == 0) {
+        rev->ovlp.posted_zero_byte = 1;
+        rev->ready = 0;
+        return NGX_AGAIN;
+    }
+
+    if (err == WSA_IO_PENDING) {
+        ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err, "Post WSARecv() not ready");
+        rev->ovlp.posted_zero_byte = 1;
+        rev->ready = 0;
+        return NGX_AGAIN;
+    }
+
+    if (err == WSAEWOULDBLOCK) {
+        ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err, "Post WSARecv() not ready retry");
+
+        /* post another overlapped-io WSARecv() */
+        rev->ovlp.posted_zero_byte = 0;
+        goto retry;
+    }
+
+    ngx_connection_error(c, err, "Post WSARecv() failed");
+
+    rev->ready = 0;
+    rev->error = 1;
+
+    return NGX_ERROR;
+}
+
 ssize_t
 ngx_overlapped_wsarecv(ngx_connection_t *c, u_char *buf, size_t size)
 {
@@ -82,71 +148,46 @@ ngx_overlapped_wsarecv(ngx_connection_t *c, u_char *buf, size_t size)
         return NGX_ERROR;
     }
 
-retry:
-
-    if (ngx_event_flags & NGX_USE_IOCP_EVENT && !rev->ovlp.posted_zero_byte) {
-        ovlp = (WSAOVERLAPPED *) &rev->ovlp;
-
-        wsabuf.buf = NULL;
-        wsabuf.len = 0;
-
-    } else {
-        ovlp = NULL;
-
-        wsabuf.buf = (CHAR *) buf;
-        wsabuf.len = (ULONG) size;
+    if (rev->ready == 0){
+        if (rev->ovlp.posted_zero_byte == 0) {
+            return ngx_post_overlapped_wsarecv(c, buf, size);
+        }
+        ngx_connection_error(c, 0, "WSARecv() is already post");
+        return NGX_AGAIN;
     }
+
+
+retry:
+    ovlp = NULL;
+
+    wsabuf.buf = (CHAR *) buf;
+    wsabuf.len = (ULONG) size;
 
     n = 0;
     flags = 0;
 
     rc = WSARecv(c->fd, &wsabuf, 1, (DWORD *) &n, (LPDWORD) &flags, ovlp, NULL);
 
+    ngx_log_debug4(NGX_LOG_DEBUG_EVENT, c->log, 0,
+        "do WSARecv: fd:%d rc:%d %ul of %z", c->fd, rc, n, size);
+
     err = ngx_socket_errno;
 
     if (rc == 0) {
-        if (ovlp != NULL) {
-            rev->ovlp.posted_zero_byte = 1;
-            rev->ready = 0;
-            return NGX_AGAIN;
-        }
-
-#if 0
-        if ((size_t) n < size) {
-            rev->ready = 0;
-        }
-#endif
-
         if (n == 0) {
             rev->eof = 1;
         }
 
-        rev->ovlp.posted_zero_byte = 0;
-
+        ngx_post_overlapped_wsarecv(c, buf, size);
         return n;
     }
 
-    if (err == WSA_IO_PENDING) {
-        ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err, "WSARecv() not ready");
-        rev->ovlp.posted_zero_byte = 1;
-        rev->ready = 0;
-        return NGX_AGAIN;
-    }
-
     if (err == WSAEWOULDBLOCK) {
-        ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err, "WSARecv() not ready");
-
-        if ((ngx_event_flags & NGX_USE_IOCP_EVENT) == 0) {
-            rev->ready = 0;
-            return NGX_AGAIN;
-        }
-
-        /* post another overlapped-io WSARecv() */
-        rev->ovlp.posted_zero_byte = 0;
-        goto retry;
+        ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err, "do WSARecv() not ready retry");
+        return ngx_post_overlapped_wsarecv(c, buf, size);
     }
 
-    ngx_connection_error(c, err, "WSARecv() failed");
+    ngx_connection_error(c, err, "do WSARecv() failed");
 
     rev->ready = 0;
     rev->error = 1;
