@@ -410,6 +410,16 @@ ngx_http_v2_write_handler(ngx_event_t *wev)
 
     ngx_log_debug0(NGX_LOG_DEBUG_HTTP, c->log, 0, "http2 write handler");
 
+    if (h2c->last_out == NULL && !c->buffered) {
+
+        if (wev->timer_set) {
+            ngx_del_timer(wev);
+        }
+
+        ngx_http_v2_handle_connection(h2c);
+        return;
+    }
+
     h2c->blocked = 1;
 
     rc = ngx_http_v2_send_output_queue(h2c);
@@ -468,7 +478,7 @@ ngx_http_v2_send_output_queue(ngx_http_v2_connection_t *h2c)
     wev = c->write;
 
     if (!wev->ready) {
-        return NGX_OK;
+        return NGX_AGAIN;
     }
 
     cl = NULL;
@@ -539,15 +549,6 @@ ngx_http_v2_send_output_queue(ngx_http_v2_connection_t *h2c)
         c->tcp_nodelay = NGX_TCP_NODELAY_SET;
     }
 
-    if (cl) {
-        ngx_add_timer(wev, clcf->send_timeout);
-
-    } else {
-        if (wev->timer_set) {
-            ngx_del_timer(wev);
-        }
-    }
-
     for ( /* void */ ; out; out = fn) {
         fn = out->next;
 
@@ -572,6 +573,15 @@ ngx_http_v2_send_output_queue(ngx_http_v2_connection_t *h2c)
 
     h2c->last_out = frame;
 
+    if (!wev->ready) {
+        ngx_add_timer(wev, clcf->send_timeout);
+        return NGX_AGAIN;
+    }
+
+    if (wev->timer_set) {
+        ngx_del_timer(wev);
+    }
+
     return NGX_OK;
 
 error:
@@ -589,7 +599,8 @@ error:
 static void
 ngx_http_v2_handle_connection(ngx_http_v2_connection_t *h2c)
 {
-    ngx_connection_t          *c;
+    ngx_int_t                rc;
+    ngx_connection_t        *c;
     ngx_http_v2_srv_conf_t  *h2scf;
 
     if (h2c->last_out || h2c->processing) {
@@ -604,7 +615,22 @@ ngx_http_v2_handle_connection(ngx_http_v2_connection_t *h2c)
     }
 
     if (c->buffered) {
-        return;
+        h2c->blocked = 1;
+
+        rc = ngx_http_v2_send_output_queue(h2c);
+
+        h2c->blocked = 0;
+
+        if (rc == NGX_ERROR) {
+            ngx_http_close_connection(c);
+            return;
+        }
+
+        if (rc == NGX_AGAIN) {
+            return;
+        }
+
+        /* rc == NGX_OK */
     }
 
     h2scf = ngx_http_get_module_srv_conf(h2c->http_connection->conf_ctx,
@@ -615,7 +641,7 @@ ngx_http_v2_handle_connection(ngx_http_v2_connection_t *h2c)
     }
 
     if (ngx_terminate || ngx_exiting) {
-        ngx_http_close_connection(c);
+        ngx_http_v2_finalize_connection(h2c, NGX_HTTP_V2_NO_ERROR);
         return;
     }
 

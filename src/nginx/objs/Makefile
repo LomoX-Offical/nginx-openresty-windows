@@ -315,7 +315,9 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/stream/ngx_stream_ssl_module.obj \
 	objs/src/stream/ngx_stream_limit_conn_module.obj \
 	objs/src/stream/ngx_stream_access_module.obj \
+	objs/src/stream/ngx_stream_geo_module.obj \
 	objs/src/stream/ngx_stream_map_module.obj \
+	objs/src/stream/ngx_stream_split_clients_module.obj \
 	objs/src/stream/ngx_stream_return_module.obj \
 	objs/src/stream/ngx_stream_upstream_hash_module.obj \
 	objs/src/stream/ngx_stream_upstream_least_conn_module.obj \
@@ -599,7 +601,9 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/stream/ngx_stream_ssl_module.obj 
 	objs/src/stream/ngx_stream_limit_conn_module.obj 
 	objs/src/stream/ngx_stream_access_module.obj 
+	objs/src/stream/ngx_stream_geo_module.obj 
 	objs/src/stream/ngx_stream_map_module.obj 
+	objs/src/stream/ngx_stream_split_clients_module.obj 
 	objs/src/stream/ngx_stream_return_module.obj 
 	objs/src/stream/ngx_stream_upstream_hash_module.obj 
 	objs/src/stream/ngx_stream_upstream_least_conn_module.obj 
@@ -1843,11 +1847,25 @@ objs/src/stream/ngx_stream_access_module.obj:	$(CORE_DEPS) $(STREAM_DEPS) \
 		src/stream/ngx_stream_access_module.c
 
 
+objs/src/stream/ngx_stream_geo_module.obj:	$(CORE_DEPS) $(STREAM_DEPS) \
+	src/stream/ngx_stream_geo_module.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) $(STREAM_INCS) \
+		-Foobjs/src/stream/ngx_stream_geo_module.obj \
+		src/stream/ngx_stream_geo_module.c
+
+
 objs/src/stream/ngx_stream_map_module.obj:	$(CORE_DEPS) $(STREAM_DEPS) \
 	src/stream/ngx_stream_map_module.c
 	$(CC) -c $(CFLAGS) $(CORE_INCS) $(STREAM_INCS) \
 		-Foobjs/src/stream/ngx_stream_map_module.obj \
 		src/stream/ngx_stream_map_module.c
+
+
+objs/src/stream/ngx_stream_split_clients_module.obj:	$(CORE_DEPS) $(STREAM_DEPS) \
+	src/stream/ngx_stream_split_clients_module.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) $(STREAM_INCS) \
+		-Foobjs/src/stream/ngx_stream_split_clients_module.obj \
+		src/stream/ngx_stream_split_clients_module.c
 
 
 objs/src/stream/ngx_stream_return_module.obj:	$(CORE_DEPS) $(STREAM_DEPS) \
