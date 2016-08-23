@@ -25,6 +25,7 @@ typedef struct {
 
     /* zero-byte recv/send with overlapped-io and then non-blocking */
     unsigned         posted_zero_byte;
+    unsigned         is_connecting;
 } ngx_event_ovlp_t;
 
 #endif

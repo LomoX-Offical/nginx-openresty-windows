@@ -168,15 +168,7 @@ ngx_event_acceptex(ngx_event_t *ev)
     wev = c->write;
 
     wev->ready = 1;
-
-    if (ngx_event_flags & (NGX_USE_AIO_EVENT|NGX_USE_RTSIG_EVENT)) {
-        /* rtsig, aio, iocp */
-        rev->ready = 1;
-    }
-
-    if (ev->deferred_accept) {
-        rev->ready = 1;
-    }
+    rev->ready = 0;
 
     rev->log = log;
     wev->log = log;
@@ -213,33 +205,38 @@ ngx_event_acceptex(ngx_event_t *ev)
     }
 
 #if (NGX_DEBUG)
-        {
-        ngx_str_t  addr;
-        u_char     text[NGX_SOCKADDR_STRLEN];
+    {
+    ngx_str_t  addr;
+    u_char     text[NGX_SOCKADDR_STRLEN];
 
-        ngx_debug_accepted_connection(ecf, c);
+    ngx_debug_accepted_connection(ecf, c);
 
-        if (log->log_level & NGX_LOG_DEBUG_EVENT) {
-            addr.data = text;
-            addr.len = ngx_sock_ntop(c->sockaddr, c->socklen, text,
-                                     NGX_SOCKADDR_STRLEN, 1);
+    if (log->log_level & NGX_LOG_DEBUG_EVENT) {
+        addr.data = text;
+        addr.len = ngx_sock_ntop(c->sockaddr, c->socklen, text,
+                                 NGX_SOCKADDR_STRLEN, 1);
 
-            ngx_log_debug3(NGX_LOG_DEBUG_EVENT, log, 0,
-                           "*%uA accept: %V fd:%d", c->number, &addr, s);
-        }
+        ngx_log_debug3(NGX_LOG_DEBUG_EVENT, log, 0,
+                       "*%uA accept: %V fd:%d", c->number, &addr, s);
+    }
 
-        }
+    }
 #endif
 
-        if (ngx_add_conn) {
-            if (ngx_add_conn(c) == NGX_ERROR) {
-                ngx_close_accepted_connection(c);
-                goto post_acceptex;
-            }
+    if (ngx_add_conn) {
+        if (ngx_add_conn(c) == NGX_ERROR) {
+            ngx_close_accepted_connection(c);
+            goto post_acceptex;
         }
+    }
 
     log->data = NULL;
     log->handler = NULL;
+
+    if (c->recv(c, NULL, 0) == NGX_ERROR) {
+        ngx_close_accepted_connection(c);
+        goto post_acceptex;
+    }
 
     ls->handler(c);
 

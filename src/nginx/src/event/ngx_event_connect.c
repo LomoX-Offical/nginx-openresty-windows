@@ -84,7 +84,11 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
 
     if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
         if (pc->local == NULL) {
-            pc->local = &ngx_iocp_local_addr;
+            if (pc->sockaddr->sa_family == AF_INET6) {
+                pc->local = &ngx_iocp_local_addr_v6;
+            } else {
+                pc->local = &ngx_iocp_local_addr_v4;
+            }
         }
     }
 
@@ -204,7 +208,8 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
     if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
         rc = ngx_connectex(s, pc->sockaddr, pc->socklen, NULL, 0, NULL,
             (OVERLAPPED *) &wev->ovlp) != 0 ? 0 : -1;
-
+        wev->ovlp.posted_zero_byte = 0;
+        wev->ovlp.is_connecting = 1;
     } else {
         rc = connect(s, pc->sockaddr, pc->socklen);
     }
@@ -261,7 +266,12 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
 
     if (ngx_add_conn) {
         if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
-            rev->ready = 1;
+            if (c->recv(c, NULL, 0) == NGX_ERROR) {
+                ngx_close_connection(c);
+                pc->connection = NULL;
+
+                return NGX_DECLINED;
+            }
             return NGX_AGAIN;
         }
 

@@ -21,7 +21,8 @@ typedef struct {
 ngx_int_t ngx_iocp_add_file(ngx_file_t *file);
 
 extern ngx_module_t  ngx_iocp_module;
-extern ngx_addr_t    ngx_iocp_local_addr;
+extern ngx_addr_t    ngx_iocp_local_addr_v4;
+extern ngx_addr_t    ngx_iocp_local_addr_v6;
 extern HANDLE        iocp;
 
 #endif /* _NGX_IOCP_MODULE_H_INCLUDED_ */

@@ -93,12 +93,15 @@ ngx_module_t  ngx_iocp_module = {
 };
 
 
-static struct sockaddr_in  sa;
+
 HANDLE                     iocp;
 static OVERLAPPED_ENTRY   *event_list;
 static ngx_uint_t          nevents;
 
-ngx_addr_t                 ngx_iocp_local_addr;
+static struct sockaddr_in   ngx_iocp_sa_v4;
+static struct sockaddr_in6  ngx_iocp_sa_v6;
+ngx_addr_t                 ngx_iocp_local_addr_v4;
+ngx_addr_t                 ngx_iocp_local_addr_v6;
 
 ngx_os_io_t  ngx_iocp_io = {
     ngx_overlapped_wsarecv,
@@ -115,14 +118,23 @@ ngx_iocp_init(ngx_cycle_t *cycle, ngx_msec_t timer)
 {
     ngx_iocp_conf_t  *cf;
 
-    sa.sin_family = AF_INET;
-    sa.sin_addr.s_addr = htonl(INADDR_ANY);
-    sa.sin_port = htons(0);
+    ngx_iocp_sa_v4.sin_family = AF_INET;
+    ngx_iocp_sa_v4.sin_addr.s_addr = htonl(INADDR_ANY);
+    ngx_iocp_sa_v4.sin_port = htons(0);
 
-    ngx_iocp_local_addr.sockaddr  = (struct sockaddr *) &sa;
-    ngx_iocp_local_addr.socklen   = sizeof(struct sockaddr_in);
-    ngx_iocp_local_addr.name.len  = sizeof("INADDR_ANY") - 1;
-    ngx_iocp_local_addr.name.data = (u_char *) "INADDR_ANY";
+    ngx_iocp_local_addr_v4.sockaddr  = (struct sockaddr *) &ngx_iocp_sa_v4;
+    ngx_iocp_local_addr_v4.socklen   = sizeof(struct sockaddr_in);
+    ngx_iocp_local_addr_v4.name.len  = sizeof("INADDR_ANY") - 1;
+    ngx_iocp_local_addr_v4.name.data = (u_char *) "INADDR_ANY";
+
+    ngx_iocp_sa_v6.sin6_family = AF_INET6;
+    ngx_iocp_sa_v6.sin6_addr   = in6addr_any;
+    ngx_iocp_sa_v6.sin6_port   = htons(0);
+
+    ngx_iocp_local_addr_v6.sockaddr  = (struct sockaddr *) &ngx_iocp_sa_v6;
+    ngx_iocp_local_addr_v6.socklen   = sizeof(struct sockaddr_in6);
+    ngx_iocp_local_addr_v6.name.len  = sizeof("INADDR_ANY") - 1;
+    ngx_iocp_local_addr_v6.name.data = (u_char *) "INADDR_ANY";
 
     cf = ngx_event_get_conf(cycle->conf_ctx, ngx_iocp_module);
 
@@ -197,6 +209,7 @@ ngx_iocp_add_event(ngx_event_t *ev, ngx_int_t event, ngx_uint_t flags)
 
 
     ev->ovlp.event = ev;
+    ev->active = 1;
 
     ngx_log_debug2(NGX_LOG_DEBUG_EVENT, ev->log, 0,
         "iocp add: fd:%d k:%ui, ov:%p", c->fd, &ev->ovlp);
@@ -217,6 +230,23 @@ ngx_iocp_add_event(ngx_event_t *ev, ngx_int_t event, ngx_uint_t flags)
 static ngx_int_t
 ngx_iocp_del_event(ngx_event_t *ev, ngx_int_t event, ngx_uint_t flags)
 {
+    ngx_connection_t  *c;
+
+    c = ev->data;
+
+    if (ev->accept) {
+        ngx_log_debug2(NGX_LOG_DEBUG_EVENT, ev->log, 0,
+            "overlap accept delete: fd:%d, ov:%p", c->fd, &ev->ovlp);
+
+        return NGX_OK;
+    }
+
+    CancelIo((HANDLE)c->fd);
+
+    ev->active = 0;
+    ngx_log_debug1(NGX_LOG_DEBUG_EVENT, ev->log, 0,
+        "delete event %d  CancelIo() success", c->fd);
+
     return NGX_OK;
 }
 
@@ -231,6 +261,9 @@ ngx_iocp_add_connection(ngx_connection_t *c)
 
     rev->ovlp.event = rev;
     wev->ovlp.event = wev;
+
+    rev->active = 1;
+    wev->active = 1;
 
     if (CreateIoCompletionPort((HANDLE) c->fd, iocp, (ULONG_PTR) c, 0) == NULL)
     {
@@ -248,6 +281,19 @@ ngx_iocp_add_connection(ngx_connection_t *c)
 static ngx_int_t
 ngx_iocp_del_connection(ngx_connection_t *c, ngx_uint_t flags)
 {
+    ngx_event_t  *rev, *wev;
+
+    rev = c->read;
+    wev = c->write;
+
+    rev->active = 0;
+    wev->active = 0;
+
+    CancelIo((HANDLE)c->fd);
+
+    ngx_log_debug1(NGX_LOG_DEBUG_EVENT, c->log, 0,
+        "delete connection %d  CancelIo() success", c->fd);
+
     return NGX_OK;
 }
 
@@ -340,6 +386,14 @@ ngx_iocp_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
         }
 
         ev->ready = 1;
+
+        if (c == NULL) {
+            c = ev->data;
+        }
+
+        
+        ngx_log_debug4(NGX_LOG_DEBUG_EVENT, c->log, 0,
+            "iocp ready %d, %s available %ul bytes, error %d", c->fd, ev->write ? "write" : "read", ev->available, ev->error);
 
 
         if (flags & NGX_POST_EVENTS) {
