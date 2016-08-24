@@ -13,6 +13,7 @@ extern ngx_module_t  ngx_events_module;
 extern ngx_module_t  ngx_event_core_module;
 extern ngx_module_t  ngx_iocp_module;
 extern ngx_module_t  ngx_select_module;
+extern ngx_module_t  ngx_poll_module;
 extern ngx_module_t  ngx_http_module;
 extern ngx_module_t  ngx_http_core_module;
 extern ngx_module_t  ngx_http_log_module;
@@ -117,6 +118,7 @@ ngx_module_t *ngx_modules[] = {
     &ngx_event_core_module,
     &ngx_iocp_module,
     &ngx_select_module,
+    &ngx_poll_module,
     &ngx_http_module,
     &ngx_http_core_module,
     &ngx_http_log_module,
@@ -223,6 +225,7 @@ char *ngx_module_names[] = {
     "ngx_event_core_module",
     "ngx_iocp_module",
     "ngx_select_module",
+    "ngx_poll_module",
     "ngx_http_module",
     "ngx_http_core_module",
     "ngx_http_log_module",
