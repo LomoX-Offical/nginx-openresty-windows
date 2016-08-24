@@ -1,23 +1,21 @@
 ## Nginx Openresty For Windows ##
+[ 语言: [English](Readme-en.md), [中文](Readme.md)]
 
-### lastest release ###
+### 最新版本 ###
 
-Version:1.9.5.1001
+版本号:1.11.3.1001
 
-32 bit: http://pan.baidu.com/s/1kT1tydx
+32 位下载地址: http://pan.baidu.com/s/1skNscCt
 
-64 bit: http://pan.baidu.com/s/1ntlasC5
+64 位下载地址: http://pan.baidu.com/s/1nuP2ixj
 
->Release time: 2015-10-10
+>发布时间: 2016-08-03
 
->Changelog:  
-
-- update nginx to 1.9.5 version.
-- The ngx_http_v2_module module (1.9.5) provides support for HTTP/2 and supersedes the ngx_http_spdy_module module.
-
+>修改日志:
+- 更新nginx core 到1.11.3
 
 
-### about ###
+### 关于 ###
 
 OpenResty is a fast web app server by extending nginx.
 
@@ -28,6 +26,8 @@ it has some feature:
 - high performance
 - concurrent more than twenty thousand connections
 - multi process
+- shared memory supported
+- udp proxy supported
 - various bugs fixed compare with nginx orginal
 
 it has been complie with these offical modules:
@@ -70,6 +70,7 @@ and these C module for Lua:
 
 - lua-cjson
 - lua-redis-parser
+- lua-rds-parser
 
 
 ### resource ###
@@ -262,3 +263,156 @@ Version:1.9.4.1003
 
 
 
+Version:1.9.5.1001
+
+32 bit: http://pan.baidu.com/s/1kT1tydx
+
+64 bit: http://pan.baidu.com/s/1ntlasC5
+
+>Release time: 2015-10-10
+
+>Changelog:  
+
+- update nginx to 1.9.5 version.
+- The ngx_http_v2_module module (1.9.5) provides support for HTTP/2 and supersedes the ngx_http_spdy_module module.
+
+
+
+Version:1.9.7.1001
+
+32 bit: http://pan.baidu.com/s/1o68bOEI
+
+64 bit: http://pan.baidu.com/s/1kTzu1oz
+
+>Release time: 2015-11-19
+
+>Changelog:  
+
+- update nginx to 1.9.7 version.
+- The ngx_http_v2_module module (1.9.7) provides support for HTTP/2 and supersedes the ngx_http_spdy_module module.
+
+版本号:1.9.7.1002
+
+32 位下载地址: http://pan.baidu.com/s/1mgXobxe
+
+64 位下载地址: http://pan.baidu.com/s/1pKjtk3T
+
+>发布时间: 2015-12-04
+
+>修改日志:  
+
+- 更新 ngx_lua module 版本到 0.9.19
+- 更新 headers-more-nginx-module 版本到 0.28
+- 更新 ngx_lua_upstream module 版本到 0.04
+- 更新 rds-csv-nginx-module 版本到 0.07
+- 更新 lua-cjson module 版本到 2.1.0.3
+- 更新 lua-rds-parser module 版本到 0.06
+- 更新 lua-redis-parser module 版本到 0.12
+- 更新 LuaJIT 版本到 2.1.0 beta1
+
+版本号:1.9.9.1001
+
+32 位下载地址: http://pan.baidu.com/s/1kUekvMv
+
+64 位下载地址: http://pan.baidu.com/s/1mgPpprU
+
+>发布时间: 2016-01-11
+
+>修改日志:  
+- 更新 nginx 版本到 1.9.9
+- 更新 headers-more-nginx-module模块 版本到 0.29
+- 更新 LuaJIT 版本到 2.1-20151219
+- 更新 ngx_lua版本到 0.9.20
+- 更新 lua-resty-core 版本到 0.1.3
+- 更新 lua-resty-redis 版本到 0.22
+
+
+版本号:1.9.10.1001
+
+32 位下载地址: http://pan.baidu.com/s/1jHlhiXw
+
+64 位下载地址: http://pan.baidu.com/s/1eQUuqoq
+
+>发布时间: 2016-02-02
+
+>修改日志:  
+- 更新 nginx 版本到 1.9.10
+- 更新 openssl 版本到 1.0.2f
+- 更新 LuaJIT 版本到 2.1-20160108
+- 更新 ngx_lua版本到 0.10.00
+- 更新 lua-resty-core 版本到 0.1.4
+
+
+
+版本号:1.9.12.1001
+
+32 位下载地址: http://pan.baidu.com/s/1eR1bR9o
+
+64 位下载地址: http://pan.baidu.com/s/1hqPeoJy
+
+>发布时间: 2016-03-07
+
+>修改日志:  
+- 更新 nginx 版本到 1.9.12
+- 更新 openssl 版本到 1.0.2g
+- 更新ngx_lua 版本到 0.10.1rc0
+
+
+版本号:1.9.14.1001
+
+32 位下载地址: http://pan.baidu.com/s/1kUYTLkj
+
+64 位下载地址: http://pan.baidu.com/s/1qXZz82S
+
+>发布时间: 2016-04-13
+
+>修改日志:  
+- 更新 nginx 版本到 1.9.14
+- 更新 Lua Nginx Module 到 0.10.2.
+- 更新 Set Misc Nginx Module 到 0.30.
+- 更新 Array Var Nginx Module 到 0.05.
+- 更新 Lua Resty Core Library 到 0.1.5.
+- 更新 Lua Resty Upstream Healthcheck Library 到 0.04.
+- 更新 Lua Resty DNS Library 到 0.15.
+
+
+版本号:1.9.15.1001
+
+32 位下载地址: http://pan.baidu.com/s/1hsxxfxy
+
+64 位下载地址: http://pan.baidu.com/s/1qXM8ZBQ
+
+>发布时间: 2016-04-27
+
+>修改日志:  
+- 更新 nginx 版本到 1.9.15
+- 更新 cjson dll
+- 适配ngx_lua_module的ngx.worker.id函数，现在windows上ngx_lua模块也可以使用这个函数了
+
+
+版本号:1.9.15.1002
+
+32 位下载地址: http://pan.baidu.com/s/1bpsjbAJ
+
+64 位下载地址: http://pan.baidu.com/s/1slw0ppN
+
+>发布时间: 2016-05-26
+
+>修改日志:  
+- ngx_stream_proxy_module模块支持udp(感谢 lihui0213 贡献的代码）
+- openssl更新到1.0.2h
+
+
+版本号:1.11.2.1001
+
+32 位下载地址: http://pan.baidu.com/s/1cIBUbW
+
+64 位下载地址: http://pan.baidu.com/s/1miETFQw
+
+>发布时间: 2016-07-11
+
+>修改日志:
+- 更新nginx core 到1.11.2
+- 更新pcre到8.39
+- 更新LuaJIT 2.1-20160517
+- 在listen指令中支持so_keepalive参数

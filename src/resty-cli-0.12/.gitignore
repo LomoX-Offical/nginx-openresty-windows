@@ -1,0 +1,6 @@
+*.swp
+*.swo
+*~
+go
+reindex
+t/tmp/
