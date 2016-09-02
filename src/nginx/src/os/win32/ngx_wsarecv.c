@@ -92,6 +92,10 @@ retry:
     n = 0;
     flags = 0;
 
+    if (c->type == SOCK_DGRAM) {
+        flags = MSG_PEEK;
+    }
+
     rc = WSARecv(c->fd, &wsabuf, 1, (DWORD *) &n, (LPDWORD) &flags, ovlp, NULL);
 
     ngx_log_debug4(NGX_LOG_DEBUG_EVENT, c->log, 0,
@@ -174,11 +178,14 @@ retry:
     err = ngx_socket_errno;
 
     if (rc == 0) {
-        if (n == 0) {
-            rev->eof = 1;
+        if (c->type != SOCK_DGRAM) {
+            if (n == 0) {
+                rev->eof = 1;
+            }
+
+            ngx_post_overlapped_wsarecv(c, buf, size);
         }
 
-        ngx_post_overlapped_wsarecv(c, buf, size);
         return n;
     }
 

@@ -109,7 +109,7 @@ ngx_wsasend_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
         }
 
         ngx_log_debug2(NGX_LOG_DEBUG_EVENT, c->log, 0,
-                       "WSASend: fd:%d, s:%ul", c->fd, sent);
+                       "WSASend chain: fd:%d, s:%ul", c->fd, sent);
 
         c->sent += sent;
 
@@ -289,7 +289,7 @@ retry:
     }
 
     if (wev->ready == 0) {
-        ngx_connection_error(c, 0, "WSASend() is already post");
+        ngx_connection_error(c, 0, "WSASend() chain is already post");
         return in;
     }
 

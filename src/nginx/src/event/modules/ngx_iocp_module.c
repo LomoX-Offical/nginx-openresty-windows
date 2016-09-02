@@ -106,7 +106,7 @@ ngx_addr_t                 ngx_iocp_local_addr_v6;
 ngx_os_io_t  ngx_iocp_io = {
     ngx_overlapped_wsarecv,
     ngx_overlapped_wsarecv_chain,
-    NULL,
+    ngx_overlapped_wsarecv,
     ngx_overlapped_wsasend,
     NULL,
     ngx_overlapped_wsasend_chain,
@@ -392,7 +392,7 @@ ngx_iocp_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
         }
 
         
-        ngx_log_debug4(NGX_LOG_DEBUG_EVENT, c->log, 0,
+        ngx_log_debug4(NGX_LOG_DEBUG_EVENT, c->log, err,
             "iocp ready %d, %s available %ul bytes, error %d", c->fd, ev->write ? "write" : "read", ev->available, ev->error);
 
 

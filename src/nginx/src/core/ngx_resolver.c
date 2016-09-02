@@ -4415,6 +4415,15 @@ ngx_udp_connect(ngx_resolver_connection_t *rec)
     ngx_log_debug3(NGX_LOG_DEBUG_EVENT, &rec->log, 0,
                    "connect to %V, fd:%d #%uA", &rec->server, s, c->number);
 
+
+#if (NGX_HAVE_IOCP)
+
+    if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
+        c->type = SOCK_DGRAM;
+    }
+
+#endif
+
     rc = connect(s, rec->sockaddr, rec->socklen);
 
     /* TODO: iocp */
@@ -4437,6 +4446,16 @@ ngx_udp_connect(ngx_resolver_connection_t *rec)
     if (ngx_add_event(rev, NGX_READ_EVENT, event) != NGX_OK) {
         goto failed;
     }
+
+
+#if (NGX_HAVE_IOCP)
+
+    if (ngx_recv(c, NULL, 0) == NGX_ERROR) {
+        goto failed;
+    }
+
+#endif
+
 
     return NGX_OK;
 
@@ -4488,6 +4507,33 @@ ngx_tcp_connect(ngx_resolver_connection_t *rec)
         goto failed;
     }
 
+#if (NGX_HAVE_IOCP)
+
+    if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
+        ngx_addr_t *local;
+
+        if (rec->sockaddr->sa_family == AF_INET6) {
+            local = &ngx_iocp_local_addr_v6;
+        } else {
+            local = &ngx_iocp_local_addr_v4;
+        }
+
+        if (bind(s, local->sockaddr, local->socklen) == -1) {
+            ngx_log_error(NGX_LOG_CRIT, &rec->log, ngx_socket_errno,
+                "bind(%V) failed", &local->name);
+
+            goto failed;
+        }
+    }
+
+    c->recv = ngx_recv;
+    c->send = ngx_send;
+    c->recv_chain = ngx_recv_chain;
+    c->send_chain = ngx_send_chain;
+
+#endif
+
+
     rev = c->read;
     wev = c->write;
 
@@ -4507,7 +4553,22 @@ ngx_tcp_connect(ngx_resolver_connection_t *rec)
     ngx_log_debug3(NGX_LOG_DEBUG_EVENT, &rec->log, 0,
                    "connect to %V, fd:%d #%uA", &rec->server, s, c->number);
 
+#if (NGX_HAVE_IOCP)
+
+    if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
+        rc = ngx_connectex(s, rec->sockaddr, rec->socklen, NULL, 0, NULL,
+            (OVERLAPPED *) &wev->ovlp) != 0 ? 0 : -1;
+        wev->ovlp.posted_zero_byte = 0;
+        wev->ovlp.is_connecting = 1;
+    } else {
+        rc = connect(s, rec->sockaddr, rec->socklen);
+    }
+
+#else
+
     rc = connect(s, rec->sockaddr, rec->socklen);
+
+#endif
 
     if (rc == -1) {
         err = ngx_socket_errno;
@@ -4517,7 +4578,11 @@ ngx_tcp_connect(ngx_resolver_connection_t *rec)
 #if (NGX_WIN32)
             /* Winsock returns WSAEWOULDBLOCK (NGX_EAGAIN) */
             && err != NGX_EAGAIN
+#if (NGX_HAVE_IOCP)
+            && err != WSA_IO_PENDING
 #endif
+#endif
+
             )
         {
             if (err == NGX_ECONNREFUSED
@@ -4551,6 +4616,16 @@ ngx_tcp_connect(ngx_resolver_connection_t *rec)
     }
 
     if (ngx_add_conn) {
+        if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
+            if (c->recv(c, NULL, 0) == NGX_ERROR) {
+                ngx_close_connection(c);
+                rec->tcp = NULL;
+
+                return NGX_DECLINED;
+            }
+            return NGX_AGAIN;
+        }
+
         if (rc == -1) {
 
             /* NGX_EINPROGRESS */
