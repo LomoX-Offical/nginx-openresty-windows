@@ -83,12 +83,10 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
 #if (NGX_HAVE_IOCP)
 
     if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
-        if (pc->local == NULL) {
-            if (pc->sockaddr->sa_family == AF_INET6) {
-                pc->local = &ngx_iocp_local_addr_v6;
-            } else {
-                pc->local = &ngx_iocp_local_addr_v4;
-            }
+        if (pc->sockaddr->sa_family == AF_INET6) {
+            pc->local = &ngx_iocp_local_addr_v6;
+        } else {
+            pc->local = &ngx_iocp_local_addr_v4;
         }
     }
 
@@ -266,12 +264,7 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
 
     if (ngx_add_conn) {
         if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
-            if (c->recv(c, NULL, 0) == NGX_ERROR) {
-                ngx_close_connection(c);
-                pc->connection = NULL;
-
-                return NGX_DECLINED;
-            }
+            rev->ready = 1;
             return NGX_AGAIN;
         }
 

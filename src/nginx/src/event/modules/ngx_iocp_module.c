@@ -11,6 +11,16 @@
 #include <ngx_iocp_module.h>
 
 
+#define GET_STATUS(overlapped)                                             \
+    ((NTSTATUS) (overlapped.Internal))
+
+#define OVERLAPPED_SUCCESS(overlapped)                                     \
+  (NT_SUCCESS(GET_STATUS(overlapped)))
+
+#define GET_REQ_SOCK_ERROR(overlapped)                                     \
+  (uv_ntstatus_to_winsock_error(GET_STATUS((overlapped))))
+
+
 static ngx_int_t ngx_iocp_init(ngx_cycle_t *cycle, ngx_msec_t timer);
 static void ngx_iocp_done(ngx_cycle_t *cycle);
 static ngx_int_t ngx_iocp_add_event(ngx_event_t *ev, ngx_int_t event,
@@ -56,6 +66,123 @@ static ngx_command_t  ngx_iocp_commands[] = {
       ngx_null_command
 };
 
+
+
+int uv_ntstatus_to_winsock_error(LONG status) {
+  switch (status) {
+    case STATUS_SUCCESS:
+      return ERROR_SUCCESS;
+
+    case STATUS_PENDING:
+      return ERROR_IO_PENDING;
+
+    case STATUS_INVALID_HANDLE:
+    case STATUS_OBJECT_TYPE_MISMATCH:
+      return WSAENOTSOCK;
+
+    case STATUS_INSUFFICIENT_RESOURCES:
+    case STATUS_PAGEFILE_QUOTA:
+    case STATUS_COMMITMENT_LIMIT:
+    case STATUS_WORKING_SET_QUOTA:
+    case STATUS_NO_MEMORY:
+    case STATUS_QUOTA_EXCEEDED:
+    case STATUS_TOO_MANY_PAGING_FILES:
+    case STATUS_REMOTE_RESOURCES:
+      return WSAENOBUFS;
+
+    case STATUS_TOO_MANY_ADDRESSES:
+    case STATUS_SHARING_VIOLATION:
+    case STATUS_ADDRESS_ALREADY_EXISTS:
+      return WSAEADDRINUSE;
+
+    case STATUS_LINK_TIMEOUT:
+    case STATUS_IO_TIMEOUT:
+    case STATUS_TIMEOUT:
+      return WSAETIMEDOUT;
+
+    case STATUS_GRACEFUL_DISCONNECT:
+      return WSAEDISCON;
+
+    case STATUS_REMOTE_DISCONNECT:
+    case STATUS_CONNECTION_RESET:
+    case STATUS_LINK_FAILED:
+    case STATUS_CONNECTION_DISCONNECTED:
+    case STATUS_PORT_UNREACHABLE:
+    case STATUS_HOPLIMIT_EXCEEDED:
+      return WSAECONNRESET;
+
+    case STATUS_LOCAL_DISCONNECT:
+    case STATUS_TRANSACTION_ABORTED:
+    case STATUS_CONNECTION_ABORTED:
+      return WSAECONNABORTED;
+
+    case STATUS_BAD_NETWORK_PATH:
+    case STATUS_NETWORK_UNREACHABLE:
+    case STATUS_PROTOCOL_UNREACHABLE:
+      return WSAENETUNREACH;
+
+    case STATUS_HOST_UNREACHABLE:
+      return WSAEHOSTUNREACH;
+
+    case STATUS_CANCELLED:
+    case STATUS_REQUEST_ABORTED:
+      return WSAEINTR;
+
+    case STATUS_BUFFER_OVERFLOW:
+    case STATUS_INVALID_BUFFER_SIZE:
+      return WSAEMSGSIZE;
+
+    case STATUS_BUFFER_TOO_SMALL:
+    case STATUS_ACCESS_VIOLATION:
+      return WSAEFAULT;
+
+    case STATUS_DEVICE_NOT_READY:
+    case STATUS_REQUEST_NOT_ACCEPTED:
+      return WSAEWOULDBLOCK;
+
+    case STATUS_INVALID_NETWORK_RESPONSE:
+    case STATUS_NETWORK_BUSY:
+    case STATUS_NO_SUCH_DEVICE:
+    case STATUS_NO_SUCH_FILE:
+    case STATUS_OBJECT_PATH_NOT_FOUND:
+    case STATUS_OBJECT_NAME_NOT_FOUND:
+    case STATUS_UNEXPECTED_NETWORK_ERROR:
+      return WSAENETDOWN;
+
+    case STATUS_INVALID_CONNECTION:
+      return WSAENOTCONN;
+
+    case STATUS_REMOTE_NOT_LISTENING:
+    case STATUS_CONNECTION_REFUSED:
+      return WSAECONNREFUSED;
+
+    case STATUS_PIPE_DISCONNECTED:
+      return WSAESHUTDOWN;
+
+    case STATUS_CONFLICTING_ADDRESSES:
+    case STATUS_INVALID_ADDRESS:
+    case STATUS_INVALID_ADDRESS_COMPONENT:
+      return WSAEADDRNOTAVAIL;
+
+    case STATUS_NOT_SUPPORTED:
+    case STATUS_NOT_IMPLEMENTED:
+      return WSAEOPNOTSUPP;
+
+    case STATUS_ACCESS_DENIED:
+      return WSAEACCES;
+
+    default:
+      if ((status & (FACILITY_NTWIN32 << 16)) == (FACILITY_NTWIN32 << 16) &&
+          (status & (ERROR_SEVERITY_ERROR | ERROR_SEVERITY_WARNING))) {
+        /* It's a windows error that has been previously mapped to an */
+        /* ntstatus code. */
+        return (DWORD) (status & 0xffff);
+      } else {
+        /* The default fallback for unmappable ntstatus codes. */
+        return WSAEINVAL;
+      }
+  }
+}
 
 
 static ngx_event_module_t  ngx_iocp_module_ctx = {
@@ -133,8 +260,8 @@ ngx_iocp_init(ngx_cycle_t *cycle, ngx_msec_t timer)
 
     ngx_iocp_local_addr_v6.sockaddr  = (struct sockaddr *) &ngx_iocp_sa_v6;
     ngx_iocp_local_addr_v6.socklen   = sizeof(struct sockaddr_in6);
-    ngx_iocp_local_addr_v6.name.len  = sizeof("INADDR_ANY") - 1;
-    ngx_iocp_local_addr_v6.name.data = (u_char *) "INADDR_ANY";
+    ngx_iocp_local_addr_v6.name.len  = sizeof("INADDR_ANY_V6") - 1;
+    ngx_iocp_local_addr_v6.name.data = (u_char *) "INADDR_ANY_V6";
 
     cf = ngx_event_get_conf(cycle->conf_ctx, ngx_iocp_module);
 
@@ -364,6 +491,26 @@ ngx_iocp_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
 
         ev = ovlp->event;
         ev->complete = 1;
+
+        if (c != NULL) {
+            rc = OVERLAPPED_SUCCESS(ovlp->ovlp);
+            if (!rc) {
+                err = GET_REQ_SOCK_ERROR(ovlp->ovlp);
+            }
+            ngx_log_debug5(NGX_LOG_DEBUG_EVENT, c->log, err,
+                "iocp GetOverlappedResult fd: %d, rc: %d, result:%d, error: %d, %ul bytes", c->fd, rc, GET_STATUS(ovlp->ovlp), err, n);
+
+            if (err == WSAEINTR) {
+                continue;
+            }
+
+            if (c->type == SOCK_DGRAM) {
+                if (err == WSAEMSGSIZE) {
+                    err = 0;
+                    rc = 1;
+                }
+            }
+        }
 
         if (rc != 0) {
             ev->available = (int) n;

@@ -89,15 +89,25 @@ ngx_overlapped_wsasend(ngx_connection_t *c, u_char *buf, size_t size)
         return NGX_ERROR;
     }
 
+    if (wev->ovlp.is_connecting) {
+        ngx_log_debug3(NGX_LOG_DEBUG_EVENT, c->log, 0,
+            "connected successfully: fd:%d, sent %ul bytes, is_connecting is %d", c->fd, wev->available, wev->ovlp.is_connecting);
+        if (c->recv(c, NULL, 0) == NGX_ERROR) {
+            err = ngx_socket_errno;
+            ngx_connection_error(c, err, "post recv failed after connected successfully");
+            return NGX_CHAIN_ERROR;
+        }
+        wev->ovlp.is_connecting = 0;
+        wev->ovlp.posted_zero_byte = 0;
+    } else {
+        ngx_log_debug2(NGX_LOG_DEBUG_EVENT, c->log, 0,
+            "finish WSASend: fd:%d, sent %ul bytes", c->fd, wev->available);
+    }
+
     if (!wev->ready) {
         ngx_connection_error(c, 0, "WSASend() is already post");
         return NGX_AGAIN;
     }
-
-    ngx_log_debug2(NGX_LOG_DEBUG_EVENT, c->log, 0,
-        "finish WSASend: fd:%d, sent %ul bytes", c->fd, wev->available);
-
-    wev->ovlp.posted_zero_byte = 0;
 
 retry:
 

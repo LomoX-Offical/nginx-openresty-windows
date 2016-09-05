@@ -278,6 +278,11 @@ ngx_overlapped_wsasend_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
     if (wev->ovlp.is_connecting) {
         ngx_log_debug3(NGX_LOG_DEBUG_EVENT, c->log, 0,
             "connected successfully: fd:%d, sent %ul bytes, is_connecting is %d", c->fd, wev->available, wev->ovlp.is_connecting);
+        if (c->recv(c, NULL, 0) == NGX_ERROR) {
+            err = ngx_socket_errno;
+            ngx_connection_error(c, err, "post recv failed after connected successfully");
+            return NGX_CHAIN_ERROR;
+        }
         wev->ovlp.is_connecting = 0;
         wev->ovlp.posted_zero_byte = 0;
     }
