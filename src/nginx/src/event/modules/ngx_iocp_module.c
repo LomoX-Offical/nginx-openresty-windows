@@ -335,21 +335,22 @@ ngx_iocp_add_event(ngx_event_t *ev, ngx_int_t event, ngx_uint_t flags)
     }
 
 
-    ev->ovlp.event = ev;
+    ev->ovlp.number = c->number;
+    ev->ovlp.event  = ev;
     ev->active = 1;
 
     ngx_log_debug2(NGX_LOG_DEBUG_EVENT, ev->log, 0,
         "iocp add: fd:%d k:%ui, ov:%p", c->fd, &ev->ovlp);
 
-    if (CreateIoCompletionPort((HANDLE) c->fd, iocp, (ULONG_PTR) c, 0) == NULL)
+    if (CreateIoCompletionPort((HANDLE) c->fd, iocp, (ULONG_PTR) c->number, 0) == NULL)
     {
         ngx_log_error(NGX_LOG_ALERT, ev->log, ngx_errno,
             "add event %d CreateIoCompletionPort() failed",  c->fd);
         return NGX_ERROR;
     }
 
-    ngx_log_debug1(NGX_LOG_DEBUG_EVENT, ev->log, 0,
-        "add event %d  CreateIoCompletionPort() success", c->fd);
+    ngx_log_debug2(NGX_LOG_DEBUG_EVENT, ev->log, 0,
+        "add event %d:%uA CreateIoCompletionPort() success", c->fd, c->number);
 
     return NGX_OK;
 }
@@ -371,6 +372,8 @@ ngx_iocp_del_event(ngx_event_t *ev, ngx_int_t event, ngx_uint_t flags)
     CancelIo((HANDLE)c->fd);
 
     ev->active = 0;
+    ev->ovlp.number = 0;
+ 
     ngx_log_debug1(NGX_LOG_DEBUG_EVENT, ev->log, 0,
         "delete event %d  CancelIo() success", c->fd);
 
@@ -389,18 +392,21 @@ ngx_iocp_add_connection(ngx_connection_t *c)
     rev->ovlp.event = rev;
     wev->ovlp.event = wev;
 
+    rev->ovlp.number = c->number;
+    wev->ovlp.number = c->number;
+
     rev->active = 1;
     wev->active = 1;
 
-    if (CreateIoCompletionPort((HANDLE) c->fd, iocp, (ULONG_PTR) c, 0) == NULL)
+    if (CreateIoCompletionPort((HANDLE) c->fd, iocp, (ULONG_PTR) c->number, 0) == NULL)
     {
         ngx_log_error(NGX_LOG_ALERT, c->log, ngx_errno,
             "add connection %d CreateIoCompletionPort() failed", c->fd);
         return NGX_ERROR;
     }
 
-    ngx_log_debug1(NGX_LOG_DEBUG_EVENT, c->log, 0,
-        "add connection %d  CreateIoCompletionPort() success", c->fd);
+    ngx_log_debug2(NGX_LOG_DEBUG_EVENT, c->log, 0,
+        "add connection %d:%uA CreateIoCompletionPort() success", c->fd, c->number);
 
     return NGX_OK;
 }
@@ -415,6 +421,9 @@ ngx_iocp_del_connection(ngx_connection_t *c, ngx_uint_t flags)
 
     rev->active = 0;
     wev->active = 0;
+
+    rev->ovlp.number = 0;
+    wev->ovlp.number = 0;
 
     CancelIo((HANDLE)c->fd);
 
@@ -435,6 +444,7 @@ ngx_iocp_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
     ngx_queue_t       *queue;
 
     ngx_connection_t  *c;
+    ngx_atomic_uint_t  number;
     ngx_event_ovlp_t  *ovlp;
 
     ngx_set_errno(0);
@@ -449,15 +459,13 @@ ngx_iocp_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
 
     } else {
 
-        c = NULL;
-
-        rc = GetQueuedCompletionStatus(iocp, (LPDWORD) &n, (ULONG_PTR *) &c,
+        rc = GetQueuedCompletionStatus(iocp, (LPDWORD) &n, (ULONG_PTR *) &number,
                                        (OVERLAPPED **) &ovlp, (DWORD) timer);
 
         if (ovlp != NULL) {
             events = 1;
 
-            event_list[0].lpCompletionKey = (ULONG_PTR) c;
+            event_list[0].lpCompletionKey = (ULONG_PTR) number;
             event_list[0].lpOverlapped = (OVERLAPPED *) ovlp;
             event_list[0].dwNumberOfBytesTransferred = (DWORD) n;
 
@@ -480,35 +488,39 @@ ngx_iocp_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
 
     for (i = 0; i < events; i++) {
 
-        c = (ngx_connection_t *) event_list[i].lpCompletionKey;
-        ovlp = (ngx_event_ovlp_t *) event_list[i].lpOverlapped;
-        n = event_list[i].dwNumberOfBytesTransferred;
+        number = (u_long) event_list[i].lpCompletionKey;
+        ovlp   = (ngx_event_ovlp_t *) event_list[i].lpOverlapped;
+        n      = (size_t) event_list[i].dwNumberOfBytesTransferred;
 
-        if ((c != NULL && c->fd == -1) || (ovlp != NULL && ovlp->event == NULL))
+        if ((ovlp == NULL) || (number != ovlp->number) || (ovlp->event == NULL) || (ovlp->event->data == NULL))
         {
+            ngx_log_debug2(NGX_LOG_DEBUG_EVENT, cycle->log, err,
+                "iocp ignored event number:%d, ovlp->number:%d", number, (ovlp == NULL) ? -1 : ovlp->number);
+
             continue;
         }
 
         ev = ovlp->event;
         ev->complete = 1;
 
-        if (c != NULL) {
-            rc = OVERLAPPED_SUCCESS(ovlp->ovlp);
-            if (!rc) {
-                err = GET_REQ_SOCK_ERROR(ovlp->ovlp);
-            }
-            ngx_log_debug5(NGX_LOG_DEBUG_EVENT, c->log, err,
-                "iocp GetOverlappedResult fd: %d, rc: %d, result:%d, error: %d, %ul bytes", c->fd, rc, GET_STATUS(ovlp->ovlp), err, n);
+        c = ev->data;
 
-            if (err == WSAEINTR) {
-                continue;
-            }
+        err = 0;
+        rc = OVERLAPPED_SUCCESS(ovlp->ovlp);
+        if (!rc) {
+            err = GET_REQ_SOCK_ERROR(ovlp->ovlp);
+        }
+        ngx_log_debug5(NGX_LOG_DEBUG_EVENT, c->log, err,
+            "iocp GetOverlappedResult fd: %d, rc: %d, result:%d, error: %d, %ul bytes", c->fd, rc, GET_STATUS(ovlp->ovlp), err, n);
 
-            if (c->type == SOCK_DGRAM) {
-                if (err == WSAEMSGSIZE) {
-                    err = 0;
-                    rc = 1;
-                }
+        if (err == WSAEINTR) {
+            continue;
+        }
+
+        if (c->type == SOCK_DGRAM) {
+            if (err == WSAEMSGSIZE) {
+                err = 0;
+                rc = 1;
             }
         }
 
@@ -533,11 +545,6 @@ ngx_iocp_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
         }
 
         ev->ready = 1;
-
-        if (c == NULL) {
-            c = ev->data;
-        }
-
         
         ngx_log_debug4(NGX_LOG_DEBUG_EVENT, c->log, err,
             "iocp ready %d, %s available %ul bytes, error %d", c->fd, ev->write ? "write" : "read", ev->available, ev->error);

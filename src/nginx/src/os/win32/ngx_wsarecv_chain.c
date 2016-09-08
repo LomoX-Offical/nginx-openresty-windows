@@ -124,7 +124,7 @@ ngx_overlapped_wsarecv_chain(ngx_connection_t *c, ngx_chain_t *chain, off_t limi
     rev = c->read;
 
     if (rev->eof || rev->closed) {
-        return 0;
+        return NGX_AGAIN;
     }
 
     if (rev->error) {

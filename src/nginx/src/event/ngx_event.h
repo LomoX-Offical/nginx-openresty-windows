@@ -19,9 +19,10 @@
 #if (NGX_HAVE_IOCP)
 
 typedef struct {
-    WSAOVERLAPPED    ovlp;
-    ngx_event_t     *event;
-    int              error;
+    WSAOVERLAPPED     ovlp;
+    ngx_atomic_uint_t number;
+    ngx_event_t      *event;
+    int               error;
 
     /* zero-byte recv/send with overlapped-io and then non-blocking */
     unsigned         posted_zero_byte;

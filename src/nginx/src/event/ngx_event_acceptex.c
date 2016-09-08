@@ -126,29 +126,6 @@ ngx_event_acceptex(ngx_event_t *ev)
         goto post_acceptex;
     }
 
-    /* set a blocking mode for aio and non-blocking mode for others */
-
-    if (ngx_inherited_nonblocking) {
-        if (ngx_event_flags & NGX_USE_AIO_EVENT) {
-            if (ngx_blocking(s) == -1) {
-                ngx_log_error(NGX_LOG_ALERT, ev->log, ngx_socket_errno,
-                              ngx_blocking_n " failed");
-                ngx_close_accepted_connection(c);
-                goto post_acceptex;
-            }
-        }
-
-    } else {
-        if (!(ngx_event_flags & (NGX_USE_AIO_EVENT|NGX_USE_RTSIG_EVENT))) {
-            if (ngx_nonblocking(s) == -1) {
-                ngx_log_error(NGX_LOG_ALERT, ev->log, ngx_socket_errno,
-                              ngx_nonblocking_n " failed");
-                ngx_close_accepted_connection(c);
-                goto post_acceptex;
-            }
-        }
-    }
-
     *log = ls->log;
 
     c->recv = ngx_recv;
@@ -160,6 +137,7 @@ ngx_event_acceptex(ngx_event_t *ev)
     c->pool->log = log;
 
     c->socklen = remote_socklen;
+    c->local_socklen = local_socklen;
     c->listening = ls;
 
 

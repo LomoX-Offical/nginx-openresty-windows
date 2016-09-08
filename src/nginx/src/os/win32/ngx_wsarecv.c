@@ -145,7 +145,7 @@ ngx_overlapped_wsarecv(ngx_connection_t *c, u_char *buf, size_t size)
     rev = c->read;
 
     if (rev->eof || rev->closed) {
-        return 0;
+        return NGX_AGAIN;
     }
 
     if (rev->error) {
