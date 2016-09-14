@@ -8,7 +8,7 @@ use Test::Nginx::Socket::Lua;
 
 repeat_each(2);
 
-plan tests => repeat_each() * (2 * blocks() + 28);
+plan tests => repeat_each() * (2 * blocks() + 30);
 
 #no_diff();
 #no_long_string();
@@ -1582,3 +1582,43 @@ X-Forwarded-For: 8.8.8.8
 Foo: 127.0.0.1
 --- no_error_log
 [error]
+
+
+
+=== TEST 52: for bad requests (bad request method letter case)
+--- config
+    error_page 400 = /err;
+
+    location = /err {
+        content_by_lua_block {
+            ngx.req.set_header("Foo", "bar")
+            ngx.say("ok")
+        }
+    }
+--- raw_request
+GeT / HTTP/1.1
+--- response_body
+ok
+--- no_error_log
+[error]
+--- no_check_leak
+
+
+
+=== TEST 53: for bad requests (bad request method names)
+--- config
+    error_page 400 = /err;
+
+    location = /err {
+        content_by_lua_block {
+            ngx.req.set_header("Foo", "bar")
+            ngx.say("ok")
+        }
+    }
+--- raw_request
+GET x HTTP/1.1
+--- response_body
+ok
+--- no_error_log
+[error]
+--- no_check_leak

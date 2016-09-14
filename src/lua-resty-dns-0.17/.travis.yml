@@ -1,0 +1,35 @@
+sudo: required
+dist: trusty
+
+os: linux
+
+language: c
+
+compiler:
+  - gcc
+
+env:
+  global:
+    - NGINX_VERSION=1.9.15
+    - JOBS=3
+    - TEST_NGINX_SLEEP=0.006
+  matrix:
+    - LUA=libluajit-5.1-dev LUA_DEV=libluajit-5.1-dev LUA_INCLUDE_DIR=/usr/include/luajit-2.0 LUALIB=-lluajit-5.1
+
+install:
+    - sudo apt-get update
+    - sudo apt-get install -qq -y $LUA cpanminus
+    - sudo cpanm --notest Test::Nginx > build.log 2>&1 || (cat build.log && exit 1)
+    - wget http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz
+    - git clone https://github.com/openresty/lua-nginx-module.git
+    - git clone https://github.com/openresty/lua-cjson.git
+
+script:
+  - cd lua-cjson && make -j$JOBS && sudo make install && cd ..
+  - tar xzf nginx-${NGINX_VERSION}.tar.gz
+  - cd nginx-${NGINX_VERSION}/
+  - ./configure --with-debug --with-cc-opt="-DDEBUG_MALLOC" --with-ipv6 --add-module=../lua-nginx-module > build.log 2>&1 || (cat build.log && exit 1)
+  - make -j$JOBS > build.log 2>&1 || (cat build.log && exit 1)
+  - export PATH=$PATH:`pwd`/objs
+  - cd ..
+  - prove -r t

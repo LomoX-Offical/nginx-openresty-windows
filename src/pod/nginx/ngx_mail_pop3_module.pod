@@ -1,0 +1,131 @@
+=encoding utf-8
+
+=head1 NAME
+
+ngx_mail_pop3_module - Module ngx_mail_pop3_module
+
+
+
+
+=head1 Directives
+
+=head2 pop3_auth
+
+
+B<syntax:> pop3_auth I<I<C<method>> ...>
+
+
+B<default:> I<plain>
+
+
+B<context:> I<mail>
+
+
+B<context:> I<server>
+
+
+
+
+
+Sets permitted methods of authentication for POP3 clients.
+Supported methods are:
+
+=over
+
+
+
+=item C<plain>
+
+
+
+
+L<USERE<sol>PASS|http://tools.ietf.org/html/rfc1939>,
+L<AUTH PLAIN|http://tools.ietf.org/html/rfc4616>,
+L<AUTH LOGIN|http://tools.ietf.org/html/draft-murchison-sasl-login-00>.
+It is not possible to disable these methods.
+
+
+
+=item C<apop>
+
+
+
+
+L<APOP|http://tools.ietf.org/html/rfc1939>.
+In order for this method to work, the password must be stored unencrypted.
+
+
+
+=item C<cram-md5>
+
+
+
+
+L<AUTH CRAM-MD5|http://tools.ietf.org/html/rfc2195>.
+In order for this method to work, the password must be stored unencrypted.
+
+
+
+
+=back
+
+
+
+
+
+
+
+
+
+=head2 pop3_capabilities
+
+
+B<syntax:> pop3_capabilities I<I<C<extension>> ...>
+
+
+B<default:> I<TOP USER UIDL>
+
+
+B<context:> I<mail>
+
+
+B<context:> I<server>
+
+
+
+
+
+Sets the
+L<POP3 protocol|http://tools.ietf.org/html/rfc2449>
+extensions list that is passed to the client in response to
+the C<CAPA> command.
+
+The authentication methods specified in the L</pop3_auth> and
+(L<SASL|http://tools.ietf.org/html/rfc2449> extension) and
+L<STLS|http://tools.ietf.org/html/rfc2595> directives,
+are automatically added to this list if the
+L<ngx_mail_ssl_module> directive is enabled.
+
+
+
+
+
+It makes sense to specify the extensions
+supported by the POP3 backends
+to which the clients are proxied (if these extensions are related to commands
+used after the authentication, when nginx transparently proxies the client
+connection to the backend).
+
+
+
+
+
+The current list of standardized extensions is published at
+L<www.iana.org|http://www.iana.org/assignments/pop3-extension-mechanism>.
+
+
+
+
+
+
+
