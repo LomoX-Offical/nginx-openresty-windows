@@ -165,31 +165,6 @@
 #endif
 
 
-#ifndef NGX_HAVE_OPENSSL_MD5_H
-#define NGX_HAVE_OPENSSL_MD5_H  1
-#endif
-
-
-#ifndef NGX_OPENSSL_MD5
-#define NGX_OPENSSL_MD5  1
-#endif
-
-
-#ifndef NGX_HAVE_MD5
-#define NGX_HAVE_MD5  1
-#endif
-
-
-#ifndef NGX_HAVE_OPENSSL_SHA1_H
-#define NGX_HAVE_OPENSSL_SHA1_H  1
-#endif
-
-
-#ifndef NGX_HAVE_SHA1
-#define NGX_HAVE_SHA1  1
-#endif
-
-
 #ifndef NGX_ZLIB
 #define NGX_ZLIB  1
 #endif

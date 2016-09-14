@@ -94,6 +94,7 @@ extern ngx_module_t  ngx_mail_auth_http_module;
 extern ngx_module_t  ngx_mail_proxy_module;
 extern ngx_module_t  ngx_stream_module;
 extern ngx_module_t  ngx_stream_core_module;
+extern ngx_module_t  ngx_stream_log_module;
 extern ngx_module_t  ngx_stream_proxy_module;
 extern ngx_module_t  ngx_stream_upstream_module;
 extern ngx_module_t  ngx_stream_ssl_module;
@@ -198,6 +199,7 @@ ngx_module_t *ngx_modules[] = {
     &ngx_mail_proxy_module,
     &ngx_stream_module,
     &ngx_stream_core_module,
+    &ngx_stream_log_module,
     &ngx_stream_proxy_module,
     &ngx_stream_upstream_module,
     &ngx_stream_ssl_module,
@@ -304,6 +306,7 @@ char *ngx_module_names[] = {
     "ngx_mail_proxy_module",
     "ngx_stream_module",
     "ngx_stream_core_module",
+    "ngx_stream_log_module",
     "ngx_stream_proxy_module",
     "ngx_stream_upstream_module",
     "ngx_stream_ssl_module",
