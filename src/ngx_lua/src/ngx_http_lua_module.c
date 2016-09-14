@@ -26,6 +26,8 @@
 #include "ngx_http_lua_semaphore.h"
 #include "ngx_http_lua_balancer.h"
 #include "ngx_http_lua_ssl_certby.h"
+#include "ngx_http_lua_ssl_session_storeby.h"
+#include "ngx_http_lua_ssl_session_fetchby.h"
 
 
 static void *ngx_http_lua_create_main_conf(ngx_conf_t *cf);
@@ -525,6 +527,34 @@ static ngx_command_t ngx_http_lua_cmds[] = {
       0,
       (void *) ngx_http_lua_ssl_cert_handler_file },
 
+    { ngx_string("ssl_session_store_by_lua_block"),
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_CONF_BLOCK|NGX_CONF_NOARGS,
+      ngx_http_lua_ssl_sess_store_by_lua_block,
+      NGX_HTTP_SRV_CONF_OFFSET,
+      0,
+      (void *) ngx_http_lua_ssl_sess_store_handler_inline },
+
+    { ngx_string("ssl_session_store_by_lua_file"),
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_CONF_TAKE1,
+      ngx_http_lua_ssl_sess_store_by_lua,
+      NGX_HTTP_SRV_CONF_OFFSET,
+      0,
+      (void *) ngx_http_lua_ssl_sess_store_handler_file },
+
+    { ngx_string("ssl_session_fetch_by_lua_block"),
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_CONF_BLOCK|NGX_CONF_NOARGS,
+      ngx_http_lua_ssl_sess_fetch_by_lua_block,
+      NGX_HTTP_SRV_CONF_OFFSET,
+      0,
+      (void *) ngx_http_lua_ssl_sess_fetch_handler_inline },
+
+    { ngx_string("ssl_session_fetch_by_lua_file"),
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_CONF_TAKE1,
+      ngx_http_lua_ssl_sess_fetch_by_lua,
+      NGX_HTTP_SRV_CONF_OFFSET,
+      0,
+      (void *) ngx_http_lua_ssl_sess_fetch_handler_file },
+
     { ngx_string("lua_ssl_verify_depth"),
       NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_num_slot,
@@ -681,7 +711,6 @@ ngx_http_lua_init(ngx_conf_t *cf)
     }
 
 #ifndef NGX_LUA_NO_FFI_API
-
     /* add the cleanup of semaphores after the lua_close */
     cln = ngx_pool_cleanup_add(cf->pool, 0);
     if (cln == NULL) {
@@ -690,7 +719,6 @@ ngx_http_lua_init(ngx_conf_t *cf)
 
     cln->data = lmcf;
     cln->handler = ngx_http_lua_sema_mm_cleanup;
-
 #endif
 
     if (lmcf->lua == NULL) {
@@ -761,7 +789,9 @@ ngx_http_lua_lowat_check(ngx_conf_t *cf, void *post, void *data)
 static void *
 ngx_http_lua_create_main_conf(ngx_conf_t *cf)
 {
+#ifndef NGX_LUA_NO_FFI_API
     ngx_int_t       rc;
+#endif
 
     ngx_http_lua_main_conf_t    *lmcf;
 
@@ -802,11 +832,14 @@ ngx_http_lua_create_main_conf(ngx_conf_t *cf)
     lmcf->postponed_to_rewrite_phase_end = NGX_CONF_UNSET;
     lmcf->postponed_to_access_phase_end = NGX_CONF_UNSET;
 
+#ifndef NGX_LUA_NO_FFI_API
     rc = ngx_http_lua_sema_mm_init(cf, lmcf);
     if (rc != NGX_OK) {
         return NULL;
     }
+
     dd("nginx Lua module main config structure initialized!");
+#endif
 
     return lmcf;
 }
@@ -852,9 +885,18 @@ ngx_http_lua_create_srv_conf(ngx_conf_t *cf)
     }
 
     /* set by ngx_pcalloc:
-     *      lscf->ssl.cert_handler = NULL;
-     *      lscf->ssl.cert_src = { 0, NULL };
-     *      lscf->ssl.cert_src_key = NULL;
+     *      lscf->srv.ssl_cert_handler = NULL;
+     *      lscf->srv.ssl_cert_src = { 0, NULL };
+     *      lscf->srv.ssl_cert_src_key = NULL;
+     *
+     *      lscf->srv.ssl_session_store_handler = NULL;
+     *      lscf->srv.ssl_session_store_src = { 0, NULL };
+     *      lscf->srv.ssl_session_store_src_key = NULL;
+     *
+     *      lscf->srv.ssl_session_fetch_handler = NULL;
+     *      lscf->srv.ssl_session_fetch_src = { 0, NULL };
+     *      lscf->srv.ssl_session_fetch_src_key = NULL;
+     *
      *      lscf->balancer.handler = NULL;
      *      lscf->balancer.src = { 0, NULL };
      *      lscf->balancer.src_key = NULL;
@@ -875,13 +917,13 @@ ngx_http_lua_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child)
 
     dd("merge srv conf");
 
-    if (conf->ssl.cert_src.len == 0) {
-        conf->ssl.cert_src = prev->ssl.cert_src;
-        conf->ssl.cert_src_key = prev->ssl.cert_src_key;
-        conf->ssl.cert_handler = prev->ssl.cert_handler;
+    if (conf->srv.ssl_cert_src.len == 0) {
+        conf->srv.ssl_cert_src = prev->srv.ssl_cert_src;
+        conf->srv.ssl_cert_src_key = prev->srv.ssl_cert_src_key;
+        conf->srv.ssl_cert_handler = prev->srv.ssl_cert_handler;
     }
 
-    if (conf->ssl.cert_src.len) {
+    if (conf->srv.ssl_cert_src.len) {
         sscf = ngx_http_conf_get_module_srv_conf(cf, ngx_http_ssl_module);
         if (sscf == NULL || sscf->ssl.ctx == NULL) {
             ngx_log_error(NGX_LOG_EMERG, cf->log, 0,
@@ -910,6 +952,56 @@ ngx_http_lua_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child)
 
 #   endif
 
+#endif
+    }
+
+    if (conf->srv.ssl_sess_store_src.len == 0) {
+        conf->srv.ssl_sess_store_src = prev->srv.ssl_sess_store_src;
+        conf->srv.ssl_sess_store_src_key = prev->srv.ssl_sess_store_src_key;
+        conf->srv.ssl_sess_store_handler = prev->srv.ssl_sess_store_handler;
+    }
+
+    if (conf->srv.ssl_sess_store_src.len) {
+        sscf = ngx_http_conf_get_module_srv_conf(cf, ngx_http_ssl_module);
+        if (sscf == NULL || sscf->ssl.ctx == NULL) {
+            ngx_log_error(NGX_LOG_EMERG, cf->log, 0,
+                          "no ssl configured for the server");
+
+            return NGX_CONF_ERROR;
+        }
+
+#ifdef LIBRESSL_VERSION_NUMBER
+        ngx_log_error(NGX_LOG_EMERG, cf->log, 0,
+                      "LibreSSL does not support ssl_session_store_by_lua*");
+        return NGX_CONF_ERROR;
+#else
+        SSL_CTX_sess_set_new_cb(sscf->ssl.ctx,
+                                ngx_http_lua_ssl_sess_store_handler);
+#endif
+    }
+
+    if (conf->srv.ssl_sess_fetch_src.len == 0) {
+        conf->srv.ssl_sess_fetch_src = prev->srv.ssl_sess_fetch_src;
+        conf->srv.ssl_sess_fetch_src_key = prev->srv.ssl_sess_fetch_src_key;
+        conf->srv.ssl_sess_fetch_handler = prev->srv.ssl_sess_fetch_handler;
+    }
+
+    if (conf->srv.ssl_sess_fetch_src.len) {
+        sscf = ngx_http_conf_get_module_srv_conf(cf, ngx_http_ssl_module);
+        if (sscf == NULL || sscf->ssl.ctx == NULL) {
+            ngx_log_error(NGX_LOG_EMERG, cf->log, 0,
+                          "no ssl configured for the server");
+
+            return NGX_CONF_ERROR;
+        }
+
+#ifdef LIBRESSL_VERSION_NUMBER
+        ngx_log_error(NGX_LOG_EMERG, cf->log, 0,
+                      "LibreSSL does not support ssl_session_fetch_by_lua*");
+        return NGX_CONF_ERROR;
+#else
+        SSL_CTX_sess_set_get_cb(sscf->ssl.ctx,
+                                ngx_http_lua_ssl_sess_fetch_handler);
 #endif
     }
 

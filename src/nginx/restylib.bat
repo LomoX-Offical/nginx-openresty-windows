@@ -1,12 +1,12 @@
 SET ORG_DIR=%cd%
 set LUA_LIB_DIR=objs\lua
-set CORE_LIB=..\lua-resty-core-0.1.6\
-set DNS_LIB=..\lua-resty-dns-0.16\
+set CORE_LIB=..\lua-resty-core-0.1.8\
+set DNS_LIB=..\lua-resty-dns-0.17\
 set LOCK_LIB=..\lua-resty-lock-0.04\
 set LRUCACHE_LIB=..\lua-resty-lrucache-0.04\
 set MEMCACHED_LIB=..\lua-resty-memcached-0.14\
 set MYSQL_LIB=..\lua-resty-mysql-0.16\
-set REDIS_LIB=..\lua-resty-redis-0.24\
+set REDIS_LIB=..\lua-resty-redis-0.25\
 set STRING_LIB=..\lua-resty-string-0.09\
 set UPLOAD_LIB=..\lua-resty-upload-0.09\
 set UPSTREAM_HEALTHCHECK_LIB=..\lua-resty-upstream-healthcheck-0.04\
