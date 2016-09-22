@@ -1142,6 +1142,18 @@ ngx_close_connection(ngx_connection_t *c)
     ngx_uint_t    log_error, level;
     ngx_socket_t  fd;
 
+
+#if (NGX_WIN32)
+
+    if (c->iocp) {
+        if (ngx_iocp_shutdown(c) == NGX_AGAIN) {
+            c->iocp->handler = ngx_close_connection;
+            return;
+        }
+    }
+
+#endif
+
     if (c->fd == (ngx_socket_t) -1) {
         ngx_log_error(NGX_LOG_ALERT, c->log, 0, "connection already closed");
         return;

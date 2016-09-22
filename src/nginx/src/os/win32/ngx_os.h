@@ -72,6 +72,19 @@ typedef BOOL (WINAPI *LPFN_GETQUEUEDCOMPLETIONSTATUSEX)(HANDLE CompletionPort,
     LPOVERLAPPED_ENTRY lpCompletionPortEntries, ULONG ulCount,
     PULONG ulNumEntriesRemoved, DWORD dwMilliseconds, BOOL fAlertable);
 
+typedef BOOL (WINAPI *LPFN_SETFILECOMPLETIONNOTIFICATIONMODES)(
+    HANDLE FileHandle, UCHAR Flags);
+
+
+#ifndef FILE_SKIP_COMPLETION_PORT_ON_SUCCESS
+#  define FILE_SKIP_COMPLETION_PORT_ON_SUCCESS           0x1
+#endif
+
+#ifndef FILE_SKIP_SET_EVENT_ON_HANDLE
+#  define FILE_SKIP_SET_EVENT_ON_HANDLE                  0x2
+#endif
+
+
 
 ngx_int_t ngx_os_init(ngx_log_t *log);
 void ngx_os_status(ngx_log_t *log);
@@ -107,7 +120,8 @@ extern ngx_uint_t   ngx_tcp_nodelay_and_tcp_nopush;
 extern ngx_uint_t   ngx_win32_version;
 extern char         ngx_unique[];
 
-extern LPFN_GETQUEUEDCOMPLETIONSTATUSEX  ngx_get_queued_completion_status_ex;
+extern LPFN_GETQUEUEDCOMPLETIONSTATUSEX         ngx_get_queued_completion_status_ex;
+extern LPFN_SETFILECOMPLETIONNOTIFICATIONMODES  ngx_set_file_completion_notification_modes;
 
 
 #endif /* _NGX_OS_H_INCLUDED_ */

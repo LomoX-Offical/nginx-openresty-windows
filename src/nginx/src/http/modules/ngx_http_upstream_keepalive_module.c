@@ -438,6 +438,17 @@ ngx_http_upstream_keepalive_close(ngx_connection_t *c)
 
 #endif
 
+#if (NGX_WIN32)
+
+    if (c->iocp) {
+        if (ngx_iocp_shutdown(c) == NGX_AGAIN) {
+            c->iocp->handler = ngx_http_upstream_keepalive_close;
+            return;
+        }
+    }
+
+#endif
+
     ngx_destroy_pool(c->pool);
     ngx_close_connection(c);
 }

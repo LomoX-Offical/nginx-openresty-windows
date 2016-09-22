@@ -803,6 +803,18 @@ ngx_mail_close_connection(ngx_connection_t *c)
 
 #endif
 
+#if (NGX_WIN32)
+
+    if (c->iocp) {
+        if (ngx_iocp_shutdown(c) == NGX_AGAIN) {
+            c->iocp->handler = ngx_mail_close_connection;
+            return;
+        }
+    }
+
+#endif
+
+
 #if (NGX_STAT_STUB)
     (void) ngx_atomic_fetch_add(ngx_stat_active, -1);
 #endif

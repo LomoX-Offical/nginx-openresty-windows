@@ -17,8 +17,12 @@ typedef struct {
     ngx_uint_t    post_udp_recv;
 } ngx_iocp_conf_t;
 
+typedef struct {
+    ngx_connection_handler_pt   handler;
+} ngx_iocp_connection_t;
 
 ngx_int_t ngx_iocp_add_file(ngx_file_t *file);
+ngx_int_t ngx_iocp_shutdown(ngx_connection_t *c);
 
 extern ngx_module_t  ngx_iocp_module;
 extern ngx_addr_t    ngx_iocp_local_addr_v4;

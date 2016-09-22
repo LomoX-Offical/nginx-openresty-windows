@@ -99,32 +99,68 @@ retry:
     rc = WSARecv(c->fd, &wsabuf, 1, (DWORD *) &n, (LPDWORD) &flags, ovlp, NULL);
 
     ngx_log_debug4(NGX_LOG_DEBUG_EVENT, c->log, 0,
-        "Post WSARecv: fd:%d rc:%d %ul of %z", c->fd, rc, n, size);
+        "iocp post WSARecv: fd:%d rc:%d %ul of %z", c->fd, rc, n, size);
 
     err = ngx_socket_errno;
 
     if (rc == 0) {
+        if (ngx_win32_version >= NGX_WIN32_VER_600) {
+            if ((buf == NULL) && (size == 0)) {
+                ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err, "iocp post WSARecv() success, need to call PostQueuedCompletionStatus!");
+
+                if (!PostQueuedCompletionStatus(iocp,
+                    0, c->number,
+                    &rev->ovlp.ovlp)) 
+                {
+                    err = ngx_socket_errno;
+                    ngx_log_error(NGX_LOG_ALERT, rev->log, err, "iocp call PostQueuedCompletionStatus() failed");
+                    return NGX_ERROR;
+                }
+
+                ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, 0, "iocp call PostQueuedCompletionStatus() success!");
+
+                rev->ovlp.posted_zero_byte = 1;
+                rev->ready = 0;
+                c->ovlp_count++;
+                ngx_log_debug2(NGX_LOG_DEBUG_EVENT, c->log, 0, "iocp ovlp_count fd: %d, count: %ul", c->fd, c->ovlp_count);
+
+                return NGX_AGAIN;
+            }
+
+
+            ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err, "iocp post WSARecv() success");
+
+            rev->ovlp.posted_zero_byte = 0;
+            rev->ready = 1;
+
+            return NGX_OK;
+        }
+
         rev->ovlp.posted_zero_byte = 1;
         rev->ready = 0;
+        c->ovlp_count++;
+        ngx_log_debug2(NGX_LOG_DEBUG_EVENT, c->log, 0, "iocp post WSARecv() success, ovlp_count fd: %d, count: %ul", c->fd, c->ovlp_count);
         return NGX_AGAIN;
     }
 
     if (err == WSA_IO_PENDING) {
-        ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err, "Post WSARecv() not ready");
         rev->ovlp.posted_zero_byte = 1;
         rev->ready = 0;
+        c->ovlp_count++;
+        ngx_log_debug2(NGX_LOG_DEBUG_EVENT, c->log, 0, "iocp post WSARecv() not ready, ovlp_count fd: %d, count: %ul", c->fd, c->ovlp_count);
+
         return NGX_AGAIN;
     }
 
     if (err == WSAEWOULDBLOCK) {
-        ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err, "Post WSARecv() not ready retry");
+        ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err, "iocp post WSARecv() not ready retry");
 
         /* post another overlapped-io WSARecv() */
         rev->ovlp.posted_zero_byte = 0;
         goto retry;
     }
 
-    ngx_connection_error(c, err, "Post WSARecv() failed");
+    ngx_connection_error(c, err, "iocp post WSARecv() failed");
 
     rev->ready = 0;
     rev->error = 1;
@@ -154,10 +190,14 @@ ngx_overlapped_wsarecv(ngx_connection_t *c, u_char *buf, size_t size)
 
     if (rev->ready == 0){
         if (rev->ovlp.posted_zero_byte == 0) {
-            return ngx_post_overlapped_wsarecv(c, buf, size);
+            rc = ngx_post_overlapped_wsarecv(c, buf, size);
+            if (rc != NGX_OK) {
+                return rc;
+            }
+        } else {
+            ngx_connection_error(c, 0, "iocp WSARecv() is already post");
+            return NGX_AGAIN;
         }
-        ngx_connection_error(c, 0, "WSARecv() is already post");
-        return NGX_AGAIN;
     }
 
 
@@ -173,7 +213,7 @@ retry:
     rc = WSARecv(c->fd, &wsabuf, 1, (DWORD *) &n, (LPDWORD) &flags, ovlp, NULL);
 
     ngx_log_debug4(NGX_LOG_DEBUG_EVENT, c->log, 0,
-        "do WSARecv: fd:%d rc:%d %ul of %z", c->fd, rc, n, size);
+        "iocp WSARecv: fd:%d rc:%d %ul of %z", c->fd, rc, n, size);
 
     err = ngx_socket_errno;
 
@@ -183,18 +223,20 @@ retry:
                 rev->eof = 1;
             }
 
-            ngx_post_overlapped_wsarecv(c, buf, size);
+            if ((size_t) n < size) {
+                ngx_post_overlapped_wsarecv(c, NULL, 0);
+            }
         }
 
         return n;
     }
 
     if (err == WSAEWOULDBLOCK) {
-        ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err, "do WSARecv() not ready retry");
-        return ngx_post_overlapped_wsarecv(c, buf, size);
+        ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err, "iocp WSARecv() not ready retry");
+        return ngx_post_overlapped_wsarecv(c, NULL, 0);
     }
 
-    ngx_connection_error(c, err, "do WSARecv() failed");
+    ngx_connection_error(c, err, "iocp WSARecv() failed");
 
     rev->ready = 0;
     rev->error = 1;

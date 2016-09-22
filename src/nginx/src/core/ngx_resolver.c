@@ -4560,6 +4560,8 @@ ngx_tcp_connect(ngx_resolver_connection_t *rec)
             (OVERLAPPED *) &wev->ovlp) != 0 ? 0 : -1;
         wev->ovlp.posted_zero_byte = 0;
         wev->ovlp.is_connecting = 1;
+        c->ovlp_count++;
+        ngx_log_debug2(NGX_LOG_DEBUG_EVENT, c->log, 0, "iocp connectex fd: %d, count: %ul", c->fd, c->ovlp_count);
     } else {
         rc = connect(s, rec->sockaddr, rec->socklen);
     }
@@ -4658,7 +4660,7 @@ ngx_tcp_connect(ngx_resolver_connection_t *rec)
          * TODO: check in Win32, etc. As workaround we can use NGX_ONESHOT_EVENT
          */
 
-        rev->ready = 1;
+        rev->ready = 0;
         wev->ready = 1;
 
         return NGX_OK;

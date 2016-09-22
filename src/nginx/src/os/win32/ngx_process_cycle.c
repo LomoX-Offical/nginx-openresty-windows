@@ -210,51 +210,50 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
                               ngx_reload_event_name);
             }
 
-			
 /* 这个方案暂时已经可用了。不好的地方就是不能重启端口。如果端口配置有变化，就会有毛病。
-			cycle = ngx_init_cycle(cycle);
-			if (cycle == NULL) {
-				cycle = (ngx_cycle_t *) ngx_cycle;
-				continue;
-			}
+            cycle = ngx_init_cycle(cycle);
+            if (cycle == NULL) {
+                cycle = (ngx_cycle_t *) ngx_cycle;
+                continue;
+            }
 
-			ngx_cycle = cycle;
+            ngx_cycle = cycle;
 
-			//ngx_close_listening_sockets(cycle);
+            //ngx_close_listening_sockets(cycle);
 
-			if (ngx_start_worker_processes(cycle, NGX_PROCESS_JUST_RESPAWN)) {
-				ngx_quit_worker_processes(cycle, 1);
-			}
+            if (ngx_start_worker_processes(cycle, NGX_PROCESS_JUST_RESPAWN)) {
+                ngx_quit_worker_processes(cycle, 1);
+            }
 */
 
-			/*---code 这里代码是先退掉所有工作进程，然后关闭listen 端口，再reload 配置，重启端口，重启工作进程*/
-			ngx_quit_worker_processes(cycle, 0);
-			ngx_close_listening_sockets(cycle);
+            /*---code 这里代码是先退掉所有工作进程，然后关闭listen 端口，再reload 配置，重启端口，重启工作进程*/
+            ngx_quit_worker_processes(cycle, 0);
+            ngx_close_listening_sockets(cycle);
 
-			ngx_msleep(500);
+            ngx_msleep(500);
 
-			cycle = ngx_init_cycle(cycle);
-			if (cycle == NULL) {
-				cycle = (ngx_cycle_t *) ngx_cycle;
-				continue;
-			}
+            cycle = ngx_init_cycle(cycle);
+            if (cycle == NULL) {
+                cycle = (ngx_cycle_t *) ngx_cycle;
+                continue;
+            }
 
-			ngx_cycle = cycle;
+            ngx_cycle = cycle;
 
-			if (ngx_open_listening_sockets(cycle) != NGX_OK) {
-				ngx_log_error(NGX_LOG_ALERT, cycle->log, err,
-					"reload ngx_open_listening_sockets() failed");
+            if (ngx_open_listening_sockets(cycle) != NGX_OK) {
+                ngx_log_error(NGX_LOG_ALERT, cycle->log, err,
+                    "reload ngx_open_listening_sockets() failed");
 
-				ngx_quit = 1;
-				continue;
-			}
+                ngx_quit = 1;
+                continue;
+            }
 
-			ngx_set_inherited_listen_sockets(cycle);
+            ngx_set_inherited_listen_sockets(cycle);
 
-			if (ngx_start_worker_processes(cycle, NGX_PROCESS_RESPAWN) == 0) {
-				exit(2);
-			}
-			/*---code --- end*/
+            if (ngx_start_worker_processes(cycle, NGX_PROCESS_RESPAWN) == 0) {
+                exit(2);
+            }
+            /*---code --- end*/
 
             continue;
         }
@@ -1125,50 +1124,50 @@ ngx_close_handle(HANDLE h)
 ngx_uint_t 
 ngx_get_worker_id(ngx_cycle_t *cycle)
 {
-	u_char           *inherited;
-	ngx_int_t         s;
+    u_char           *inherited;
+    ngx_int_t         s;
 
-	inherited = (u_char *) getenv(NGX_WORKER_ID);
+    inherited = (u_char *) getenv(NGX_WORKER_ID);
 
-	if (inherited == NULL) {
-		return NGX_OK;
-	}
+    if (inherited == NULL) {
+        return NGX_OK;
+    }
 
-	s = ngx_atoi(inherited, strlen(inherited));
+    s = ngx_atoi(inherited, strlen(inherited));
 
-	if (s < 0) {
-		ngx_log_error(NGX_LOG_EMERG, cycle->log, 0,
-			"invalid worker id \"%s\" in " NGX_WORKER_ID
-			" environment variable, ignoring", inherited);
-	} else {
-		ngx_log_error(NGX_LOG_NOTICE, cycle->log, 0,
-			"using worker id from \"%d\"", s);
-	}
+    if (s < 0) {
+        ngx_log_error(NGX_LOG_EMERG, cycle->log, 0,
+            "invalid worker id \"%s\" in " NGX_WORKER_ID
+            " environment variable, ignoring", inherited);
+    } else {
+        ngx_log_error(NGX_LOG_NOTICE, cycle->log, 0,
+            "using worker id from \"%d\"", s);
+    }
 
-	return (ngx_uint_t)s;
+    return (ngx_uint_t)s;
 }
 
 void
 ngx_set_inherited_listen_sockets(ngx_cycle_t *cycle)
 {
-	char              *var;
-	u_char            *p;
-	ngx_listening_t   *ls;
-	ngx_uint_t         i;
+    char              *var;
+    u_char            *p;
+    ngx_listening_t   *ls;
+    ngx_uint_t         i;
 
-	var = ngx_alloc(cycle->listening.nelts * (NGX_INT32_LEN + 1) + 1, cycle->log); // (numberMaxLen + ';') * n + '\0'
+    var = ngx_alloc(cycle->listening.nelts * (NGX_INT32_LEN + 1) + 1, cycle->log); // (numberMaxLen + ';') * n + '\0'
 
-	p = var;
+    p = var;
 
-	ls = cycle->listening.elts;
-	for (i = 0; i < cycle->listening.nelts; i++) {
-		p = ngx_sprintf(p, "%d;", (int)ls[i].fd);
-	}
+    ls = cycle->listening.elts;
+    for (i = 0; i < cycle->listening.nelts; i++) {
+        p = ngx_sprintf(p, "%d;", (int)ls[i].fd);
+    }
 
-	*p = '\0';
+    *p = '\0';
 
-	SetEnvironmentVariable(NGINX_VAR, var);
+    SetEnvironmentVariable(NGINX_VAR, var);
 
-	ngx_free(var);
+    ngx_free(var);
 
 }

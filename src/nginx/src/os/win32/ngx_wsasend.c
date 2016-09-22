@@ -69,7 +69,7 @@ ngx_overlapped_wsasend(ngx_connection_t *c, u_char *buf, size_t size)
 {
     int             rc;
     WSABUF          wsabuf;
-    ssize_t         n;
+    u_long          sent;
     ngx_err_t       err;
     ngx_event_t    *wev;
     WSAOVERLAPPED  *ovlp;
@@ -89,20 +89,8 @@ ngx_overlapped_wsasend(ngx_connection_t *c, u_char *buf, size_t size)
         return NGX_ERROR;
     }
 
-    if (wev->ovlp.is_connecting) {
-        ngx_log_debug3(NGX_LOG_DEBUG_EVENT, c->log, 0,
-            "connected successfully: fd:%d, sent %ul bytes, is_connecting is %d", c->fd, wev->available, wev->ovlp.is_connecting);
-        if (c->recv(c, NULL, 0) == NGX_ERROR) {
-            err = ngx_socket_errno;
-            ngx_connection_error(c, err, "post recv failed after connected successfully");
-            return NGX_CHAIN_ERROR;
-        }
-        wev->ovlp.is_connecting = 0;
-        wev->ovlp.posted_zero_byte = 0;
-    } else {
-        ngx_log_debug2(NGX_LOG_DEBUG_EVENT, c->log, 0,
-            "finish WSASend: fd:%d, sent %ul bytes", c->fd, wev->available);
-    }
+    ngx_log_debug2(NGX_LOG_DEBUG_EVENT, c->log, 0,
+        "finish WSASend: fd:%d, sent %ul bytes", c->fd, wev->available);
 
     if (!wev->ready) {
         ngx_connection_error(c, 0, "WSASend() is already post");
@@ -118,17 +106,30 @@ retry:
     wsabuf.buf = (CHAR *) buf;
     wsabuf.len = (ULONG) size;
 
-    n = 0;
+    sent = 0;
 
-    rc = WSASend(c->fd, &wsabuf, 1, (DWORD *) &n, 0, ovlp, NULL);
+    rc = WSASend(c->fd, &wsabuf, 1, (DWORD *) &sent, 0, ovlp, NULL);
     ngx_log_debug4(NGX_LOG_DEBUG_EVENT, c->log, 0,
-        "WSASend: fd:%d, %d, %ul of %uz", c->fd, rc, n, size);
+        "WSASend: fd:%d, %d, %ul of %uz", c->fd, rc, sent, size);
 
     err = ngx_socket_errno;
 
     if (rc == 0) {
+        if (ngx_win32_version >= NGX_WIN32_VER_600) {
+            ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err, "iocp post WSASend() success");
+
+            wev->ovlp.posted_zero_byte = 0;
+            wev->ready = 1;
+            c->sent += size;
+            return size;
+        }
+
         wev->ovlp.posted_zero_byte = 1;
         wev->ready = 0;
+        c->sent += size;
+        c->ovlp_count++;
+        ngx_log_debug2(NGX_LOG_DEBUG_EVENT, c->log, 0, "iocp post WSASend() success, ovlp_count fd: %d, count: %ul", c->fd, c->ovlp_count);
+
         return size;
     }
 
@@ -136,17 +137,21 @@ retry:
         ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err, "Post WSASend() not ready");
         wev->ovlp.posted_zero_byte = 1;
         wev->ready = 0;
-        return NGX_AGAIN;
+        c->sent += size;
+        c->ovlp_count++;
+        ngx_log_debug2(NGX_LOG_DEBUG_EVENT, c->log, 0, "iocp post WSASend() not ready, ovlp_count fd: %d, count: %ul", c->fd, c->ovlp_count);
+
+        return size;
     }
 
     if (err == WSAEWOULDBLOCK) {
-        ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err, "Post WSASend() not ready, retry");
+        ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err, "iocp post WSASend() not ready, retry");
 
         wev->ovlp.posted_zero_byte = 0;
         goto retry;
     }
 
-    ngx_connection_error(c, err, "Post WSASend() failed");
+    ngx_connection_error(c, err, "iocp post WSASend() failed");
 
     wev->ovlp.posted_zero_byte = 0;
     wev->ready = 0;

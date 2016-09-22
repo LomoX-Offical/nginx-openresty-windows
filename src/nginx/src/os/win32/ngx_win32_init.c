@@ -48,6 +48,7 @@ LPFN_TRANSMITFILE                 ngx_transmitfile;
 LPFN_TRANSMITPACKETS              ngx_transmitpackets;
 LPFN_GETACCEPTEXSOCKADDRS         ngx_getacceptexsockaddrs;
 LPFN_GETQUEUEDCOMPLETIONSTATUSEX  ngx_get_queued_completion_status_ex;
+LPFN_SETFILECOMPLETIONNOTIFICATIONMODES ngx_set_file_completion_notification_modes;
 
 
 static struct {
@@ -194,6 +195,14 @@ ngx_os_init(ngx_log_t *log)
         if (ngx_get_queued_completion_status_ex == NULL) {
             ngx_log_error(NGX_LOG_ALERT, log, ngx_errno,
                 "GetProcAddress(\"GetQueuedCompletionStatusEx\") failed");
+            return NGX_ERROR;
+        }
+
+        ngx_set_file_completion_notification_modes = (LPFN_SETFILECOMPLETIONNOTIFICATIONMODES) GetProcAddress(handle,
+            "SetFileCompletionNotificationModes");
+        if (ngx_set_file_completion_notification_modes == NULL) {
+            ngx_log_error(NGX_LOG_ALERT, log, ngx_errno,
+                "GetProcAddress(\"SetFileCompletionNotificationModes\") failed");
             return NGX_ERROR;
         }
     }

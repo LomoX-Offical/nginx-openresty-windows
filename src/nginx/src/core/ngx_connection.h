@@ -11,6 +11,7 @@
 
 #include <ngx_config.h>
 #include <ngx_core.h>
+#include <ngx_iocp_module.h>
 
 
 typedef struct ngx_listening_s  ngx_listening_t;
@@ -153,6 +154,11 @@ struct ngx_connection_s {
 
 #if (NGX_SSL)
     ngx_ssl_connection_t  *ssl;
+#endif
+
+#if (NGX_WIN32)
+    ngx_iocp_connection_t  *iocp;
+    size_t                  ovlp_count;
 #endif
 
     struct sockaddr    *local_sockaddr;
