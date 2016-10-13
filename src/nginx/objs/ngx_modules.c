@@ -97,6 +97,7 @@ extern ngx_module_t  ngx_stream_core_module;
 extern ngx_module_t  ngx_stream_log_module;
 extern ngx_module_t  ngx_stream_proxy_module;
 extern ngx_module_t  ngx_stream_upstream_module;
+extern ngx_module_t  ngx_stream_write_filter_module;
 extern ngx_module_t  ngx_stream_ssl_module;
 extern ngx_module_t  ngx_stream_limit_conn_module;
 extern ngx_module_t  ngx_stream_access_module;
@@ -202,6 +203,7 @@ ngx_module_t *ngx_modules[] = {
     &ngx_stream_log_module,
     &ngx_stream_proxy_module,
     &ngx_stream_upstream_module,
+    &ngx_stream_write_filter_module,
     &ngx_stream_ssl_module,
     &ngx_stream_limit_conn_module,
     &ngx_stream_access_module,
@@ -309,6 +311,7 @@ char *ngx_module_names[] = {
     "ngx_stream_log_module",
     "ngx_stream_proxy_module",
     "ngx_stream_upstream_module",
+    "ngx_stream_write_filter_module",
     "ngx_stream_ssl_module",
     "ngx_stream_limit_conn_module",
     "ngx_stream_access_module",
