@@ -3,33 +3,21 @@
 
 ### 最新版本 ###
 
-版本号:1.11.4.1001
+版本号:1.11.5.1001
 
-32 位下载地址: http://pan.baidu.com/s/1o7ZBGz4
+32 位下载地址: http://pan.baidu.com/s/1nvMysvn
 
-64 位下载地址: http://pan.baidu.com/s/1mig1zcs
+64 位下载地址: http://pan.baidu.com/s/1nv1z993
 
->发布时间: 2016-09-14
+>发布时间: 2016-10-14
 
 >修改日志:
 >Nginx:
-- 更新 nginx core 到 1.11.4
-
->Modules:
-- 更新 echo-nginx-module 到 0.60
-- 更新 encrypted-session-nginx-module 到 0.06
-- 更新 headers-more-nginx-module 到 0.31
-- 更新 ngx_lua_upstream 到 0.06
-- 更新 ngx_lua_module 到 0.10.6
-- 更新 set-misc-nginx-module 到 0.31 
+- 更新 nginx core 到 1.11.5
 
 >Libs:
-- 更新 lua-resty-core 到 0.1.8
-- 更新 lua-resty-dns 到 0.17
-- 更新 lua-resty-redis 到 0.25
+- 更新 openssl 到 1.0.2j
 
->Tools:
-- 更新 resty-cli 到 0.13
 
 ### 关于 ###
 
@@ -444,3 +432,32 @@ Version:1.9.7.1001
 
 >修改日志:
 - 更新nginx core 到1.11.3
+
+
+版本号:1.11.4.1001
+
+32 位下载地址: http://pan.baidu.com/s/1o7ZBGz4
+
+64 位下载地址: http://pan.baidu.com/s/1mig1zcs
+
+>发布时间: 2016-09-14
+
+>修改日志:
+>Nginx:
+- 更新 nginx core 到 1.11.4
+
+>Modules:
+- 更新 echo-nginx-module 到 0.60
+- 更新 encrypted-session-nginx-module 到 0.06
+- 更新 headers-more-nginx-module 到 0.31
+- 更新 ngx_lua_upstream 到 0.06
+- 更新 ngx_lua_module 到 0.10.6
+- 更新 set-misc-nginx-module 到 0.31 
+
+>Libs:
+- 更新 lua-resty-core 到 0.1.8
+- 更新 lua-resty-dns 到 0.17
+- 更新 lua-resty-redis 到 0.25
+
+>Tools:
+- 更新 resty-cli 到 0.13
