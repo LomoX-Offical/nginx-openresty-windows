@@ -119,8 +119,8 @@ extern "C" {
 
 #if !(defined(VMS) || defined(__VMS)) /* VMS uses logical names instead */
 #if defined(HEADER_CRYPTLIB_H) && !defined(OPENSSLDIR)
-#define ENGINESDIR "c:\\openssl/lib/engines"
-#define OPENSSLDIR "c:\\openssl/ssl"
+#define ENGINESDIR "openssl/lib/engines"
+#define OPENSSLDIR "openssl/openssl/ssl"
 #endif
 #endif
 

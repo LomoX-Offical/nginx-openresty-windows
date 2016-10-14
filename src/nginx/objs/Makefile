@@ -313,6 +313,7 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/stream/ngx_stream_proxy_module.obj \
 	objs/src/stream/ngx_stream_upstream.obj \
 	objs/src/stream/ngx_stream_upstream_round_robin.obj \
+	objs/src/stream/ngx_stream_write_filter_module.obj \
 	objs/src/stream/ngx_stream_ssl_module.obj \
 	objs/src/stream/ngx_stream_limit_conn_module.obj \
 	objs/src/stream/ngx_stream_access_module.obj \
@@ -603,6 +604,7 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/stream/ngx_stream_proxy_module.obj 
 	objs/src/stream/ngx_stream_upstream.obj 
 	objs/src/stream/ngx_stream_upstream_round_robin.obj 
+	objs/src/stream/ngx_stream_write_filter_module.obj 
 	objs/src/stream/ngx_stream_ssl_module.obj 
 	objs/src/stream/ngx_stream_limit_conn_module.obj 
 	objs/src/stream/ngx_stream_access_module.obj 
@@ -1839,6 +1841,13 @@ objs/src/stream/ngx_stream_upstream_round_robin.obj:	$(CORE_DEPS) $(STREAM_DEPS)
 	$(CC) -c $(CFLAGS) $(CORE_INCS) $(STREAM_INCS) \
 		-Foobjs/src/stream/ngx_stream_upstream_round_robin.obj \
 		src/stream/ngx_stream_upstream_round_robin.c
+
+
+objs/src/stream/ngx_stream_write_filter_module.obj:	$(CORE_DEPS) $(STREAM_DEPS) \
+	src/stream/ngx_stream_write_filter_module.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) $(STREAM_INCS) \
+		-Foobjs/src/stream/ngx_stream_write_filter_module.obj \
+		src/stream/ngx_stream_write_filter_module.c
 
 
 objs/src/stream/ngx_stream_ssl_module.obj:	$(CORE_DEPS) $(STREAM_DEPS) \

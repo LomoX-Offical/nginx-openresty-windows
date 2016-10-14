@@ -26,6 +26,7 @@ ngx_os_io_t ngx_os_io = {
     ngx_udp_wsarecv,
     ngx_wsasend,
     ngx_udp_wsasend,
+    NULL,
     ngx_wsasend_chain,
     0
 };
