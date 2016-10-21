@@ -607,7 +607,7 @@ ngx_iocp_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
 
         ev->ready = 1;
 
-        if (ev->ovlp.is_connecting) {
+        if (!ev->error && ev->ovlp.is_connecting) {
             ngx_log_debug2(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
                 "iocp fd: %d, connected successfully, is_connecting is %d", c->fd, ev->ovlp.is_connecting);
 
@@ -620,7 +620,6 @@ ngx_iocp_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
             ev->ovlp.is_connecting = 0;
             ev->ovlp.posted_zero_byte = 0;
         }
-
 
         if (flags & NGX_POST_EVENTS) {
 

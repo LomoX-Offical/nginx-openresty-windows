@@ -3494,6 +3494,19 @@ ngx_http_lua_socket_test_connect(ngx_http_request_t *r, ngx_connection_t *c)
             }
             return err;
         }
+
+#if (NGX_HAVE_IOCP)
+
+        if (ngx_event_flags & NGX_USE_IOCP_EVENT)
+        {
+            ngx_event_t *ev;
+            ev = c->write;
+            if (ev->error) {
+                return ev->ovlp.error;
+            }
+        }
+#endif
+
     }
 
     return NGX_OK;

@@ -93,7 +93,8 @@ ngx_overlapped_wsasend(ngx_connection_t *c, u_char *buf, size_t size)
         "finish WSASend: fd:%d, sent %ul bytes", c->fd, wev->available);
 
     if (!wev->ready) {
-        ngx_connection_error(c, 0, "WSASend() is already post");
+        ngx_log_debug1(NGX_LOG_DEBUG_EVENT, c->log, 0,
+            "iocp WSASend() is already post: fd:%d", c->fd);
         return NGX_AGAIN;
     }
 

@@ -195,7 +195,8 @@ ngx_overlapped_wsarecv(ngx_connection_t *c, u_char *buf, size_t size)
                 return rc;
             }
         } else {
-            ngx_connection_error(c, 0, "iocp WSARecv() is already post");
+            ngx_log_debug1(NGX_LOG_DEBUG_EVENT, c->log, 0,
+                "iocp WSARecv() is already post: fd:%d", c->fd);
             return NGX_AGAIN;
         }
     }

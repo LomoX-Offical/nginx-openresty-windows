@@ -4450,8 +4450,11 @@ ngx_udp_connect(ngx_resolver_connection_t *rec)
 
 #if (NGX_HAVE_IOCP)
 
-    if (ngx_recv(c, NULL, 0) == NGX_ERROR) {
-        goto failed;
+    if (ngx_event_flags & NGX_USE_IOCP_EVENT)
+    {
+        if (ngx_recv(c, NULL, 0) == NGX_ERROR) {
+            goto failed;
+        }
     }
 
 #endif

@@ -288,7 +288,8 @@ ngx_overlapped_wsasend_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
 retry:
 
     if (wev->ready == 0) {
-        ngx_connection_error(c, 0, "iocp WSASend() chain is already post");
+        ngx_log_debug1(NGX_LOG_DEBUG_EVENT, c->log, 0,
+            "iocp WSASend() chain is already post: fd:%d", c->fd);
         return in;
     }
 

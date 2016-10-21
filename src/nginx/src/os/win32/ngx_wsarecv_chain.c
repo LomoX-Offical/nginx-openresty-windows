@@ -222,7 +222,9 @@ ngx_overlapped_wsarecv_chain(ngx_connection_t *c, ngx_chain_t *chain, off_t limi
                 return rc;
             }
         }
-        ngx_connection_error(c, 0, "WSARecv() chain is already post");
+
+        ngx_log_debug1(NGX_LOG_DEBUG_EVENT, c->log, 0,
+            "iocp WSARecv() chain is already post: fd:%d", c->fd);
         return NGX_AGAIN;
     }
 

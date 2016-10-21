@@ -1426,6 +1426,14 @@ ngx_http_lua_udp_connect(ngx_http_lua_udp_connection_t *uc)
     ngx_log_debug3(NGX_LOG_DEBUG_EVENT, &uc->log, 0,
                    "connect to %V, fd:%d #%d", &uc->server, s, c->number);
 
+#if (NGX_HAVE_IOCP)
+
+    if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
+        c->type = SOCK_DGRAM;
+    }
+
+#endif
+
     rc = connect(s, uc->sockaddr, uc->socklen);
 
     /* TODO: aio, iocp */
@@ -1458,6 +1466,16 @@ ngx_http_lua_udp_connect(ngx_http_lua_udp_connection_t *uc)
             return NGX_ERROR;
         }
     }
+
+#if (NGX_HAVE_IOCP)
+
+    if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
+        if (ngx_recv(c, NULL, 0) == NGX_ERROR) {
+            return NGX_ERROR;
+        }
+    }
+
+#endif
 
     return NGX_OK;
 }

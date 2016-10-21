@@ -168,6 +168,7 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
 
             ngx_terminate = 1;
             ngx_quit_worker_processes(cycle, 0);
+            ngx_master_process_exit(cycle);
 
             continue;
         }
@@ -182,6 +183,7 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
 
             ngx_quit = 1;
             ngx_quit_worker_processes(cycle, 0);
+            ngx_master_process_exit(cycle);
 
             continue;
         }
