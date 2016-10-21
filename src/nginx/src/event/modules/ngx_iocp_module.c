@@ -24,14 +24,14 @@
 static ngx_int_t ngx_iocp_init(ngx_cycle_t *cycle, ngx_msec_t timer);
 static void ngx_iocp_done(ngx_cycle_t *cycle);
 static ngx_int_t ngx_iocp_add_event(ngx_event_t *ev, ngx_int_t event,
-									ngx_uint_t flags);
+                                    ngx_uint_t flags);
 static ngx_int_t ngx_iocp_del_event(ngx_event_t *ev, ngx_int_t event,
-									ngx_uint_t flags);
+                                    ngx_uint_t flags);
 static ngx_int_t ngx_iocp_add_connection(ngx_connection_t *c);
 static ngx_int_t ngx_iocp_del_connection(ngx_connection_t *c,
-										 ngx_uint_t flags);
+                                         ngx_uint_t flags);
 static ngx_int_t ngx_iocp_process_events(ngx_cycle_t *cycle, ngx_msec_t timer,
-										 ngx_uint_t flags);
+                                         ngx_uint_t flags);
 
 static void *ngx_iocp_create_conf(ngx_cycle_t *cycle);
 static char *ngx_iocp_init_conf(ngx_cycle_t *cycle, void *conf);
@@ -122,7 +122,6 @@ ngx_os_io_t  ngx_iocp_io = {
     ngx_overlapped_wsarecv_chain,
     ngx_overlapped_wsarecv,
     ngx_overlapped_wsasend,
-    NULL,
     NULL,
     NULL,
     ngx_overlapped_wsasend_chain,
