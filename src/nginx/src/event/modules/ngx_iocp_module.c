@@ -123,6 +123,8 @@ ngx_os_io_t  ngx_iocp_io = {
     ngx_overlapped_wsarecv,
     ngx_overlapped_wsasend,
     NULL,
+    NULL,
+    NULL,
     ngx_overlapped_wsasend_chain,
     0
 };

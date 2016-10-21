@@ -73,7 +73,7 @@ static ngx_int_t ngx_stream_proxy_test_connect(ngx_connection_t *c);
 static void ngx_stream_proxy_process(ngx_stream_session_t *s,
     ngx_uint_t from_upstream, ngx_uint_t do_write);
 static void ngx_stream_proxy_next_upstream(ngx_stream_session_t *s);
-static void ngx_stream_proxy_finalize(ngx_stream_session_t *s, ngx_int_t rc);
+static void ngx_stream_proxy_finalize(ngx_stream_session_t *s, ngx_uint_t rc);
 static u_char *ngx_stream_proxy_log_error(ngx_log_t *log, u_char *buf,
     size_t len);
 
@@ -84,10 +84,10 @@ static char *ngx_stream_proxy_pass(ngx_conf_t *cf, ngx_command_t *cmd,
     void *conf);
 static char *ngx_stream_proxy_bind(ngx_conf_t *cf, ngx_command_t *cmd,
     void *conf);
-static ngx_int_t ngx_stream_proxy_send_proxy_protocol(ngx_stream_session_t *s);
 
 #if (NGX_STREAM_SSL)
 
+static ngx_int_t ngx_stream_proxy_send_proxy_protocol(ngx_stream_session_t *s);
 static char *ngx_stream_proxy_ssl_password_file(ngx_conf_t *cf,
     ngx_command_t *cmd, void *conf);
 static void ngx_stream_proxy_ssl_init_connection(ngx_stream_session_t *s);
@@ -368,7 +368,7 @@ ngx_stream_proxy_handler(ngx_stream_session_t *s)
 
     u = ngx_pcalloc(c->pool, sizeof(ngx_stream_upstream_t));
     if (u == NULL) {
-        ngx_stream_proxy_finalize(s, NGX_ERROR);
+        ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
         return;
     }
 
@@ -380,22 +380,27 @@ ngx_stream_proxy_handler(ngx_stream_session_t *s)
     u->peer.log_error = NGX_ERROR_ERR;
 
     if (ngx_stream_proxy_set_local(s, u, pscf->local) != NGX_OK) {
-        ngx_stream_proxy_finalize(s, NGX_ERROR);
+        ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
         return;
     }
 
     u->peer.type = c->type;
-
-    u->proxy_protocol = pscf->proxy_protocol;
     u->start_sec = ngx_time();
 
     c->write->handler = ngx_stream_proxy_downstream_handler;
     c->read->handler = ngx_stream_proxy_downstream_handler;
 
+    s->upstream_states = ngx_array_create(c->pool, 1,
+                                          sizeof(ngx_stream_upstream_state_t));
+    if (s->upstream_states == NULL) {
+        ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
+        return;
+    }
+
     if (c->type == SOCK_STREAM) {
         p = ngx_pnalloc(c->pool, pscf->buffer_size);
         if (p == NULL) {
-            ngx_stream_proxy_finalize(s, NGX_ERROR);
+            ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
             return;
         }
 
@@ -404,28 +409,6 @@ ngx_stream_proxy_handler(ngx_stream_session_t *s)
         u->downstream_buf.pos = p;
         u->downstream_buf.last = p;
 
-        if (u->proxy_protocol
-#if (NGX_STREAM_SSL)
-            && pscf->ssl == NULL
-#endif
-            && pscf->buffer_size >= NGX_PROXY_PROTOCOL_MAX_HEADER)
-        {
-            /* optimization for a typical case */
-
-            ngx_log_debug0(NGX_LOG_DEBUG_STREAM, c->log, 0,
-                           "stream proxy send PROXY protocol header");
-
-            p = ngx_proxy_protocol_write(c, u->downstream_buf.last,
-                                         u->downstream_buf.end);
-            if (p == NULL) {
-                ngx_stream_proxy_finalize(s, NGX_ERROR);
-                return;
-            }
-
-            u->downstream_buf.last = p;
-            u->proxy_protocol = 0;
-        }
-
         if (c->read->ready) {
             ngx_post_event(c->read, &ngx_posted_events);
         }
@@ -433,7 +416,7 @@ ngx_stream_proxy_handler(ngx_stream_session_t *s)
 
     if (pscf->upstream_value) {
         if (ngx_stream_proxy_eval(s, pscf) != NGX_OK) {
-            ngx_stream_proxy_finalize(s, NGX_ERROR);
+            ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
             return;
         }
     }
@@ -457,14 +440,14 @@ ngx_stream_proxy_handler(ngx_stream_session_t *s)
             {
                 ngx_log_error(NGX_LOG_ERR, c->log, 0,
                               "no port in upstream \"%V\"", host);
-                ngx_stream_proxy_finalize(s, NGX_ERROR);
+                ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
                 return;
             }
 
             if (ngx_stream_upstream_create_round_robin_peer(s, u->resolved)
                 != NGX_OK)
             {
-                ngx_stream_proxy_finalize(s, NGX_ERROR);
+                ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
                 return;
             }
 
@@ -493,7 +476,7 @@ ngx_stream_proxy_handler(ngx_stream_session_t *s)
         if (u->resolved->port == 0) {
             ngx_log_error(NGX_LOG_ERR, c->log, 0,
                           "no port in upstream \"%V\"", host);
-            ngx_stream_proxy_finalize(s, NGX_ERROR);
+            ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
             return;
         }
 
@@ -503,14 +486,14 @@ ngx_stream_proxy_handler(ngx_stream_session_t *s)
 
         ctx = ngx_resolve_start(cscf->resolver, &temp);
         if (ctx == NULL) {
-            ngx_stream_proxy_finalize(s, NGX_ERROR);
+            ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
             return;
         }
 
         if (ctx == NGX_NO_RESOLVER) {
             ngx_log_error(NGX_LOG_ERR, c->log, 0,
                           "no resolver defined to resolve %V", host);
-            ngx_stream_proxy_finalize(s, NGX_ERROR);
+            ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
             return;
         }
 
@@ -523,7 +506,7 @@ ngx_stream_proxy_handler(ngx_stream_session_t *s)
 
         if (ngx_resolve_name(ctx) != NGX_OK) {
             u->resolved->ctx = NULL;
-            ngx_stream_proxy_finalize(s, NGX_ERROR);
+            ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
             return;
         }
 
@@ -534,16 +517,18 @@ found:
 
     if (uscf == NULL) {
         ngx_log_error(NGX_LOG_ALERT, c->log, 0, "no upstream configuration");
-        ngx_stream_proxy_finalize(s, NGX_ERROR);
+        ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
         return;
     }
 
-#if (NGX_HTTP_SSL)
+    u->upstream = uscf;
+
+#if (NGX_STREAM_SSL)
     u->ssl_name = uscf->host;
 #endif
 
     if (uscf->peer.init(s, uscf) != NGX_OK) {
-        ngx_stream_proxy_finalize(s, NGX_ERROR);
+        ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
         return;
     }
 
@@ -675,20 +660,43 @@ ngx_stream_proxy_connect(ngx_stream_session_t *s)
 
     c->log->action = "connecting to upstream";
 
+    pscf = ngx_stream_get_module_srv_conf(s, ngx_stream_proxy_module);
+
     u = s->upstream;
+
+    u->connected = 0;
+    u->proxy_protocol = pscf->proxy_protocol;
+
+    if (u->state) {
+        u->state->response_time = ngx_current_msec - u->state->response_time;
+    }
+
+    u->state = ngx_array_push(s->upstream_states);
+    if (u->state == NULL) {
+        ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
+        return;
+    }
+
+    ngx_memzero(u->state, sizeof(ngx_stream_upstream_state_t));
+
+    u->state->connect_time = (ngx_msec_t) -1;
+    u->state->first_byte_time = (ngx_msec_t) -1;
+    u->state->response_time = ngx_current_msec;
 
     rc = ngx_event_connect_peer(&u->peer);
 
     ngx_log_debug1(NGX_LOG_DEBUG_STREAM, c->log, 0, "proxy connect: %i", rc);
 
     if (rc == NGX_ERROR) {
-        ngx_stream_proxy_finalize(s, NGX_ERROR);
+        ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
         return;
     }
 
+    u->state->peer = u->peer.name;
+
     if (rc == NGX_BUSY) {
         ngx_log_error(NGX_LOG_ERR, c->log, 0, "no live upstreams");
-        ngx_stream_proxy_finalize(s, NGX_DECLINED);
+        ngx_stream_proxy_finalize(s, NGX_STREAM_BAD_GATEWAY);
         return;
     }
 
@@ -715,8 +723,6 @@ ngx_stream_proxy_connect(ngx_stream_session_t *s)
     pc->read->handler = ngx_stream_proxy_connect_handler;
     pc->write->handler = ngx_stream_proxy_connect_handler;
 
-    pscf = ngx_stream_get_module_srv_conf(s, ngx_stream_proxy_module);
-
     ngx_add_timer(pc->write, pscf->connect_timeout);
 }
 
@@ -726,6 +732,7 @@ ngx_stream_proxy_init_upstream(ngx_stream_session_t *s)
 {
     int                           tcp_nodelay;
     u_char                       *p;
+    ngx_chain_t                  *cl;
     ngx_connection_t             *c, *pc;
     ngx_log_handler_pt            handler;
     ngx_stream_upstream_t        *u;
@@ -757,21 +764,26 @@ ngx_stream_proxy_init_upstream(ngx_stream_session_t *s)
         pc->tcp_nodelay = NGX_TCP_NODELAY_SET;
     }
 
-    if (u->proxy_protocol) {
-        if (ngx_stream_proxy_send_proxy_protocol(s) != NGX_OK) {
-            return;
-        }
-
-        u->proxy_protocol = 0;
-    }
-
     pscf = ngx_stream_get_module_srv_conf(s, ngx_stream_proxy_module);
 
 #if (NGX_STREAM_SSL)
-    if (pc->type == SOCK_STREAM && pscf->ssl && pc->ssl == NULL) {
-        ngx_stream_proxy_ssl_init_connection(s);
-        return;
+
+    if (pc->type == SOCK_STREAM && pscf->ssl) {
+
+        if (u->proxy_protocol) {
+            if (ngx_stream_proxy_send_proxy_protocol(s) != NGX_OK) {
+                return;
+            }
+
+            u->proxy_protocol = 0;
+        }
+
+        if (pc->ssl == NULL) {
+            ngx_stream_proxy_ssl_init_connection(s);
+            return;
+        }
     }
+
 #endif
 
     c = s->connection;
@@ -796,12 +808,14 @@ ngx_stream_proxy_init_upstream(ngx_stream_session_t *s)
         }
     }
 
+    u->state->connect_time = ngx_current_msec - u->state->response_time;
+
     c->log->action = "proxying connection";
 
     if (u->upstream_buf.start == NULL) {
         p = ngx_pnalloc(c->pool, pscf->buffer_size);
         if (p == NULL) {
-            ngx_stream_proxy_finalize(s, NGX_ERROR);
+            ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
             return;
         }
 
@@ -811,14 +825,66 @@ ngx_stream_proxy_init_upstream(ngx_stream_session_t *s)
         u->upstream_buf.last = p;
     }
 
-    if (c->type == SOCK_DGRAM) {
-        s->received = c->buffer->last - c->buffer->pos;
-        u->downstream_buf = *c->buffer;
+    if (c->buffer && c->buffer->pos < c->buffer->last) {
+        ngx_log_debug1(NGX_LOG_DEBUG_STREAM, c->log, 0,
+                       "stream proxy add preread buffer: %uz",
+                       c->buffer->last - c->buffer->pos);
 
-        if (pscf->responses == 0) {
-            pc->read->ready = 0;
-            pc->read->eof = 1;
+        cl = ngx_chain_get_free_buf(c->pool, &u->free);
+        if (cl == NULL) {
+            ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
+            return;
         }
+
+        *cl->buf = *c->buffer;
+
+        cl->buf->tag = (ngx_buf_tag_t) &ngx_stream_proxy_module;
+        cl->buf->flush = 1;
+        cl->buf->last_buf = (c->type == SOCK_DGRAM);
+
+        cl->next = u->upstream_out;
+        u->upstream_out = cl;
+    }
+
+    if (u->proxy_protocol) {
+        ngx_log_debug0(NGX_LOG_DEBUG_STREAM, c->log, 0,
+                       "stream proxy add PROXY protocol header");
+
+        cl = ngx_chain_get_free_buf(c->pool, &u->free);
+        if (cl == NULL) {
+            ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
+            return;
+        }
+
+        p = ngx_pnalloc(c->pool, NGX_PROXY_PROTOCOL_MAX_HEADER);
+        if (p == NULL) {
+            ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
+            return;
+        }
+
+        cl->buf->pos = p;
+
+        p = ngx_proxy_protocol_write(c, p, p + NGX_PROXY_PROTOCOL_MAX_HEADER);
+        if (p == NULL) {
+            ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
+            return;
+        }
+
+        cl->buf->last = p;
+        cl->buf->temporary = 1;
+        cl->buf->flush = 0;
+        cl->buf->last_buf = 0;
+        cl->buf->tag = (ngx_buf_tag_t) &ngx_stream_proxy_module;
+
+        cl->next = u->upstream_out;
+        u->upstream_out = cl;
+
+        u->proxy_protocol = 0;
+    }
+
+    if (c->type == SOCK_DGRAM && pscf->responses == 0) {
+        pc->read->ready = 0;
+        pc->read->eof = 1;
     }
 
     u->connected = 1;
@@ -833,6 +899,8 @@ ngx_stream_proxy_init_upstream(ngx_stream_session_t *s)
     ngx_stream_proxy_process(s, 0, 1);
 }
 
+
+#if (NGX_STREAM_SSL)
 
 static ngx_int_t
 ngx_stream_proxy_send_proxy_protocol(ngx_stream_session_t *s)
@@ -851,7 +919,7 @@ ngx_stream_proxy_send_proxy_protocol(ngx_stream_session_t *s)
 
     p = ngx_proxy_protocol_write(c, buf, buf + NGX_PROXY_PROTOCOL_MAX_HEADER);
     if (p == NULL) {
-        ngx_stream_proxy_finalize(s, NGX_ERROR);
+        ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
         return NGX_ERROR;
     }
 
@@ -865,7 +933,7 @@ ngx_stream_proxy_send_proxy_protocol(ngx_stream_session_t *s)
 
     if (n == NGX_AGAIN) {
         if (ngx_handle_write_event(pc->write, 0) != NGX_OK) {
-            ngx_stream_proxy_finalize(s, NGX_ERROR);
+            ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
             return NGX_ERROR;
         }
 
@@ -879,7 +947,7 @@ ngx_stream_proxy_send_proxy_protocol(ngx_stream_session_t *s)
     }
 
     if (n == NGX_ERROR) {
-        ngx_stream_proxy_finalize(s, NGX_DECLINED);
+        ngx_stream_proxy_finalize(s, NGX_STREAM_OK);
         return NGX_ERROR;
     }
 
@@ -895,7 +963,7 @@ ngx_stream_proxy_send_proxy_protocol(ngx_stream_session_t *s)
         ngx_log_error(NGX_LOG_ERR, c->log, 0,
                       "could not send PROXY protocol header at once");
 
-        ngx_stream_proxy_finalize(s, NGX_DECLINED);
+        ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
 
         return NGX_ERROR;
     }
@@ -903,8 +971,6 @@ ngx_stream_proxy_send_proxy_protocol(ngx_stream_session_t *s)
     return NGX_OK;
 }
 
-
-#if (NGX_STREAM_SSL)
 
 static char *
 ngx_stream_proxy_ssl_password_file(ngx_conf_t *cf, ngx_command_t *cmd,
@@ -947,20 +1013,20 @@ ngx_stream_proxy_ssl_init_connection(ngx_stream_session_t *s)
     if (ngx_ssl_create_connection(pscf->ssl, pc, NGX_SSL_BUFFER|NGX_SSL_CLIENT)
         != NGX_OK)
     {
-        ngx_stream_proxy_finalize(s, NGX_ERROR);
+        ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
         return;
     }
 
     if (pscf->ssl_server_name || pscf->ssl_verify) {
         if (ngx_stream_proxy_ssl_name(s) != NGX_OK) {
-            ngx_stream_proxy_finalize(s, NGX_ERROR);
+            ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
             return;
         }
     }
 
     if (pscf->ssl_session_reuse) {
         if (u->peer.set_session(&u->peer, u->peer.data) != NGX_OK) {
-            ngx_stream_proxy_finalize(s, NGX_ERROR);
+            ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
             return;
         }
     }
@@ -1157,7 +1223,7 @@ ngx_stream_proxy_resolve_handler(ngx_resolver_ctx_t *ctx)
     u = s->upstream;
     ur = u->resolved;
 
-    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, s->connection->log, 0,
+    ngx_log_debug0(NGX_LOG_DEBUG_STREAM, s->connection->log, 0,
                    "stream upstream resolve");
 
     if (ctx->state) {
@@ -1166,7 +1232,7 @@ ngx_stream_proxy_resolve_handler(ngx_resolver_ctx_t *ctx)
                       &ctx->name, ctx->state,
                       ngx_resolver_strerror(ctx->state));
 
-        ngx_stream_proxy_finalize(s, NGX_ERROR);
+        ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
         return;
     }
 
@@ -1192,7 +1258,7 @@ ngx_stream_proxy_resolve_handler(ngx_resolver_ctx_t *ctx)
 #endif
 
     if (ngx_stream_upstream_create_round_robin_peer(s, ur) != NGX_OK) {
-        ngx_stream_proxy_finalize(s, NGX_ERROR);
+        ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
         return;
     }
 
@@ -1245,7 +1311,8 @@ ngx_stream_proxy_process_connection(ngx_event_t *ev, ngx_uint_t from_upstream)
 
             if (!ev->ready) {
                 if (ngx_handle_read_event(ev, 0) != NGX_OK) {
-                    ngx_stream_proxy_finalize(s, NGX_ERROR);
+                    ngx_stream_proxy_finalize(s,
+                                              NGX_STREAM_INTERNAL_SERVER_ERROR);
                     return;
                 }
 
@@ -1279,7 +1346,7 @@ ngx_stream_proxy_process_connection(ngx_event_t *ev, ngx_uint_t from_upstream)
             }
 
             ngx_connection_error(c, NGX_ETIMEDOUT, "connection timed out");
-            ngx_stream_proxy_finalize(s, NGX_DECLINED);
+            ngx_stream_proxy_finalize(s, NGX_STREAM_OK);
             return;
         }
 
@@ -1289,7 +1356,7 @@ ngx_stream_proxy_process_connection(ngx_event_t *ev, ngx_uint_t from_upstream)
                        "stream connection delayed");
 
         if (ngx_handle_read_event(ev, 0) != NGX_OK) {
-            ngx_stream_proxy_finalize(s, NGX_ERROR);
+            ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
         }
 
         return;
@@ -1384,8 +1451,10 @@ ngx_stream_proxy_process(ngx_stream_session_t *s, ngx_uint_t from_upstream,
     size_t                        size, limit_rate;
     ssize_t                       n;
     ngx_buf_t                    *b;
+    ngx_int_t                     rc;
     ngx_uint_t                    flags;
     ngx_msec_t                    delay;
+    ngx_chain_t                  *cl, **ll, **out, **busy;
     ngx_connection_t             *c, *pc, *src, *dst;
     ngx_log_handler_pt            handler;
     ngx_stream_upstream_t        *u;
@@ -1407,7 +1476,7 @@ ngx_stream_proxy_process(ngx_stream_session_t *s, ngx_uint_t from_upstream,
 
         c->log->handler = handler;
 
-        ngx_stream_proxy_finalize(s, NGX_OK);
+        ngx_stream_proxy_finalize(s, NGX_STREAM_OK);
         return;
     }
 
@@ -1419,6 +1488,8 @@ ngx_stream_proxy_process(ngx_stream_session_t *s, ngx_uint_t from_upstream,
         b = &u->upstream_buf;
         limit_rate = pscf->download_rate;
         received = &u->received;
+        out = &u->downstream_out;
+        busy = &u->downstream_busy;
 
     } else {
         src = c;
@@ -1426,40 +1497,33 @@ ngx_stream_proxy_process(ngx_stream_session_t *s, ngx_uint_t from_upstream,
         b = &u->downstream_buf;
         limit_rate = pscf->upload_rate;
         received = &s->received;
+        out = &u->upstream_out;
+        busy = &u->upstream_busy;
     }
 
     for ( ;; ) {
 
-        if (do_write) {
+        if (do_write && dst) {
 
-            size = b->last - b->pos;
+            if (*out || *busy || dst->buffered) {
+                rc = ngx_stream_top_filter(s, *out, from_upstream);
 
-            if (size && dst && dst->write->ready) {
-
-                n = dst->send(dst, b->pos, size);
-
-                if (n == NGX_AGAIN && dst->shared) {
-                    /* cannot wait on a shared socket */
-                    n = NGX_ERROR;
-                }
-
-                if (n == NGX_ERROR) {
+                if (rc == NGX_ERROR) {
                     if (c->type == SOCK_DGRAM && !from_upstream) {
                         ngx_stream_proxy_next_upstream(s);
                         return;
                     }
 
-                    ngx_stream_proxy_finalize(s, NGX_DECLINED);
+                    ngx_stream_proxy_finalize(s, NGX_STREAM_OK);
                     return;
                 }
 
-                if (n > 0) {
-                    b->pos += n;
+                ngx_chain_update_chains(c->pool, &u->free, busy, out,
+                                      (ngx_buf_tag_t) &ngx_stream_proxy_module);
 
-                    if (b->pos == b->last) {
-                        b->pos = b->start;
-                        b->last = b->start;
-                    }
+                if (*busy == NULL) {
+                    b->pos = b->start;
+                    b->last = b->start;
                 }
             }
         }
@@ -1486,31 +1550,8 @@ ngx_stream_proxy_process(ngx_stream_session_t *s, ngx_uint_t from_upstream,
 
             n = src->recv(src, b->last, size);
 
-            if (n == NGX_AGAIN || n == 0) {
+            if (n == NGX_AGAIN) {
                 break;
-            }
-
-            if (n > 0) {
-                if (limit_rate) {
-                    delay = (ngx_msec_t) (n * 1000 / limit_rate);
-
-                    if (delay > 0) {
-                        src->read->delayed = 1;
-                        ngx_add_timer(src->read, delay);
-                    }
-                }
-
-                if (c->type == SOCK_DGRAM && ++u->responses == pscf->responses)
-                {
-                    src->read->ready = 0;
-                    src->read->eof = 1;
-                }
-
-                *received += n;
-                b->last += n;
-                do_write = 1;
-
-                continue;
             }
 
             if (n == NGX_ERROR) {
@@ -1520,13 +1561,63 @@ ngx_stream_proxy_process(ngx_stream_session_t *s, ngx_uint_t from_upstream,
                 }
 
                 src->read->eof = 1;
+                n = 0;
+            }
+
+            if (n >= 0) {
+                if (limit_rate) {
+                    delay = (ngx_msec_t) (n * 1000 / limit_rate);
+
+                    if (delay > 0) {
+                        src->read->delayed = 1;
+                        ngx_add_timer(src->read, delay);
+                    }
+                }
+
+                if (from_upstream) {
+                    if (u->state->first_byte_time == (ngx_msec_t) -1) {
+                        u->state->first_byte_time = ngx_current_msec
+                                                    - u->state->response_time;
+                    }
+                }
+
+                if (c->type == SOCK_DGRAM && ++u->responses == pscf->responses)
+                {
+                    src->read->ready = 0;
+                    src->read->eof = 1;
+                }
+
+                for (ll = out; *ll; ll = &(*ll)->next) { /* void */ }
+
+                cl = ngx_chain_get_free_buf(c->pool, &u->free);
+                if (cl == NULL) {
+                    ngx_stream_proxy_finalize(s,
+                                              NGX_STREAM_INTERNAL_SERVER_ERROR);
+                    return;
+                }
+
+                *ll = cl;
+
+                cl->buf->pos = b->last;
+                cl->buf->last = b->last + n;
+                cl->buf->tag = (ngx_buf_tag_t) &ngx_stream_proxy_module;
+
+                cl->buf->temporary = (n ? 1 : 0);
+                cl->buf->last_buf = src->read->eof;
+                cl->buf->flush = 1;
+
+                *received += n;
+                b->last += n;
+                do_write = 1;
+
+                continue;
             }
         }
 
         break;
     }
 
-    if (src->read->eof && (b->pos == b->last || (dst && dst->read->eof))) {
+    if (src->read->eof && dst && (dst->read->eof || !dst->buffered)) {
         handler = c->log->handler;
         c->log->handler = NULL;
 
@@ -1540,20 +1631,20 @@ ngx_stream_proxy_process(ngx_stream_session_t *s, ngx_uint_t from_upstream,
 
         c->log->handler = handler;
 
-        ngx_stream_proxy_finalize(s, NGX_OK);
+        ngx_stream_proxy_finalize(s, NGX_STREAM_OK);
         return;
     }
 
     flags = src->read->eof ? NGX_CLOSE_EVENT : 0;
 
     if (!src->shared && ngx_handle_read_event(src->read, flags) != NGX_OK) {
-        ngx_stream_proxy_finalize(s, NGX_ERROR);
+        ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
         return;
     }
 
     if (dst) {
         if (!dst->shared && ngx_handle_write_event(dst->write, 0) != NGX_OK) {
-            ngx_stream_proxy_finalize(s, NGX_ERROR);
+            ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
             return;
         }
 
@@ -1579,6 +1670,14 @@ ngx_stream_proxy_next_upstream(ngx_stream_session_t *s)
                    "stream proxy next upstream");
 
     u = s->upstream;
+    pc = u->peer.connection;
+
+    if (u->upstream_out || u->upstream_busy || (pc && pc->buffered)) {
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+                      "pending buffers on next upstream");
+        ngx_stream_proxy_finalize(s, NGX_STREAM_INTERNAL_SERVER_ERROR);
+        return;
+    }
 
     if (u->peer.sockaddr) {
         u->peer.free(&u->peer, u->peer.data, NGX_PEER_FAILED);
@@ -1593,11 +1692,9 @@ ngx_stream_proxy_next_upstream(ngx_stream_session_t *s)
         || !pscf->next_upstream
         || (timeout && ngx_current_msec - u->peer.start_time >= timeout))
     {
-        ngx_stream_proxy_finalize(s, NGX_DECLINED);
+        ngx_stream_proxy_finalize(s, NGX_STREAM_BAD_GATEWAY);
         return;
     }
-
-    pc = u->peer.connection;
 
     if (pc) {
         ngx_log_debug1(NGX_LOG_DEBUG_STREAM, s->connection->log, 0,
@@ -1612,6 +1709,9 @@ ngx_stream_proxy_next_upstream(ngx_stream_session_t *s)
         }
 #endif
 
+        u->state->bytes_received = u->received;
+        u->state->bytes_sent = pc->sent;
+
         ngx_close_connection(pc);
         u->peer.connection = NULL;
     }
@@ -1621,7 +1721,7 @@ ngx_stream_proxy_next_upstream(ngx_stream_session_t *s)
 
 
 static void
-ngx_stream_proxy_finalize(ngx_stream_session_t *s, ngx_int_t rc)
+ngx_stream_proxy_finalize(ngx_stream_session_t *s, ngx_uint_t rc)
 {
     ngx_connection_t       *pc;
     ngx_stream_upstream_t  *u;
@@ -1640,12 +1740,21 @@ ngx_stream_proxy_finalize(ngx_stream_session_t *s, ngx_int_t rc)
         u->resolved->ctx = NULL;
     }
 
+    pc = u->peer.connection;
+
+    if (u->state) {
+        u->state->response_time = ngx_current_msec - u->state->response_time;
+
+        if (pc) {
+            u->state->bytes_received = u->received;
+            u->state->bytes_sent = pc->sent;
+        }
+    }
+
     if (u->peer.free && u->peer.sockaddr) {
         u->peer.free(&u->peer, u->peer.data, 0);
         u->peer.sockaddr = NULL;
     }
-
-    pc = u->peer.connection;
 
     if (pc) {
         ngx_log_debug1(NGX_LOG_DEBUG_STREAM, s->connection->log, 0,
@@ -1664,7 +1773,7 @@ ngx_stream_proxy_finalize(ngx_stream_session_t *s, ngx_int_t rc)
 
 noupstream:
 
-    ngx_stream_close_connection(s->connection);
+    ngx_stream_finalize_session(s, rc);
 }
 
 

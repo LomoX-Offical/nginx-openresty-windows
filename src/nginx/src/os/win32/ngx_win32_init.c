@@ -26,6 +26,7 @@ ngx_os_io_t ngx_os_io = {
     ngx_udp_wsarecv,
     ngx_wsasend,
     ngx_udp_wsasend,
+    NULL,
     ngx_wsasend_chain,
     0
 };
@@ -109,6 +110,7 @@ static struct {
 ngx_int_t
 ngx_os_init(ngx_log_t *log)
 {
+
     void           *handle;
     long            rc;
     u_long          bytes;
@@ -119,6 +121,7 @@ ngx_os_init(ngx_log_t *log)
     ngx_uint_t      n;
     SOCKADDR_IN     sa;
     SYSTEM_INFO     si;
+    ngx_time_t   *tp;
 
 
     /* current windows version */
@@ -333,6 +336,8 @@ retry_bind:
         ngx_sprintf((u_char *) ngx_unique, "%P%Z", ngx_pid);
     }
 
+    tp = ngx_timeofday();
+    srand((ngx_pid << 16) ^ (unsigned) tp->sec ^ tp->msec);
 #if (NGX_HAVE_INHERITED_NONBLOCK)
     ngx_inherited_nonblocking = 1;
 #else

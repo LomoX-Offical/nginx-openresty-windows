@@ -3,17 +3,21 @@
 
 ### lastest release ###
 
-version:1.11.3.1001
+version:1.11.5.1001
 
-32 bit: http://pan.baidu.com/s/1skNscCt
+32 bit: http://pan.baidu.com/s/1nvMysvn
         
-64 bit: http://pan.baidu.com/s/1nuP2ixj
+64 bit: http://pan.baidu.com/s/1nv1z993
 
->Publish Time: 2016-08-03
+>Publish Time: 2016-10-14
 
 >Changelog:  
 
-- update nginx core to 1.11.3
+>Nginx:
+- upgrade nginx core to 1.11.5
+
+>Libs:
+- upgrade openssl to 1.0.2j
 
 
 
@@ -417,3 +421,46 @@ version:1.11.2.1001
 - update pcre to 8.39
 - update LuaJIT to 2.1-20160517
 - support so_keepalive parameter in listen directive
+
+
+version:1.11.3.1001
+
+32 bit: http://pan.baidu.com/s/1skNscCt
+        
+64 bit: http://pan.baidu.com/s/1nuP2ixj
+
+>Publish Time: 2016-08-03
+
+>Changelog:  
+
+- update nginx core to 1.11.3
+
+
+version:1.11.4.1001
+
+32 bit: http://pan.baidu.com/s/1o7ZBGz4
+        
+64 bit: http://pan.baidu.com/s/1mig1zcs
+
+>Publish Time: 2016-09-14
+
+>Changelog:  
+
+>Nginx:
+- upgrade nginx core to 1.11.4
+
+>Modules:
+- upgrade echo-nginx-module to 0.60
+- upgrade encrypted-session-nginx-module to 0.06
+- upgrade headers-more-nginx-module to 0.31
+- upgrade ngx_lua_upstream to 0.06
+- upgrade ngx_lua_module to 0.10.6
+- upgrade set-misc-nginx-module to 0.31 
+
+>Libs:
+- upgrade lua-resty-core to 0.1.8
+- upgrade lua-resty-dns to 0.17
+- upgrade lua-resty-redis to 0.25
+
+>Tools:
+- upgrade resty-cli to 0.13
