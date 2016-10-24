@@ -12,11 +12,29 @@
 >发布时间: 2016-10-14
 
 >修改日志:
+
 >Nginx:
 - 更新 nginx core 到 1.11.5
 
 >Libs:
 - 更新 openssl 到 1.0.2j
+
+
+### IOCP版本(开发版本) ###
+版本号:1.11.5.1001
+
+32 位下载地址: http://pan.baidu.com/s/1kVdhEPh
+
+64 位下载地址: http://pan.baidu.com/s/1o7IcPVO
+
+>发布时间: 2016-10-24
+
+>修改日志: 
+
+>Nginx:
+
+- 为 windows 版本添加了IOCP(支持多进程）网络事件模型
+
 
 
 ### 关于 ###
