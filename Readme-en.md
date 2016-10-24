@@ -5,19 +5,16 @@
 
 version:1.11.5.1001
 
-32 bit: http://pan.baidu.com/s/1nvMysvn
+32 bit: http://pan.baidu.com/s/1kVdhEPh
         
-64 bit: http://pan.baidu.com/s/1nv1z993
+64 bit: http://pan.baidu.com/s/1o7IcPVO
 
->Publish Time: 2016-10-14
+>Publish Time: 2016-10-24
 
 >Changelog:  
 
 >Nginx:
-- upgrade nginx core to 1.11.5
-
->Libs:
-- upgrade openssl to 1.0.2j
+- add IOCP event model for windows version
 
 
 
@@ -464,3 +461,20 @@ version:1.11.4.1001
 
 >Tools:
 - upgrade resty-cli to 0.13
+
+
+version:1.11.5.1001
+
+32 bit: http://pan.baidu.com/s/1nvMysvn
+        
+64 bit: http://pan.baidu.com/s/1nv1z993
+
+>Publish Time: 2016-10-14
+
+>Changelog:  
+
+>Nginx:
+- upgrade nginx core to 1.11.5
+
+>Libs:
+- upgrade openssl to 1.0.2j

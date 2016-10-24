@@ -5,18 +5,15 @@
 
 版本号:1.11.5.1001
 
-32 位下载地址: http://pan.baidu.com/s/1nvMysvn
+32 位下载地址: http://pan.baidu.com/s/1kVdhEPh
 
-64 位下载地址: http://pan.baidu.com/s/1nv1z993
+64 位下载地址: http://pan.baidu.com/s/1o7IcPVO
 
->发布时间: 2016-10-14
+>发布时间: 2016-10-24
 
 >修改日志:
 >Nginx:
-- 更新 nginx core 到 1.11.5
-
->Libs:
-- 更新 openssl 到 1.0.2j
+- 为 windows 版本添加了IOCP事件模型
 
 
 ### 关于 ###
@@ -461,3 +458,19 @@ Version:1.9.7.1001
 
 >Tools:
 - 更新 resty-cli 到 0.13
+
+
+版本号:1.11.5.1001
+
+32 位下载地址: http://pan.baidu.com/s/1nvMysvn
+
+64 位下载地址: http://pan.baidu.com/s/1nv1z993
+
+>发布时间: 2016-10-14
+
+>修改日志:
+>Nginx:
+- 更新 nginx core 到 1.11.5
+
+>Libs:
+- 更新 openssl 到 1.0.2j
