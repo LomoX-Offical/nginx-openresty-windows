@@ -20,6 +20,22 @@ version:1.11.5.1001
 - upgrade openssl to 1.0.2j
 
 
+### IOCP version (develop) ###
+version:1.11.5.1001
+
+32 bit: http://pan.baidu.com/s/1kVdhEPh
+
+64 bit: http://pan.baidu.com/s/1o7IcPVO
+
+>Publish Time: 2016-10-24
+
+>Changelog: 
+
+>Nginx:
+
+- add IOCP (support multi-thread) network event model for Windows
+
+
 
 ### about ###
 
