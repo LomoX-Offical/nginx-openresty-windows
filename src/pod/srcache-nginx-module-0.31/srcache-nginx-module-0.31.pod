@@ -8,6 +8,7 @@ B<ngx_srcache> - Transparent subrequest-based caching layout for arbitrary nginx
 I<This module is not distributed with the Nginx source.> See L<the installation instructions>.
 
 
+=head1 Status
 
 This module is production ready.
 

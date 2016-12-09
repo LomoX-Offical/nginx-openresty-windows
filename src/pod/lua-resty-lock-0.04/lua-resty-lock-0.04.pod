@@ -6,6 +6,7 @@
 lua-resty-lock - Simple shm-based nonblocking lock API
 
 
+=head1 Status
 
 This library is still under early development and is production ready.
 

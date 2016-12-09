@@ -6,6 +6,7 @@
 NDK - Nginx Development Kit
 
 
+=head1 Synopsis
 
 The NDK is an Nginx module that is designed to extend the core functionality of the
 excellent Nginx webserver in a way that can be used as a basis of other Nginx modules.

@@ -6,6 +6,7 @@
 lua-resty-upstream-healthcheck - Health-checker for Nginx upstream servers
 
 
+=head1 Status
 
 This library is still under early development but is already production ready.
 

@@ -848,7 +848,7 @@ B<context:> I<server>
 
 
 Specifies a time during which a client may reuse the
-session parameters stored in a cache.
+session parameters.
 
 
 
@@ -1258,7 +1258,23 @@ for an established SSL connection;
 
 
 returns the “subject DN” string of the client certificate
+for an established SSL connection according to
+L<RFC 2253|https://tools.ietf.org/html/rfc2253> (1.11.6);
+
+
+
+=item C<$ssl_client_s_dn_legacy>
+
+
+
+
+returns the “subject DN” string of the client certificate
 for an established SSL connection;
+
+B<NOTE>
+
+Prior to version 1.11.6, the variable name was C<$ssl_client_s_dn>.
+
 
 
 
@@ -1268,7 +1284,23 @@ for an established SSL connection;
 
 
 returns the “issuer DN” string of the client certificate
+for an established SSL connection according to
+L<RFC 2253|https://tools.ietf.org/html/rfc2253> (1.11.6);
+
+
+
+=item C<$ssl_client_i_dn_legacy>
+
+
+
+
+returns the “issuer DN” string of the client certificate
 for an established SSL connection;
+
+B<NOTE>
+
+Prior to version 1.11.6, the variable name was C<$ssl_client_i_dn>.
+
 
 
 

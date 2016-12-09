@@ -6,6 +6,7 @@
 xss-nginx-module - Native cross-site scripting support in nginx
 
 
+=head1 Synopsis
 
 
     # accessing /foo?callback=process gives the response

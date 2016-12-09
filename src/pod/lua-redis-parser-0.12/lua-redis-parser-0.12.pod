@@ -6,6 +6,7 @@
 lua-redis-parser - Redis reply parser and request constructor library for Lua
 
 
+=head1 Version
 
 This document describes lua-redis-parser L<v0.09rc5|https://github.com/agentzh/lua-redis-parser/tags> released on 28 August 2011.
 

@@ -8,6 +8,7 @@ ngx_redis2 - Nginx upstream module for the Redis 2.0 protocol
 I<This module is not distributed with the Nginx source.> See L<the installation instructions>.
 
 
+=head1 Status
 
 This module is already production ready.
 

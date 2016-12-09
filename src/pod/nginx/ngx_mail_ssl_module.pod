@@ -765,7 +765,7 @@ B<context:> I<server>
 
 
 Specifies a time during which a client may reuse the
-session parameters stored in a cache.
+session parameters.
 
 
 

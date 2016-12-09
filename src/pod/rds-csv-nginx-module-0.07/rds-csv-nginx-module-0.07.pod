@@ -7,6 +7,7 @@ ngx_rds_csv - Nginx output filter module to convert Resty-DBD-Streams
 (RDS) to Comma-Separated Values (CSV)
 
 
+=head1 Status
 
 This module is considered production ready.
 

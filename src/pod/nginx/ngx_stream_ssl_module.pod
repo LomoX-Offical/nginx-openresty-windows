@@ -643,7 +643,7 @@ B<context:> I<server>
 
 
 Specifies a time during which a client may reuse the
-session parameters stored in a cache.
+session parameters.
 
 
 
@@ -655,7 +655,7 @@ session parameters stored in a cache.
 
 
 
-The C<ngx_http_ssl_module> module supports variables
+The C<ngx_stream_ssl_module> module supports variables
 since 1.11.2.
 
 =over

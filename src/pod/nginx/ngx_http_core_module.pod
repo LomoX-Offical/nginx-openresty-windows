@@ -935,10 +935,7 @@ B<context:> I<if in location>
 
 
 Defines the URI that will be shown for the specified errors.
-C<error_page> directives are inherited from the previous
-level only if there are no C<error_page>
-directives defined on the current level.
-A C<uri> value can contain variables.
+A I<C<uri>> value can contain variables.
 
 
 
@@ -951,6 +948,15 @@ Example:
     error_page 500 502 503 504 /50x.html;
 
 
+
+
+
+
+
+This causes an internal redirect to the specified I<C<uri>>
+with the client request method changed to “C<GET>”
+(for all methods other than
+“C<GET>” and “C<HEAD>”).
 
 
 
@@ -982,23 +988,8 @@ or 404), it is possible to respond with the code it returns:
 
 
 
-It is also possible to use redirects for error processing:
-
-    
-    error_page 403      http://example.com/forbidden.html;
-    error_page 404 =301 http://example.com/notfound.html;
-
-
-In this case, by default, the response code 302 is returned to the client.
-It can only be changed to one of the redirect status
-codes (301, 302, 303, and 307).
-
-
-
-
-
-If there is no need to change URI during internal redirection it is
-possible to pass error processing into a named location:
+If there is no need to change URI and method during internal redirection
+it is possible to pass error processing into a named location:
 
     
     location / {
@@ -1018,9 +1009,33 @@ possible to pass error processing into a named location:
 
 B<NOTE>
 
-If C<uri> processing leads to an error,
+If I<C<uri>> processing leads to an error,
 the status code of the last occurred error is returned to the client.
 
+
+
+
+
+
+It is also possible to use URL redirects for error processing:
+
+    
+    error_page 403      http://example.com/forbidden.html;
+    error_page 404 =301 http://example.com/notfound.html;
+
+
+In this case, by default, the response code 302 is returned to the client.
+It can only be changed to one of the redirect status
+codes (301, 302, 303, and 307).
+
+
+
+
+
+These directives are inherited from the previous level if and
+only if there are no
+C<error_page>
+directives defined on the current level.
 
 
 
@@ -3136,6 +3151,12 @@ B<NOTE>
 
 Before version 1.1.9, tuning of caching time was not possible,
 and nginx always cached answers for the duration of 5 minutes.
+
+
+B<NOTE>
+
+To prevent DNS spoofing, it is recommended
+configuring DNS servers in a properly secured trusted local network.
 
 
 

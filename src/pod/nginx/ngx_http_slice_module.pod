@@ -75,7 +75,7 @@ B<context:> I<location>
 Sets the I<C<size>> of the slice.
 The zero value disables splitting responses into slices.
 Note that a too low value may result in excessive memory usage
-and a large number of file descriptors.
+and opening a large number of files.
 
 
 

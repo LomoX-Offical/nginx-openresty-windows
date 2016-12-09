@@ -8,6 +8,7 @@ B<ngx_memc> - An extended version of the standard memcached module that supports
 I<This module is not distributed with the Nginx source.> See L<the installation instructions>.
 
 
+=head1 Version
 
 This document describes ngx_memc L<v0.17|http://github.com/openresty/memc-nginx-module/tags> released on 15 May 2016.
 

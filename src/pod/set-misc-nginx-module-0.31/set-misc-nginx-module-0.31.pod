@@ -9,6 +9,7 @@ B<ngx_set_misc> - Various set_xxx directives added to nginx's rewrite module (md
 I<This module is not distributed with the Nginx source.> See L<the installation instructions>.
 
 
+=head1 Version
 
 This document describes ngx_set_misc L<v0.31|https://github.com/openresty/set-misc-nginx-module/tags> released on 15 August 2016.
 
