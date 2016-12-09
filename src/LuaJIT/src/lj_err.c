@@ -401,6 +401,9 @@ static void err_raise_ext(int errcode)
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+
+#if LJ_TARGET_X64
+/* Taken from: http://www.nynaeve.net/?p=99 */
 typedef EXCEPTION_DISPOSITION (*PEXCEPTION_ROUTINE) (
   struct _EXCEPTION_RECORD *ExceptionRecord,
   PVOID EstablisherFrame,
@@ -431,8 +434,6 @@ VOID NTAPI RtlUnwindEx(
   PUNWIND_HISTORY_TABLE HistoryTable
 );
 
-#if LJ_TARGET_X64
-/* Taken from: http://www.nynaeve.net/?p=99 */
 typedef struct UndocumentedDispatcherContext {
   ULONG64 ControlPc;
   ULONG64 ImageBase;
@@ -446,6 +447,8 @@ typedef struct UndocumentedDispatcherContext {
   ULONG ScopeIndex;
   ULONG Fill0;
 } UndocumentedDispatcherContext;
+
+
 #else
 typedef void *UndocumentedDispatcherContext;
 #endif
