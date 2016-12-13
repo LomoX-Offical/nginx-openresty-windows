@@ -9,7 +9,7 @@
 
 #include "resty_dbd_stream.h"
 #include "sys/types.h"
-#include <stdint.h>
+#include "stdint.h"
 
 
 #ifndef u_char
