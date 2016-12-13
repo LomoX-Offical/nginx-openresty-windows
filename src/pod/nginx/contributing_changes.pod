@@ -11,7 +11,7 @@ contributing_changes - Contributing Changes
 
 
 
-L<Mercurial|http://mercurial.selenic.com> is used
+L<Mercurial|https://www.mercurial-scm.org> is used
 to store source code.
 The L<repository|http://hg.nginx.org/nginx> can be cloned
 with the following command:
@@ -75,9 +75,9 @@ code.
 
 
 Commit the changes to create a Mercurial
-L<changeset|http://mercurial.selenic.com/wiki/ChangeSet>.
+L<changeset|https://www.mercurial-scm.org/wiki/ChangeSet>.
 Please ensure that the specified
-L<e-mail|http://mercurial.selenic.com/wiki/QuickStart#Setting_a_username>
+L<e-mail|https://www.mercurial-scm.org/wiki/QuickStart#Setting_a_username>
 address and real name of the change’s author are correct.
 
 
@@ -174,7 +174,7 @@ L<nginx development|support>
 mailing list.
 The preferred and convenient method of submitting changesets
 is with the
-L<patchbomb|http://mercurial.selenic.com/wiki/PatchbombExtension>
+L<patchbomb|https://www.mercurial-scm.org/wiki/PatchbombExtension>
 extension.
 
 

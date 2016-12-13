@@ -183,6 +183,37 @@ sets the weight of the server, by default, 1.
 
 
 =item 
+C<max_conns>=I<C<number>>
+
+
+
+
+
+limits the maximum I<C<number>> of simultaneous active
+connections to the proxied server (1.11.5).
+Default value is zero, meaning there is no limit.
+If the server group does not reside in the shared memory,
+the limitation works per each worker process.
+
+B<NOTE>
+
+If idle keepalive connections,
+multiple L<workers|ngx_core_module>,
+and the shared memory are enabled,
+the total number of active and idle connections to the proxied server
+may exceed the C<max_conns> value.
+
+
+B<NOTE>
+
+Since version 1.5.9 and prior to version 1.11.5,
+this parameter was available as part of our
+commercial subscription.
+
+
+
+
+=item 
 C<max_fails>=I<C<number>>
 
 
@@ -276,28 +307,6 @@ the following parameters are available as part of our
 commercial subscription:
 
 =over
-
-
-
-=item 
-C<max_conns>=I<C<number>>
-
-
-
-
-
-limits the maximum I<C<number>> of simultaneous active
-connections to the proxied server (1.5.9).
-Default value is zero, meaning there is no limit.
-
-B<NOTE>
-
-When L</keepalive> connections and multiple
-L<workers|ngx_core_module>
-are enabled,
-the total number of connections to the proxied server
-may exceed the C<max_conns> value.
-
 
 
 
@@ -418,6 +427,12 @@ or when the server becomes available after a period of time
 it was considered unavailable.
 Default value is zero, i.e. slow start is disabled.
 
+B<NOTE>
+
+The parameter cannot be used along with the
+L</hash> and L</ip_hash> load balancing methods.
+
+
 
 
 
@@ -504,6 +519,23 @@ This directive appeared in version 1.9.7.
 
 Specifies a I<C<file>> that keeps the state
 of the dynamically configurable group.
+
+
+
+
+
+Examples:
+
+    
+    state /var/lib/nginx/state/servers.conf; # path for Linux
+    state /var/db/nginx/state/servers.conf;  # path for FreeBSD
+
+
+
+
+
+
+
 The state is currently limited to the list of servers with their parameters.
 The file is read when parsing the configuration and is updated each time
 the upstream configuration is
@@ -1441,8 +1473,6 @@ This directive appeared in version 1.5.12.
 
 If an upstream server cannot be selected immediately
 while processing a request,
-and there are the servers in the group that have reached the
-L</max_conns> limit,
 the request will be placed into the queue.
 The directive specifies the maximum number of requests that can be in the queue
 at the same time.
@@ -1578,6 +1608,7 @@ the end of a browser session.
 
 
 Defines the I<C<domain>> for which the cookie is set.
+Parameter value can contain variables (1.11.5).
 
 
 
@@ -1816,6 +1847,18 @@ C<X-Accel-Redirect> or
 L<ngx_http_core_module>,
 then the server addresses from different groups are separated by colons, e.g.
 “C<192.168.1.1:80, 192.168.1.2:80, unix:E<sol>tmpE<sol>sock : 192.168.10.1:80, 192.168.10.2:80>”.
+
+
+
+=item C<$upstream_bytes_received>
+
+
+
+
+number of bytes received from an upstream server (1.11.4).
+Values from several connections
+are separated by commas and colons like addresses in the
+$upstream_addr variable.
 
 
 

@@ -68,7 +68,7 @@ the “Application-Layer Protocol Negotiation” (ALPN) TLS extension
 support, which is available only since
 L<OpenSSL|http://www.openssl.org> version 1.0.2.
 Using the “Next Protocol Negotiation” (NPN) TLS extension for this purpose
-(available since OpenSSL version 1.0.1) is not guaranteed.
+(available since OpenSSL version 1.0.1) is not guaranteed to work.
 
 
 
@@ -258,6 +258,42 @@ B<context:> I<server>
 Limits the maximum size of the entire request header list after
 L<HPACK|http://tools.ietf.org/html/rfc7541> decompression.
 For most requests, the default limit should be enough.
+
+
+
+
+
+
+
+=head2 http2_max_requests
+
+
+B<syntax:> http2_max_requests I<I<C<number>>>
+
+
+B<default:> I<1000>
+
+
+B<context:> I<http>
+
+
+B<context:> I<server>
+
+
+B<context:> I<location>
+
+
+
+This directive appeared in version 1.11.6.
+
+
+
+
+
+Sets the maximum number of requests that can be
+served through one HTTPE<sol>2 connection,
+after which the connection is closed
+and the client should use a new connection.
 
 
 

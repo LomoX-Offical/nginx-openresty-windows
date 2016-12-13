@@ -179,6 +179,27 @@ sets the weight of the server, by default, 1.
 
 
 =item 
+C<max_conns>=I<C<number>>
+
+
+
+
+
+limits the maximum I<C<number>> of simultaneous
+connections to the proxied server (1.11.5).
+Default value is zero, meaning there is no limit.
+If the server group does not reside in the shared memory,
+the limitation works per each worker process.
+
+B<NOTE>
+
+Prior to version 1.11.5, this parameter was available as part of our
+commercial subscription.
+
+
+
+
+=item 
 C<max_fails>=I<C<number>>
 
 
@@ -268,19 +289,6 @@ the following parameters are available as part of our
 commercial subscription:
 
 =over
-
-
-
-=item 
-C<max_conns>=I<C<number>>
-
-
-
-
-
-limits the maximum I<C<number>> of simultaneous connections to the
-proxied server.
-Default value is zero, meaning there is no limit.
 
 
 
@@ -390,6 +398,12 @@ or when the server becomes available after a period of time
 it was considered unavailable.
 Default value is zero, i.e. slow start is disabled.
 
+B<NOTE>
+
+The parameter cannot be used along with the
+L</hash> load balancing method.
+
+
 
 
 
@@ -472,6 +486,23 @@ This directive appeared in version 1.9.7.
 
 Specifies a I<C<file>> that keeps the state
 of the dynamically configurable group.
+
+
+
+
+
+Examples:
+
+    
+    state /var/lib/nginx/state/servers.conf; # path for Linux
+    state /var/db/nginx/state/servers.conf;  # path for FreeBSD
+
+
+
+
+
+
+
 The state is currently limited to the list of servers with their parameters.
 The file is read when parsing the configuration and is updated each time
 the upstream configuration is
@@ -991,6 +1022,100 @@ This directive is available as part of our
 commercial subscription.
 
 
+
+
+
+
+
+
+=head1 Embedded Variables
+
+
+
+The C<ngx_stream_upstream_module> module
+supports the following embedded variables:
+
+=over
+
+
+
+=item C<$upstream_addr>
+
+
+
+
+keeps the IP address and port,
+or the path to the UNIX-domain socket of the upstream server (1.11.4).
+If several servers were contacted during proxying,
+their addresses are separated by commas, e.g.
+“C<192.168.1.1:12345, 192.168.1.2:12345, unix:E<sol>tmpE<sol>sock>”.
+
+
+
+=item C<$upstream_bytes_sent>
+
+
+
+
+number of bytes sent to an upstream server (1.11.4).
+Values from several connections
+are separated by commas like addresses in the
+$upstream_addr variable.
+
+
+
+=item C<$upstream_bytes_received>
+
+
+
+
+number of bytes received from an upstream server (1.11.4).
+Values from several connections
+are separated by commas like addresses in the
+$upstream_addr variable.
+
+
+
+=item C<$upstream_connect_time>
+
+
+
+
+time to connect to the upstream server (1.11.4);
+the time is kept in seconds with millisecond resolution.
+Times of several connections
+are separated by commas like addresses in the
+$upstream_addr variable.
+
+
+
+=item C<$upstream_first_byte_time>
+
+
+
+
+time to receive the first byte of data (1.11.4);
+the time is kept in seconds with millisecond resolution.
+Times of several connections
+are separated by commas like addresses in the
+$upstream_addr variable.
+
+
+
+=item C<$upstream_session_time>
+
+
+
+
+session duration in seconds with millisecond resolution (1.11.4).
+Times of several connections
+are separated by commas like addresses in the
+$upstream_addr variable.
+
+
+
+
+=back
 
 
 

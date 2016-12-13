@@ -483,6 +483,40 @@ Before 1.7.8, the response could be cached.
 
 
 
+=head2 fastcgi_cache_max_range_offset
+
+
+B<syntax:> fastcgi_cache_max_range_offset I<I<C<number>>>
+
+
+
+B<context:> I<http>
+
+
+B<context:> I<server>
+
+
+B<context:> I<location>
+
+
+
+This directive appeared in version 1.11.6.
+
+
+
+
+
+Sets an offset in bytes for byte-range requests.
+If the range is beyond the offset,
+the range request will be passed to the FastCGI server
+and the response will not be cached.
+
+
+
+
+
+
+
 =head2 fastcgi_cache_methods
 
 
@@ -564,6 +598,9 @@ B<syntax:> fastcgi_cache_path I<
     C<keys_zone>=I<C<name>>:I<C<size>>
     [C<inactive>=I<C<time>>]
     [C<max_size>=I<C<size>>]
+    [C<manager_files>=I<C<number>>]
+    [C<manager_sleep>=I<C<time>>]
+    [C<manager_threshold>=I<C<time>>]
     [C<loader_files>=I<C<number>>]
     [C<loader_sleep>=I<C<time>>]
     [C<loader_threshold>=I<C<time>>]
@@ -585,7 +622,8 @@ Cache data are stored in files.
 Both the key and file name in a cache are a result of
 applying the MD5 function to the proxied URL.
 
-The C<levels> parameter defines hierarchy levels of a cache.
+The C<levels> parameter defines hierarchy levels of a cache:
+from 1 to 3, each level accepts values 1 or 2.
 For example, in the following configuration
 
     
@@ -645,6 +683,16 @@ By default, C<inactive> is set to 10 minutes.
 The special “cache manager” process monitors the maximum cache size set
 by the C<max_size> parameter.
 When this size is exceeded, it removes the least recently used data.
+The data is removed in iterations configured by
+C<manager_files>,
+C<manager_threshold>, and
+C<manager_sleep> parameters (1.11.5).
+During one iteration no more than C<manager_files> items
+are deleted (by default, 100).
+The duration of one iteration is limited by the
+C<manager_threshold> parameter (by default, 200 milliseconds).
+Between iterations, a pause configured by the C<manager_sleep>
+parameter (by default, 50 milliseconds) is made.
 
 
 
@@ -653,7 +701,7 @@ When this size is exceeded, it removes the least recently used data.
 A minute after the start the special “cache loader” process is activated.
 It loads information about previously cached data stored on file system
 into a cache zone.
-The loading is done in iterations.
+The loading is also done in iterations.
 During one iteration no more than C<loader_files> items
 are loaded (by default, 100).
 Besides, the duration of one iteration is limited by the
@@ -1365,7 +1413,8 @@ B<context:> I<location>
 
 
 Determines whether FastCGI server responses with codes greater than or equal
-to 300 should be passed to a client or be redirected to nginx for processing
+to 300 should be passed to a client
+or be intercepted and redirected to nginx for processing
 with the L<ngx_http_core_module> directive.
 
 

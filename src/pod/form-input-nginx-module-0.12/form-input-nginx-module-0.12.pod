@@ -6,6 +6,7 @@
 form-input-nginx-module - NGINX module that reads HTTP POST and PUT request body encoded in "application/x-www-form-urlencoded" and parses the arguments into nginx variables.
 
 
+=head1 Description
 
 This is a nginx module that reads HTTP POST and PUT request body encoded
 in "application/x-www-form-urlencoded", and parse the arguments in

@@ -232,7 +232,7 @@ The following status information is provided:
 
 
 Version of the provided data set.
-The current version is 6.
+The current version is 7.
 
 
 
@@ -890,6 +890,16 @@ idle L<ngx_http_upstream_module> connections.
 
 
 
+=item C<zombies>
+
+
+
+
+The current number of servers removed
+from the group but still processing active client requests.
+
+
+
 =item C<queue>
 
 
@@ -1130,6 +1140,56 @@ client connections that are currently being processed.
 
 The total number of
 connections accepted from clients.
+
+
+
+=item C<sessions>
+
+
+
+
+
+=over
+
+
+
+=item C<total>
+
+
+
+
+The total number of completed client sessions.
+
+
+
+=item 
+C<2xx>,
+C<4xx>,
+C<5xx>
+
+
+
+
+
+The number of sessions completed with
+L<status codes|ngx_stream_core_module>
+2xx, 4xx, or 5xx.
+
+
+
+
+=back
+
+
+
+
+
+=item C<discarded>
+
+
+
+
+The total number of connections completed without creating a session.
 
 
 
@@ -1465,6 +1525,24 @@ when the server was last selected to process a connection.
 
 =over
 
+
+
+
+=item *
+
+The
+L</sessions> status data
+and the discarded field in
+stream server_zones
+were added in L</version> 7.
+
+
+
+=item *
+
+The L</zombies> field
+was moved from nginx L<debug|debugging_log> version
+in L</version> 6.
 
 
 

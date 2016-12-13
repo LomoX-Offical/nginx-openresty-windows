@@ -1,0 +1,7 @@
+*~
+*.bak
+*.swp
+*.swo
+web/logs/
+ebooks.sh
+web/email.ini

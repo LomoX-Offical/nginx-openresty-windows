@@ -6,6 +6,7 @@
 lua-cjson - Fast JSON encoding/parsing
 
 
+=head1 Description
 
 This fork of L<mpxE<sol>lua-cjson|https://github.com/mpx/lua-cjson> is included in
 the L<OpenResty|https://openresty.org/> bundle and includes a few bugfixes and

@@ -69,8 +69,10 @@ commercial subscription.
 =head2 auth_jwt
 
 
-B<syntax:> auth_jwt I<I<C<string>> [I<C<token=$variable>>] E<verbar>
-C<off>>
+B<syntax:> auth_jwt I<
+    I<C<string>>
+    [C<token=>I<C<$variable>>] E<verbar>
+    C<off>>
 
 
 B<default:> I<off>
@@ -96,7 +98,7 @@ Parameter value can contain variables.
 
 
 
-The optional C<token> argument specifies a variable
+The optional C<token> parameter specifies a variable
 that contains JSON Web Token.
 By default, JWT is passed in the C<Authorization> header
 as a
@@ -175,7 +177,7 @@ L<JWT claims|https://tools.ietf.org/html/rfc7519#section-4>:
 
 
 
-the C<aud> (audience) claim
+audience
 
 
 
@@ -184,7 +186,7 @@ the C<aud> (audience) claim
 
 
 
-the C<email> claim
+email
 
 
 
@@ -193,7 +195,7 @@ the C<email> claim
 
 
 
-the C<exp> (expiration time) claim
+expiration time
 
 
 
@@ -202,7 +204,7 @@ the C<exp> (expiration time) claim
 
 
 
-the C<iat> (issued at) claim
+issued at
 
 
 
@@ -211,7 +213,7 @@ the C<iat> (issued at) claim
 
 
 
-the issuer of the claim
+issuer
 
 
 
@@ -220,7 +222,7 @@ the issuer of the claim
 
 
 
-the JWT ID
+JWT ID
 
 
 
@@ -229,7 +231,7 @@ the JWT ID
 
 
 
-the C<nbf> (not-before time) claim
+not-before
 
 
 
@@ -238,7 +240,7 @@ the C<nbf> (not-before time) claim
 
 
 
-the subject of the JWT
+subject
 
 
 
@@ -262,7 +264,7 @@ L<JOSE header|https://tools.ietf.org/html/rfc7515#section-4>:
 
 
 
-the C<alg> (algorithm) header parameter
+algorithm
 
 
 
@@ -271,7 +273,7 @@ the C<alg> (algorithm) header parameter
 
 
 
-the C<cty> (content type) header parameter
+content type
 
 
 
@@ -280,7 +282,7 @@ the C<cty> (content type) header parameter
 
 
 
-the C<enc> (encryption algorithm) header parameter
+encryption algorithm
 
 
 
@@ -289,7 +291,7 @@ the C<enc> (encryption algorithm) header parameter
 
 
 
-the C<kid> (key ID) header parameter
+key ID
 
 
 
@@ -298,7 +300,7 @@ the C<kid> (key ID) header parameter
 
 
 
-the C<typ> (type) header parameter
+type
 
 
 

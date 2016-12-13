@@ -6,6 +6,7 @@
 lua-resty-lrucache - in-Lua LRU Cache based on LuaJIT FFI
 
 
+=head1 Status
 
 This library is still under active development and is considered production ready.
 

@@ -42,7 +42,7 @@ or L<Strawberry Perl|http://strawberryperl.com>.
 
 =item *
 
-L<Mercurial|http://mercurial.selenic.com/> client.
+L<Mercurial|https://www.mercurial-scm.org> client.
 
 
 
@@ -108,7 +108,7 @@ sources into lib directory:
     cd objs/lib
     tar -xzf ../../pcre-8.39.tar.gz
     tar -xzf ../../zlib-1.2.8.tar.gz
-    tar -xzf ../../openssl-1.0.2h.tar.gz
+    tar -xzf ../../openssl-1.0.2j.tar.gz
 
 
 
@@ -126,8 +126,8 @@ Run configure script:
     --http-proxy-temp-path=temp/proxy_temp \
     --http-fastcgi-temp-path=temp/fastcgi_temp \
     --with-cc-opt=-DFD_SETSIZE=1024 --with-pcre=objs/lib/pcre-8.39 \
-    --with-zlib=objs/lib/zlib-1.2.8 --with-openssl=objs/lib/openssl-1.0.2h \
-    --with-select_module --with-http_ssl_module --with-ipv6
+    --with-zlib=objs/lib/zlib-1.2.8 --with-openssl=objs/lib/openssl-1.0.2j \
+    --with-select_module --with-http_ssl_module
 
 
 

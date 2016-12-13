@@ -55,6 +55,14 @@ may just waste system resources.
 
 B<NOTE>
 
+There is no need to enable C<accept_mutex>
+on systems that support the
+L<EPOLLEXCLUSIVE|events> flag (1.11.3) or
+when using L<ngx_http_core_module>.
+
+
+B<NOTE>
+
 Prior to version 1.11.3, the default value was C<on>.
 
 

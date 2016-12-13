@@ -12,7 +12,7 @@ ngx_http_image_filter_module - Module ngx_http_image_filter_module
 
 
 The C<ngx_http_image_filter_module> module (0.7.54+) is a filter
-that transforms images in JPEG, GIF, and PNG formats.
+that transforms images in JPEG, GIF, PNG, and WebP formats.
 
 
 
@@ -27,6 +27,13 @@ B<NOTE>
 This module utilizes the
 L<libgd|http://libgd.org> library.
 It is recommended to use the latest available version of the library.
+
+
+B<NOTE>
+
+The WebP format support appeared in version 1.11.6.
+To transform images in this format,
+the C<libgd> library must be compiled with the WebP support.
 
 
 
@@ -115,7 +122,7 @@ turns off module processing in a surrounding location.
 
 
 
-ensures that responses are images in either JPEG, GIF, or PNG format.
+ensures that responses are images in either JPEG, GIF, PNG, or WebP format.
 Otherwise, the
 C<415> (C<Unsupported Media Type>)
 error is returned.
@@ -361,6 +368,42 @@ Defines whether transparency should be preserved when transforming
 GIF images or PNG images with colors specified by a palette.
 The loss of transparency results in images of a better quality.
 The alpha channel transparency in PNG is always preserved.
+
+
+
+
+
+
+
+=head2 image_filter_webp_quality
+
+
+B<syntax:> image_filter_webp_quality I<I<C<quality>>>
+
+
+B<default:> I<80>
+
+
+B<context:> I<http>
+
+
+B<context:> I<server>
+
+
+B<context:> I<location>
+
+
+
+This directive appeared in version 1.11.6.
+
+
+
+
+
+Sets the desired I<C<quality>> of the transformed WebP images.
+Acceptable values are in the range from 1 to 100.
+Lesser values usually imply both lower image quality and less data to transfer.
+Parameter value can contain variables.
 
 
 

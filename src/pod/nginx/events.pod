@@ -80,6 +80,13 @@ Linux 2.6+.
 
 B<NOTE>
 
+The C<EPOLLRDHUP> (Linux 2.6.17, glibc 2.8)
+and C<EPOLLEXCLUSIVE> (Linux 4.5, glibc 2.24)
+flags are supported since 1.11.3.
+
+
+B<NOTE>
+
 Some older distributions like SuSE 8.2 provide patches
 that add epoll support to 2.4 kernels.
 
