@@ -3,36 +3,18 @@
 
 ### lastest release ###
 
-version:1.11.6.1001
+version:1.11.7.1001
 
-32 bit: http://pan.baidu.com/s/1dELfLKX
+32 bit: http://pan.baidu.com/s/1bpvHYf9
         
-64 bit: http://pan.baidu.com/s/1eRU7dL4
+64 bit: http://pan.baidu.com/s/1dEHcwiH
 
->Publish Time: 2016-12-13
+>Publish Time: 2016-12-19
 
 >Changelog:  
 
 >Nginx core:
-- upgrade nginx core to 1.11.6
-
->Luajit lib:
-- upgraded LuaJIT to v2.1-20161104: https://github.com/openresty/luajit2/tags
-
->Modules:
-- upgrade headers-more-nginx-module to 0.32
-- upgrade ngx-lua-module to 0.10.7
-
->Libs:
-- upgrade lua-resty-core to 0.1.9
-- upgrade lua-resty-dns to 0.18
-- upgrade lua-resty-limit-traffic to 0.01
-- upgrade lua-resty-mysql to 0.17
-- upgrade lua-resty-redis to 0.26
-- upgrade lua-resty-upload to 0.10
-- upgrade lua-resty-websocket to 0.06
-
-- upgrade resty-cli to 0.16
+- upgrade nginx core to 1.11.7
 
 
 
@@ -513,3 +495,34 @@ version:1.11.5.1001
 
 >Libs:
 - upgrade openssl to 1.0.2j
+
+
+version:1.11.6.1001
+
+32 bit: http://pan.baidu.com/s/1dELfLKX
+        
+64 bit: http://pan.baidu.com/s/1eRU7dL4
+
+>Publish Time: 2016-12-13
+
+>Changelog:  
+
+>Nginx core:
+- upgrade nginx core to 1.11.6
+
+>Luajit lib:
+- upgraded LuaJIT to v2.1-20161104: https://github.com/openresty/luajit2/tags
+
+>Modules:
+- upgrade headers-more-nginx-module to 0.32
+- upgrade ngx-lua-module to 0.10.7
+
+>Libs:
+- upgrade lua-resty-core to 0.1.9
+- upgrade lua-resty-dns to 0.18
+- upgrade lua-resty-limit-traffic to 0.01
+- upgrade lua-resty-mysql to 0.17
+- upgrade lua-resty-redis to 0.26
+- upgrade lua-resty-upload to 0.10
+- upgrade lua-resty-websocket to 0.06
+- upgrade resty-cli to 0.16
