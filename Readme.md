@@ -525,5 +525,4 @@ Version:1.9.7.1001
 - 更新 lua-resty-redis 库到 0.26
 - 更新 lua-resty-upload 库到 0.10
 - 更新 lua-resty-websocket 库到 0.06
-
 - 更新 resty-cli 库到 0.16

@@ -525,5 +525,4 @@ version:1.11.6.1001
 - upgrade lua-resty-redis to 0.26
 - upgrade lua-resty-upload to 0.10
 - upgrade lua-resty-websocket to 0.06
-
 - upgrade resty-cli to 0.16
