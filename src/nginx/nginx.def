@@ -69,28 +69,40 @@ EXPORTS
     ngx_http_lua_ffi_balancer_set_current_peer @50
     ngx_http_lua_ffi_balancer_set_more_tries @51
     ngx_http_lua_ffi_balancer_get_last_failure @52
+	ngx_http_lua_ffi_balancer_set_timeouts @53
     
-    ngx_http_lua_ffi_ssl_get_ocsp_responder_from_der_chain @53
-    ngx_http_lua_ffi_ssl_create_ocsp_request @54
-    ngx_http_lua_ffi_ssl_validate_ocsp_response @55
-    ngx_http_lua_ffi_ssl_set_ocsp_status_resp @56
+    ngx_http_lua_ffi_ssl_get_ocsp_responder_from_der_chain @54
+    ngx_http_lua_ffi_ssl_create_ocsp_request @55
+    ngx_http_lua_ffi_ssl_validate_ocsp_response @56
+    ngx_http_lua_ffi_ssl_set_ocsp_status_resp @57
     
-    ngx_http_lua_ffi_sema_new @57
-    ngx_http_lua_ffi_sema_post @58
-    ngx_http_lua_ffi_sema_count @59
-    ngx_http_lua_ffi_sema_wait @60
-    ngx_http_lua_ffi_sema_gc @61
+    ngx_http_lua_ffi_sema_new @58
+    ngx_http_lua_ffi_sema_post @59
+    ngx_http_lua_ffi_sema_count @60
+    ngx_http_lua_ffi_sema_wait @61
+    ngx_http_lua_ffi_sema_gc @62
     
     
-    ngx_http_lua_ffi_ssl_set_der_certificate @62
-    ngx_http_lua_ffi_ssl_clear_certs @63
-    ngx_http_lua_ffi_ssl_set_der_private_key @64
-    ngx_http_lua_ffi_ssl_raw_server_addr @65
-    ngx_http_lua_ffi_ssl_server_name @66
-    ngx_http_lua_ffi_cert_pem_to_der @67
-    ngx_http_lua_ffi_priv_key_pem_to_der @68
-    ngx_http_lua_ffi_ssl_get_tls1_version @69
+    ngx_http_lua_ffi_ssl_set_der_certificate @63
+    ngx_http_lua_ffi_ssl_clear_certs @64
+    ngx_http_lua_ffi_ssl_set_der_private_key @65
+    ngx_http_lua_ffi_ssl_raw_server_addr @66
+    ngx_http_lua_ffi_ssl_server_name @67
+    ngx_http_lua_ffi_cert_pem_to_der @68
+    ngx_http_lua_ffi_priv_key_pem_to_der @69
+    ngx_http_lua_ffi_ssl_get_tls1_version @70
 	
-	free @70
-    
-   
+
+	ngx_http_lua_ffi_parse_pem_cert @71
+	ngx_http_lua_ffi_parse_pem_priv_key @72
+	ngx_http_lua_ffi_set_cert @73
+	ngx_http_lua_ffi_set_priv_key @74
+	ngx_http_lua_ffi_free_cert @75
+	ngx_http_lua_ffi_free_priv_key @76
+	ngx_http_lua_ffi_ssl_set_serialized_session @77
+	ngx_http_lua_ffi_ssl_get_serialized_session @78
+	ngx_http_lua_ffi_ssl_get_session_id @79
+	ngx_http_lua_ffi_ssl_get_serialized_session_size @80
+	ngx_http_lua_ffi_ssl_get_session_id_size @81
+	
+	free @82
