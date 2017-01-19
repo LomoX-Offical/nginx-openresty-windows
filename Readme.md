@@ -3,18 +3,18 @@
 
 ### 最新版本 ###
 
-版本号:1.11.7.1001
+版本号:1.11.7.1002
 
-32 位下载地址: http://pan.baidu.com/s/1bpvHYf9
+32 位下载地址: http://pan.baidu.com/s/1qYhLRFA
 
-64 位下载地址: http://pan.baidu.com/s/1dEHcwiH
+64 位下载地址: http://pan.baidu.com/s/1bVxnPk
 
->发布时间: 2016-12-19
+>发布时间: 2016-01-18
 
 >修改日志:  
 
 >Nginx:
-- 更新 nginx 到版本 1.11.7
+- 添加更多的导出函数，使ngx目录下面的库文件可以正确引用，目前一共有82个函数被导出
 
 
 
@@ -526,3 +526,18 @@ Version:1.9.7.1001
 - 更新 lua-resty-upload 库到 0.10
 - 更新 lua-resty-websocket 库到 0.06
 - 更新 resty-cli 库到 0.16
+
+
+
+版本号:1.11.7.1001
+
+32 位下载地址: http://pan.baidu.com/s/1bpvHYf9
+
+64 位下载地址: http://pan.baidu.com/s/1dEHcwiH
+
+>发布时间: 2016-12-19
+
+>修改日志:  
+
+>Nginx:
+- 更新 nginx 到版本 1.11.7

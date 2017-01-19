@@ -2,20 +2,18 @@
 [ languages: [中文](Readme.md), [English](Readme-en.md) ]
 
 ### lastest release ###
+version:1.11.7.1002
 
-version:1.11.7.1001
-
-32 bit: http://pan.baidu.com/s/1bpvHYf9
+32 bit: http://pan.baidu.com/s/1qYhLRFA
         
-64 bit: http://pan.baidu.com/s/1dEHcwiH
+64 bit: http://pan.baidu.com/s/1bVxnPk
 
->Publish Time: 2016-12-19
+>Publish Time: 2017-01-18
 
 >Changelog:  
 
 >Nginx core:
-- upgrade nginx core to 1.11.7
-
+- add more export functions, now 82 functions exported in total
 
 
 ### IOCP version (develop) ###
@@ -526,3 +524,17 @@ version:1.11.6.1001
 - upgrade lua-resty-upload to 0.10
 - upgrade lua-resty-websocket to 0.06
 - upgrade resty-cli to 0.16
+
+
+version:1.11.7.1001
+
+32 bit: http://pan.baidu.com/s/1bpvHYf9
+        
+64 bit: http://pan.baidu.com/s/1dEHcwiH
+
+>Publish Time: 2016-12-19
+
+>Changelog:  
+
+>Nginx core:
+- upgrade nginx core to 1.11.7
