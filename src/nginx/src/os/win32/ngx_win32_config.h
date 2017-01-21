@@ -166,15 +166,10 @@ typedef unsigned short int  uint16_t;
 typedef __int64             int64_t;
 typedef unsigned __int64    uint64_t;
 
-<<<<<<< HEAD
-#ifndef _WIN64
-#ifndef __WATCOMC__
-=======
+
 #if __BORLANDC__
->>>>>>> nginx_base
 typedef int                 intptr_t;
 typedef u_int               uintptr_t;
-#endif
 #endif
 
 #ifndef _OFF_T_DEFINED
@@ -207,11 +202,8 @@ typedef unsigned int        ino_t;
 #endif
 
 
-<<<<<<< HEAD
-#ifndef __MINGW64_VERSION_MAJOR
-=======
+
 #ifndef __GNUC__
->>>>>>> nginx_base
 #ifdef _WIN64
 typedef __int64             ssize_t;
 #else
