@@ -52,13 +52,14 @@
 
 /* GCC MinGW's stdio.h includes sys/types.h */
 #define _OFF_T_
+#define __have_typedef_off_t
 
 #endif
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#ifdef __MINGW64_VERSION_MAJOR
+#ifdef __GNUC__
 #include <stdint.h>
 #endif
 #include <ctype.h>
@@ -88,11 +89,20 @@ typedef long  time_t;
 /* 'type cast': from data pointer to function pointer */
 #pragma warning(disable:4055)
 
+/* 'function' : different 'const' qualifiers */
+#pragma warning(disable:4090)
+
 /* unreferenced formal parameter */
 #pragma warning(disable:4100)
 
 /* FD_SET() and FD_CLR(): conditional expression is constant */
 #pragma warning(disable:4127)
+
+/* conversion from 'type1' to 'type2', possible loss of data */
+#pragma warning(disable:4244)
+
+/* conversion from 'size_t' to 'type', possible loss of data */
+#pragma warning(disable:4267)
 
 /* array is too small to include a terminating null character */
 #pragma warning(disable:4295)
@@ -118,6 +128,9 @@ typedef long  time_t;
 
 /* unreferenced formal parameter */
 #pragma warn -8057
+
+/* suspicious pointer arithmetic */
+#pragma warn -8072
 
 #endif
 
@@ -153,8 +166,12 @@ typedef unsigned short int  uint16_t;
 typedef __int64             int64_t;
 typedef unsigned __int64    uint64_t;
 
+<<<<<<< HEAD
 #ifndef _WIN64
 #ifndef __WATCOMC__
+=======
+#if __BORLANDC__
+>>>>>>> nginx_base
 typedef int                 intptr_t;
 typedef u_int               uintptr_t;
 #endif
@@ -190,7 +207,11 @@ typedef unsigned int        ino_t;
 #endif
 
 
+<<<<<<< HEAD
 #ifndef __MINGW64_VERSION_MAJOR
+=======
+#ifndef __GNUC__
+>>>>>>> nginx_base
 #ifdef _WIN64
 typedef __int64             ssize_t;
 #else
