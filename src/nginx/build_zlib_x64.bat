@@ -2,7 +2,7 @@ SET ORG_DIR=%cd%
 SET nginxpath=%~dp0
 
 cd /d %~dp0
-cd /d .\objs\lib\zlib\
+cd /d .\objs\lib_x64\zlib\
 
 del /S /Q *.obj
 del /S /Q *.manifest
