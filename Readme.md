@@ -3,18 +3,20 @@
 
 ### 最新版本 ###
 
-版本号:1.11.7.1002
+版本号:1.11.9.1001
 
-32 位下载地址: http://pan.baidu.com/s/1qYhLRFA
+32 位下载地址: http://pan.baidu.com/s/1pLczj3H
 
-64 位下载地址: http://pan.baidu.com/s/1bVxnPk
+64 位下载地址: http://pan.baidu.com/s/1ciVqkY
 
->发布时间: 2016-01-18
+>发布时间: 2017-02-06
 
 >修改日志:  
 
 >Nginx:
-- 添加更多的导出函数，使ngx目录下面的库文件可以正确引用，目前一共有82个函数被导出
+- 更新 nginx core 到版本 1.11.9
+- 更新 pcre 到版本 8.40
+- 更新 zlib 到版本 1.2.11
 
 
 
@@ -541,3 +543,18 @@ Version:1.9.7.1001
 
 >Nginx:
 - 更新 nginx 到版本 1.11.7
+
+
+
+版本号:1.11.7.1002
+
+32 位下载地址: http://pan.baidu.com/s/1qYhLRFA
+
+64 位下载地址: http://pan.baidu.com/s/1bVxnPk
+
+>发布时间: 2016-01-18
+
+>修改日志:  
+
+>Nginx:
+- 添加更多的导出函数，使ngx目录下面的库文件可以正确引用，目前一共有82个函数被导出

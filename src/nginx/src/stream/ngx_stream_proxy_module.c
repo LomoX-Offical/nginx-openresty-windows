@@ -808,6 +808,11 @@ ngx_stream_proxy_init_upstream(ngx_stream_session_t *s)
 
     u->state->connect_time = ngx_current_msec - u->state->response_time;
 
+    if (u->peer.notify) {
+        u->peer.notify(&u->peer, u->peer.data,
+                       NGX_STREAM_UPSTREAM_NOTIFY_CONNECT);
+    }
+
     c->log->action = "proxying connection";
 
     if (u->upstream_buf.start == NULL) {
@@ -1529,8 +1534,9 @@ ngx_stream_proxy_process(ngx_stream_session_t *s, ngx_uint_t from_upstream,
 
         size = b->end - b->last;
 
-        if (size && src->read->ready && !src->read->delayed) {
-
+        if (size && src->read->ready && !src->read->delayed
+            && !src->read->error)
+        {
             if (limit_rate) {
                 limit = (off_t) limit_rate * (ngx_time() - u->start_sec + 1)
                         - *received;

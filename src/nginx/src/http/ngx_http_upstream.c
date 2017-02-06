@@ -3848,9 +3848,24 @@ ngx_http_upstream_process_request(ngx_http_request_t *r,
     p = u->pipe;
 
 #if (NGX_THREADS)
+
+    if (p->writing && !p->aio) {
+
+        /*
+         * make sure to call ngx_event_pipe()
+         * if there is an incomplete aio write
+         */
+
+        if (ngx_event_pipe(p, 1) == NGX_ABORT) {
+            ngx_http_upstream_finalize_request(r, u, NGX_ERROR);
+            return;
+        }
+    }
+
     if (p->writing) {
         return;
     }
+
 #endif
 
     if (u->peer.connection) {
@@ -4927,8 +4942,8 @@ ngx_http_upstream_rewrite_location(ngx_http_request_t *r, ngx_table_elt_t *h,
     }
 
     /*
-     * we do not set r->headers_out.location here to avoid the handling
-     * the local redirects without a host name by ngx_http_header_filter()
+     * we do not set r->headers_out.location here to avoid handling
+     * relative redirects in ngx_http_header_filter()
      */
 
     return NGX_OK;

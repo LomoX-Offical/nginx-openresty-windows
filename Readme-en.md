@@ -2,18 +2,20 @@
 [ languages: [中文](Readme.md), [English](Readme-en.md) ]
 
 ### lastest release ###
-version:1.11.7.1002
+version:1.11.9.1001
 
-32 bit: http://pan.baidu.com/s/1qYhLRFA
+32 bit: http://pan.baidu.com/s/1pLczj3H
         
-64 bit: http://pan.baidu.com/s/1bVxnPk
+64 bit: http://pan.baidu.com/s/1ciVqkY
 
->Publish Time: 2017-01-18
+>Publish Time: 2017-02-06
 
 >Changelog:  
 
 >Nginx core:
-- add more export functions, now 82 functions exported in total
+- update nginx core to 1.11.9
+- update pcre to 8.40
+- update zlib to version 1.2.11
 
 
 ### IOCP version (develop) ###
@@ -538,3 +540,17 @@ version:1.11.7.1001
 
 >Nginx core:
 - upgrade nginx core to 1.11.7
+
+
+version:1.11.7.1002
+
+32 bit: http://pan.baidu.com/s/1qYhLRFA
+        
+64 bit: http://pan.baidu.com/s/1bVxnPk
+
+>Publish Time: 2017-01-18
+
+>Changelog:  
+
+>Nginx core:
+- add more export functions, now 82 functions exported in total
