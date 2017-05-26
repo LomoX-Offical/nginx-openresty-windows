@@ -27,7 +27,7 @@ if [ -n "$LUAJIT_INC" -o -n "$LUAJIT_LIB" ]; then
         NGX_TEST_LD_OPT="$ngx_lua_opt_L $NGX_TEST_LD_OPT"
 
         # LuaJIT's win32 build uses the library file name lua51.dll.
-        ngx_feature_libs="$ngx_lua_opt_L $LUAJIT_LIB/lua51.lib"
+        ngx_feature_libs="$ngx_lua_opt_L -llua51"
 
         . auto/feature
 
@@ -360,6 +360,7 @@ HTTP_LUA_SRCS=" \
             $ngx_addon_dir/src/ngx_http_lua_ssl_session_storeby.c \
             $ngx_addon_dir/src/ngx_http_lua_ssl_session_fetchby.c \
             $ngx_addon_dir/src/ngx_http_lua_ssl.c \
+            $ngx_addon_dir/src/ngx_http_lua_log_ringbuf.c \
             "
 
 HTTP_LUA_DEPS=" \
@@ -420,6 +421,7 @@ HTTP_LUA_DEPS=" \
             $ngx_addon_dir/src/ngx_http_lua_ssl_session_storeby.h \
             $ngx_addon_dir/src/ngx_http_lua_ssl_session_fetchby.h \
             $ngx_addon_dir/src/ngx_http_lua_ssl.h \
+            $ngx_addon_dir/src/ngx_http_lua_log_ringbuf.h \
             "
 
 CFLAGS="$CFLAGS -DNDK_SET_VAR"

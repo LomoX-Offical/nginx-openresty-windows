@@ -28,6 +28,7 @@
 #include "ngx_http_lua_ssl_certby.h"
 #include "ngx_http_lua_ssl_session_storeby.h"
 #include "ngx_http_lua_ssl_session_fetchby.h"
+#include "ngx_http_lua_headers.h"
 
 
 static void *ngx_http_lua_create_main_conf(ngx_conf_t *cf);
@@ -89,6 +90,13 @@ static ngx_command_t ngx_http_lua_cmds[] = {
     { ngx_string("lua_shared_dict"),
       NGX_HTTP_MAIN_CONF|NGX_CONF_TAKE2,
       ngx_http_lua_shared_dict,
+      0,
+      0,
+      NULL },
+
+    { ngx_string("lua_capture_error_log"),
+      NGX_HTTP_MAIN_CONF|NGX_CONF_TAKE1,
+      ngx_http_lua_capture_error_log,
       0,
       0,
       NULL },
@@ -624,7 +632,7 @@ ngx_http_lua_init(ngx_conf_t *cf)
     volatile ngx_cycle_t       *saved_cycle;
     ngx_http_core_main_conf_t  *cmcf;
     ngx_http_lua_main_conf_t   *lmcf;
-#ifndef NGX_LUA_NO_FFI_API
+#if !defined(NGX_LUA_NO_FFI_API) || nginx_version >= 1011011
     ngx_pool_cleanup_t         *cln;
 #endif
 
@@ -716,6 +724,16 @@ ngx_http_lua_init(ngx_conf_t *cf)
     cln->handler = ngx_http_lua_sema_mm_cleanup;
 #endif
 
+#if nginx_version >= 1011011
+    cln = ngx_pool_cleanup_add(cf->pool, 0);
+    if (cln == NULL) {
+        return NGX_ERROR;
+    }
+
+    cln->data = lmcf;
+    cln->handler = ngx_http_lua_ngx_raw_header_cleanup;
+#endif
+
     if (lmcf->lua == NULL) {
         dd("initializing lua vm");
 
@@ -803,6 +821,7 @@ ngx_http_lua_create_main_conf(ngx_conf_t *cf)
      *      lmcf->running_timers = 0;
      *      lmcf->watcher = NULL;
      *      lmcf->regex_cache_entries = 0;
+     *      lmcf->jit_stack = NULL;
      *      lmcf->shm_zones = NULL;
      *      lmcf->init_handler = NULL;
      *      lmcf->init_src = { 0, NULL };
@@ -941,7 +960,7 @@ ngx_http_lua_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child)
 #ifdef LIBRESSL_VERSION_NUMBER
 
         ngx_log_error(NGX_LOG_EMERG, cf->log, 0,
-                      "LibreSSL does not support ssl_ceritificate_by_lua*");
+                      "LibreSSL does not support ssl_certificate_by_lua*");
         return NGX_CONF_ERROR;
 
 #else
@@ -953,7 +972,7 @@ ngx_http_lua_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child)
 #   else
 
         ngx_log_error(NGX_LOG_EMERG, cf->log, 0,
-                      "OpenSSL too old to support ssl_ceritificate_by_lua*");
+                      "OpenSSL too old to support ssl_certificate_by_lua*");
         return NGX_CONF_ERROR;
 
 #   endif
