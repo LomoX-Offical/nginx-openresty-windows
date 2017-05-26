@@ -1002,6 +1002,7 @@ ngx_http_core_find_config_phase(ngx_http_request_t *r,
             p = ngx_pnalloc(r->pool, len);
 
             if (p == NULL) {
+                ngx_http_clear_location(r);
                 ngx_http_finalize_request(r, NGX_HTTP_INTERNAL_SERVER_ERROR);
                 return NGX_OK;
             }
@@ -1314,6 +1315,11 @@ ngx_http_core_try_files_phase(ngx_http_request_t *r,
         if (ngx_open_cached_file(clcf->open_file_cache, &path, &of, r->pool)
             != NGX_OK)
         {
+            if (of.err == 0) {
+                ngx_http_finalize_request(r, NGX_HTTP_INTERNAL_SERVER_ERROR);
+                return NGX_OK;
+            }
+
             if (of.err != NGX_ENOENT
                 && of.err != NGX_ENOTDIR
                 && of.err != NGX_ENAMETOOLONG)
@@ -1889,7 +1895,8 @@ ngx_http_send_response(ngx_http_request_t *r, ngx_uint_t status,
     if (status == NGX_HTTP_MOVED_PERMANENTLY
         || status == NGX_HTTP_MOVED_TEMPORARILY
         || status == NGX_HTTP_SEE_OTHER
-        || status == NGX_HTTP_TEMPORARY_REDIRECT)
+        || status == NGX_HTTP_TEMPORARY_REDIRECT
+        || status == NGX_HTTP_PERMANENT_REDIRECT)
     {
         ngx_http_clear_location(r);
 
@@ -1921,7 +1928,7 @@ ngx_http_send_response(ngx_http_request_t *r, ngx_uint_t status,
         return ngx_http_send_header(r);
     }
 
-    b = ngx_pcalloc(r->pool, sizeof(ngx_buf_t));
+    b = ngx_calloc_buf(r->pool);
     if (b == NULL) {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
@@ -4405,15 +4412,13 @@ ngx_http_core_root(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     if (clcf->root.data) {
 
         if ((clcf->alias != 0) == alias) {
-            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                               "\"%V\" directive is duplicate",
-                               &cmd->name);
-        } else {
-            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                               "\"%V\" directive is duplicate, "
-                               "\"%s\" directive was specified earlier",
-                               &cmd->name, clcf->alias ? "alias" : "root");
+            return "is duplicate";
         }
+
+        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
+                           "\"%V\" directive is duplicate, "
+                           "\"%s\" directive was specified earlier",
+                           &cmd->name, clcf->alias ? "alias" : "root");
 
         return NGX_CONF_ERROR;
     }
@@ -4529,7 +4534,7 @@ ngx_http_core_limit_except(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     ngx_http_core_loc_conf_t  *clcf;
 
     if (pclcf->limit_except) {
-        return "duplicate";
+        return "is duplicate";
     }
 
     pclcf->limit_except = 0xffffffff;
