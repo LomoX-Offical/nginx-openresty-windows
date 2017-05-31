@@ -62,7 +62,9 @@
 /* unused                                  1 */
 #define NGX_HTTP_SUBREQUEST_IN_MEMORY      2
 #define NGX_HTTP_SUBREQUEST_WAITED         4
-#define NGX_HTTP_LOG_UNSAFE                8
+#define NGX_HTTP_SUBREQUEST_CLONE          8
+
+#define NGX_HTTP_LOG_UNSAFE                1
 
 
 #define NGX_HTTP_CONTINUE                  100
@@ -81,6 +83,7 @@
 #define NGX_HTTP_SEE_OTHER                 303
 #define NGX_HTTP_NOT_MODIFIED              304
 #define NGX_HTTP_TEMPORARY_REDIRECT        307
+#define NGX_HTTP_PERMANENT_REDIRECT        308
 
 #define NGX_HTTP_BAD_REQUEST               400
 #define NGX_HTTP_UNAUTHORIZED              401
@@ -96,6 +99,7 @@
 #define NGX_HTTP_UNSUPPORTED_MEDIA_TYPE    415
 #define NGX_HTTP_RANGE_NOT_SATISFIABLE     416
 #define NGX_HTTP_MISDIRECTED_REQUEST       421
+#define NGX_HTTP_TOO_MANY_REQUESTS         429
 
 
 /* Our own HTTP codes */
@@ -307,11 +311,10 @@ typedef struct {
 #endif
 #endif
 
-    ngx_buf_t                       **busy;
+    ngx_chain_t                      *busy;
     ngx_int_t                         nbusy;
 
-    ngx_buf_t                       **free;
-    ngx_int_t                         nfree;
+    ngx_chain_t                      *free;
 
     unsigned                          ssl:1;
     unsigned                          proxy_protocol:1;
@@ -481,6 +484,7 @@ struct ngx_http_request_s {
 
 #if (NGX_HTTP_CACHE)
     unsigned                          cached:1;
+    unsigned                          cache_updater:1;
 #endif
 
 #if (NGX_HTTP_GZIP)

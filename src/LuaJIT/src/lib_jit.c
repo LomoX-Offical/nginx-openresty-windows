@@ -1,6 +1,6 @@
 /*
 ** JIT library.
-** Copyright (C) 2005-2016 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2017 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #define lib_jit_c
@@ -204,6 +204,7 @@ LJLIB_CF(jit_util_funcinfo)
     lua_setfield(L, -2, "source");
     lj_debug_pushloc(L, pt, pc);
     lua_setfield(L, -2, "loc");
+    setprotoV(L, lj_tab_setstr(L, t, lj_str_newlit(L, "proto")), pt);
   } else {
     GCfunc *fn = funcV(L->base);
     GCtab *t;
@@ -223,6 +224,7 @@ LJLIB_CF(jit_util_funcbc)
 {
   GCproto *pt = check_Lproto(L, 0);
   BCPos pc = (BCPos)lj_lib_checkint(L, 2);
+  int lineinfo = lj_lib_optint(L, 3, 0);
   if (pc < pt->sizebc) {
     BCIns ins = proto_bc(pt)[pc];
     BCOp op = bc_op(ins);
@@ -230,6 +232,11 @@ LJLIB_CF(jit_util_funcbc)
     setintV(L->top, ins);
     setintV(L->top+1, lj_bc_mode[op]);
     L->top += 2;
+    if (lineinfo) {
+      setintV(L->top, lj_debug_line(pt, pc));
+      L->top += 1;
+      return 3;
+    }
     return 2;
   }
   return 0;

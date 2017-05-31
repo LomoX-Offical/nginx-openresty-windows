@@ -220,7 +220,7 @@ ngx_http_set_complex_value_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     cv = (ngx_http_complex_value_t **) (p + cmd->offset);
 
     if (*cv != NULL) {
-        return "duplicate";
+        return "is duplicate";
     }
 
     *cv = ngx_palloc(cf->pool, sizeof(ngx_http_complex_value_t));
@@ -1513,6 +1513,12 @@ ngx_http_script_file_code(ngx_http_script_engine_t *e)
     if (ngx_open_cached_file(clcf->open_file_cache, &path, &of, r->pool)
         != NGX_OK)
     {
+        if (of.err == 0) {
+            e->ip = ngx_http_script_exit;
+            e->status = NGX_HTTP_INTERNAL_SERVER_ERROR;
+            return;
+        }
+
         if (of.err != NGX_ENOENT
             && of.err != NGX_ENOTDIR
             && of.err != NGX_ENAMETOOLONG)

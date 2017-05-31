@@ -552,6 +552,11 @@ ngx_http_log_script_write(ngx_http_request_t *r, ngx_http_log_script_t *script,
     if (ngx_open_cached_file(llcf->open_file_cache, &log, &of, r->pool)
         != NGX_OK)
     {
+        if (of.err == 0) {
+            /* simulate successful logging */
+            return len;
+        }
+
         ngx_log_error(NGX_LOG_CRIT, r->connection->log, ngx_errno,
                       "%s \"%s\" failed", of.failed, log.data);
         /* simulate successful logging */
@@ -748,23 +753,10 @@ ngx_http_log_flush(ngx_open_file_t *file, ngx_log_t *log)
 static void
 ngx_http_log_flush_handler(ngx_event_t *ev)
 {
-    ngx_open_file_t     *file;
-    ngx_http_log_buf_t  *buffer;
-
     ngx_log_debug0(NGX_LOG_DEBUG_EVENT, ev->log, 0,
                    "http log buffer flush handler");
 
-    if (ev->timedout) {
-        ngx_http_log_flush(ev->data, ev->log);
-        return;
-    }
-
-    /* cancel the flush timer for graceful shutdown */
-
-    file = ev->data;
-    buffer = file->data;
-
-    buffer->event = NULL;
+    ngx_http_log_flush(ev->data, ev->log);
 }
 
 
