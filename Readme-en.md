@@ -12,25 +12,25 @@ version:1.13.0.1001
 
 >Changelog:  
 > Moules:
-upgrade lua-cjson to 2.1.0.5
-upgrade lua-redis-parser to 0.13
-upgrade redis2-nginx-module to 0.14
-upgrade drizzle-nginx-module to 0.1.10
-upgrade ngx-lua-module 0.10.9rc5
-upgrade memc-nginx-module to 0.18
-upgrade LuaJIT to 2.1-20170405
+- upgrade lua-cjson to 2.1.0.5
+- upgrade lua-redis-parser to 0.13
+- upgrade redis2-nginx-module to 0.14
+- upgrade drizzle-nginx-module to 0.1.10
+- upgrade ngx-lua-module 0.10.9rc5
+- upgrade memc-nginx-module to 0.18
+- upgrade LuaJIT to 2.1-20170405
 
 > Libs:
-upgrade lua-resty-core to 0.1.11
-upgrade lua-resty-limit-traffic to 0.03
-upgrade lua-resty-mysql to 0.19
-upgrade lua-resty-lock to 0.06
-upgrade lua-resty-lrucache to 0.06
+- upgrade lua-resty-core to 0.1.11
+- upgrade lua-resty-limit-traffic to 0.03
+- upgrade lua-resty-mysql to 0.19
+- upgrade lua-resty-lock to 0.06
+- upgrade lua-resty-lrucache to 0.06
 
-upgrade resty-cli to 0.17
+- upgrade resty-cli to 0.17
 
 > Nginx core:
-upgrade nginx core to 1.13.0
+- upgrade nginx core to 1.13.0
 
 
 
