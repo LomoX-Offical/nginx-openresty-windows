@@ -2,21 +2,36 @@
 [ 语言: [English](Readme-en.md), [中文](Readme.md)]
 
 ### 最新版本 ###
+版本号:1.13.0.1001
 
-版本号:1.11.9.1001
+32 位下载地址: http://pan.baidu.com/s/1qYNk6h2
+        
+64 位下载地址: http://pan.baidu.com/s/1gf89Mr5
 
-32 位下载地址: http://pan.baidu.com/s/1pLczj3H
+> 发布时间: 2017-05-31
 
-64 位下载地址: http://pan.baidu.com/s/1ciVqkY
+> 修改日志:  
+> 模块:
+更新 lua-cjson 到 2.1.0.5
+更新 lua-redis-parser 到 0.13
+更新 redis2-nginx-module 到 0.14
+更新 drizzle-nginx-module 到 0.1.10
+更新 ngx-lua-module 到 0.10.9rc5
+更新 memc-nginx-module 到 0.18
+更新 LuaJIT 到 2.1-20170405
 
->发布时间: 2017-02-06
+> 库:
+更新 lua-resty-core 到 0.1.11
+更新 lua-resty-limit-traffic 到 0.03
+更新 lua-resty-mysql 到 0.19
+更新 lua-resty-lock 到 0.06
+更新 lua-resty-lrucache 到 0.06
 
->修改日志:  
+更新 resty-cli 到 0.17
 
->Nginx:
-- 更新 nginx core 到版本 1.11.9
-- 更新 pcre 到版本 8.40
-- 更新 zlib 到版本 1.2.11
+> Nginx 核心:
+更新 nginx core 到 1.13.0
+
 
 
 
@@ -558,3 +573,19 @@ Version:1.9.7.1001
 
 >Nginx:
 - 添加更多的导出函数，使ngx目录下面的库文件可以正确引用，目前一共有82个函数被导出
+
+
+版本号:1.11.9.1001
+
+32 位下载地址: http://pan.baidu.com/s/1pLczj3H
+
+64 位下载地址: http://pan.baidu.com/s/1ciVqkY
+
+>发布时间: 2017-02-06
+
+>修改日志:  
+
+>Nginx:
+- 更新 nginx core 到版本 1.11.9
+- 更新 pcre 到版本 8.40
+- 更新 zlib 到版本 1.2.11

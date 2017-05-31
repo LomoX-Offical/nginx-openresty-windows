@@ -2,20 +2,37 @@
 [ languages: [中文](Readme.md), [English](Readme-en.md) ]
 
 ### lastest release ###
-version:1.11.9.1001
+version:1.13.0.1001
 
-32 bit: http://pan.baidu.com/s/1pLczj3H
+32 bit: http://pan.baidu.com/s/1qYNk6h2
         
-64 bit: http://pan.baidu.com/s/1ciVqkY
+64 bit: http://pan.baidu.com/s/1gf89Mr5
 
->Publish Time: 2017-02-06
+>Publish Time: 2017-05-31
 
 >Changelog:  
+> Moules:
+upgrade lua-cjson to 2.1.0.5
+upgrade lua-redis-parser to 0.13
+upgrade redis2-nginx-module to 0.14
+upgrade drizzle-nginx-module to 0.1.10
+upgrade ngx-lua-module 0.10.9rc5
+upgrade memc-nginx-module to 0.18
+upgrade LuaJIT to 2.1-20170405
 
->Nginx core:
-- update nginx core to 1.11.9
-- update pcre to 8.40
-- update zlib to version 1.2.11
+> Libs:
+upgrade lua-resty-core to 0.1.11
+upgrade lua-resty-limit-traffic to 0.03
+upgrade lua-resty-mysql to 0.19
+upgrade lua-resty-lock to 0.06
+upgrade lua-resty-lrucache to 0.06
+
+upgrade resty-cli to 0.17
+
+> Nginx core:
+upgrade nginx core to 1.13.0
+
+
 
 
 ### IOCP version (develop) ###
@@ -554,3 +571,19 @@ version:1.11.7.1002
 
 >Nginx core:
 - add more export functions, now 82 functions exported in total
+
+
+version:1.11.9.1001
+
+32 bit: http://pan.baidu.com/s/1pLczj3H
+        
+64 bit: http://pan.baidu.com/s/1ciVqkY
+
+>Publish Time: 2017-02-06
+
+>Changelog:  
+
+>Nginx core:
+- update nginx core to 1.11.9
+- update pcre to 8.40
+- update zlib to version 1.2.11
