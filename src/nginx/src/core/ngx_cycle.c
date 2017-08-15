@@ -400,10 +400,6 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
     cycle->log = &cycle->new_log;
     pool->log = &cycle->new_log;
 
-
-    /* create shared memory */
-    ngx_slab_module_init();
-
     part = &cycle->shared_memory.part;
     shm_zone = part->elts;
 
@@ -1125,9 +1121,7 @@ ngx_reopen_files(ngx_cycle_t *cycle, ngx_uid_t user)
         if (user != (ngx_uid_t) NGX_CONF_UNSET_UINT) {
             ngx_file_info_t  fi;
 
-            if (ngx_file_info((const char *) file[i].name.data, &fi)
-                == NGX_FILE_ERROR)
-            {
+            if (ngx_file_info(file[i].name.data, &fi) == NGX_FILE_ERROR) {
                 ngx_log_error(NGX_LOG_EMERG, cycle->log, ngx_errno,
                               ngx_file_info_n " \"%s\" failed",
                               file[i].name.data);
