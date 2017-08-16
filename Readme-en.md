@@ -2,35 +2,21 @@
 [ languages: [中文](Readme.md), [English](Readme-en.md) ]
 
 ### lastest release ###
-version:1.13.0.1001
+version:1.13.4.1001
 
-32 bit: http://pan.baidu.com/s/1qYNk6h2
+32 bit: http://pan.baidu.com/s/1c27yqA0
         
-64 bit: http://pan.baidu.com/s/1gf89Mr5
+64 bit: http://pan.baidu.com/s/1pLwS3Wn
 
->Publish Time: 2017-05-31
+>Publish Time: 2017-08-16
 
 >Changelog:  
-> Moules:
-- upgrade lua-cjson to 2.1.0.5
-- upgrade lua-redis-parser to 0.13
-- upgrade redis2-nginx-module to 0.14
-- upgrade drizzle-nginx-module to 0.1.10
-- upgrade ngx-lua-module 0.10.9rc5
-- upgrade memc-nginx-module to 0.18
-- upgrade LuaJIT to 2.1-20170405
-
 > Libs:
-- upgrade lua-resty-core to 0.1.11
-- upgrade lua-resty-limit-traffic to 0.03
-- upgrade lua-resty-mysql to 0.19
-- upgrade lua-resty-lock to 0.06
-- upgrade lua-resty-lrucache to 0.06
-
-- upgrade resty-cli to 0.17
+- upgrade openssl to 1.0.2l
+- upgrade pcre lib to 8.41
 
 > Nginx core:
-- upgrade nginx core to 1.13.0
+- upgrade nginx core to 1.13.4
 
 
 
@@ -587,3 +573,35 @@ version:1.11.9.1001
 - update nginx core to 1.11.9
 - update pcre to 8.40
 - update zlib to version 1.2.11
+
+
+
+version:1.13.0.1001
+
+32 bit: http://pan.baidu.com/s/1qYNk6h2
+        
+64 bit: http://pan.baidu.com/s/1gf89Mr5
+
+>Publish Time: 2017-05-31
+
+>Changelog:  
+> Moules:
+- upgrade lua-cjson to 2.1.0.5
+- upgrade lua-redis-parser to 0.13
+- upgrade redis2-nginx-module to 0.14
+- upgrade drizzle-nginx-module to 0.1.10
+- upgrade ngx-lua-module 0.10.9rc5
+- upgrade memc-nginx-module to 0.18
+- upgrade LuaJIT to 2.1-20170405
+
+> Libs:
+- upgrade lua-resty-core to 0.1.11
+- upgrade lua-resty-limit-traffic to 0.03
+- upgrade lua-resty-mysql to 0.19
+- upgrade lua-resty-lock to 0.06
+- upgrade lua-resty-lrucache to 0.06
+
+- upgrade resty-cli to 0.17
+
+> Nginx core:
+- upgrade nginx core to 1.13.0

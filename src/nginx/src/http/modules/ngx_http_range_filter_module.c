@@ -315,7 +315,7 @@ ngx_http_range_parse(ngx_http_request_t *r, ngx_http_range_filter_ctx_t *ctx,
                     return NGX_HTTP_RANGE_NOT_SATISFIABLE;
                 }
 
-                start = start * 10 + *p++ - '0';
+                start = start * 10 + (*p++ - '0');
             }
 
             while (*p == ' ') { p++; }
@@ -345,7 +345,7 @@ ngx_http_range_parse(ngx_http_request_t *r, ngx_http_range_filter_ctx_t *ctx,
                 return NGX_HTTP_RANGE_NOT_SATISFIABLE;
             }
 
-            end = end * 10 + *p++ - '0';
+            end = end * 10 + (*p++ - '0');
         }
 
         while (*p == ' ') { p++; }
@@ -355,7 +355,7 @@ ngx_http_range_parse(ngx_http_request_t *r, ngx_http_range_filter_ctx_t *ctx,
         }
 
         if (suffix) {
-            start = content_length - end;
+            start = (end < content_length) ? content_length - end : 0;
             end = content_length - 1;
         }
 
@@ -377,11 +377,18 @@ ngx_http_range_parse(ngx_http_request_t *r, ngx_http_range_filter_ctx_t *ctx,
             range->start = start;
             range->end = end;
 
+            if (size > NGX_MAX_OFF_T_VALUE - (end - start)) {
+                return NGX_HTTP_RANGE_NOT_SATISFIABLE;
+            }
+
             size += end - start;
 
             if (ranges-- == 0) {
                 return NGX_DECLINED;
             }
+
+        } else if (start == 0) {
+            return NGX_DECLINED;
         }
 
         if (*p++ != ',') {

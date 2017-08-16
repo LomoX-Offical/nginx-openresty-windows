@@ -1300,7 +1300,7 @@ ngx_ssl_handshake(ngx_connection_t *c)
 #ifdef SSL3_FLAGS_NO_RENEGOTIATE_CIPHERS
 
         /* initial handshake done, disable renegotiation (CVE-2009-3555) */
-        if (c->ssl->connection->s3) {
+        if (c->ssl->connection->s3 && SSL_is_server(c->ssl->connection)) {
             c->ssl->connection->s3->flags |= SSL3_FLAGS_NO_RENEGOTIATE_CIPHERS;
         }
 
@@ -3128,7 +3128,7 @@ ngx_ssl_session_ticket_keys(ngx_conf_t *cf, ngx_ssl_t *ssl, ngx_array_t *paths)
 {
     if (paths) {
         ngx_log_error(NGX_LOG_WARN, ssl->log, 0,
-                      "\"ssl_session_ticket_keys\" ignored, not supported");
+                      "\"ssl_session_ticket_key\" ignored, not supported");
     }
 
     return NGX_OK;

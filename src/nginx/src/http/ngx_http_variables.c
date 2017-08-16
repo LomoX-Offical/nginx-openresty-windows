@@ -38,6 +38,8 @@ static ngx_int_t ngx_http_variable_unknown_header_in(ngx_http_request_t *r,
     ngx_http_variable_value_t *v, uintptr_t data);
 static ngx_int_t ngx_http_variable_unknown_header_out(ngx_http_request_t *r,
     ngx_http_variable_value_t *v, uintptr_t data);
+static ngx_int_t ngx_http_variable_unknown_trailer_out(ngx_http_request_t *r,
+    ngx_http_variable_value_t *v, uintptr_t data);
 static ngx_int_t ngx_http_variable_request_line(ngx_http_request_t *r,
     ngx_http_variable_value_t *v, uintptr_t data);
 static ngx_int_t ngx_http_variable_cookie(ngx_http_request_t *r,
@@ -365,13 +367,16 @@ static ngx_http_variable_t  ngx_http_core_variables[] = {
     { ngx_string("sent_http_"), NULL, ngx_http_variable_unknown_header_out,
       0, NGX_HTTP_VAR_PREFIX, 0 },
 
+    { ngx_string("sent_trailer_"), NULL, ngx_http_variable_unknown_trailer_out,
+      0, NGX_HTTP_VAR_PREFIX, 0 },
+
     { ngx_string("cookie_"), NULL, ngx_http_variable_cookie,
       0, NGX_HTTP_VAR_PREFIX, 0 },
 
     { ngx_string("arg_"), NULL, ngx_http_variable_argument,
       0, NGX_HTTP_VAR_NOCACHEABLE|NGX_HTTP_VAR_PREFIX, 0 },
 
-    { ngx_null_string, NULL, NULL, 0, 0, 0 }
+      ngx_http_null_variable
 };
 
 
@@ -934,6 +939,16 @@ ngx_http_variable_unknown_header_out(ngx_http_request_t *r,
 }
 
 
+static ngx_int_t
+ngx_http_variable_unknown_trailer_out(ngx_http_request_t *r,
+    ngx_http_variable_value_t *v, uintptr_t data)
+{
+    return ngx_http_variable_unknown_header(v, (ngx_str_t *) data,
+                                            &r->headers_out.trailers.part,
+                                            sizeof("sent_trailer_") - 1);
+}
+
+
 ngx_int_t
 ngx_http_variable_unknown_header(ngx_http_variable_value_t *v, ngx_str_t *var,
     ngx_list_part_t *part, size_t prefix)
@@ -1448,17 +1463,15 @@ static ngx_int_t
 ngx_http_variable_is_args(ngx_http_request_t *r,
     ngx_http_variable_value_t *v, uintptr_t data)
 {
-    v->valid = 1;
-    v->no_cacheable = 0;
-    v->not_found = 0;
-
     if (r->args.len == 0) {
-        v->len = 0;
-        v->data = NULL;
+        *v = ngx_http_variable_null_value;
         return NGX_OK;
     }
 
     v->len = 1;
+    v->valid = 1;
+    v->no_cacheable = 0;
+    v->not_found = 0;
     v->data = (u_char *) "?";
 
     return NGX_OK;
@@ -1975,11 +1988,7 @@ ngx_http_variable_request_completion(ngx_http_request_t *r,
         return NGX_OK;
     }
 
-    v->len = 0;
-    v->valid = 1;
-    v->no_cacheable = 0;
-    v->not_found = 0;
-    v->data = (u_char *) "";
+    *v = ngx_http_variable_null_value;
 
     return NGX_OK;
 }

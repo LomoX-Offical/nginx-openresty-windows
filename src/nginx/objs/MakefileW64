@@ -263,6 +263,8 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/http/modules/ngx_http_autoindex_module.obj \
 	objs/src/http/modules/ngx_http_index_module.obj \
 	objs/src/http/modules/ngx_http_random_index_module.obj \
+	objs/src/http/modules/ngx_http_mirror_module.obj \
+	objs/src/http/modules/ngx_http_try_files_module.obj \
 	objs/src/http/modules/ngx_http_auth_request_module.obj \
 	objs/src/http/modules/ngx_http_auth_basic_module.obj \
 	objs/src/http/modules/ngx_http_access_module.obj \
@@ -555,6 +557,8 @@ objs/nginx.exe:	objs/src/core/nginx.obj \
 	objs/src/http/modules/ngx_http_autoindex_module.obj 
 	objs/src/http/modules/ngx_http_index_module.obj 
 	objs/src/http/modules/ngx_http_random_index_module.obj 
+	objs/src/http/modules/ngx_http_mirror_module.obj 
+	objs/src/http/modules/ngx_http_try_files_module.obj 
 	objs/src/http/modules/ngx_http_auth_request_module.obj 
 	objs/src/http/modules/ngx_http_auth_basic_module.obj 
 	objs/src/http/modules/ngx_http_access_module.obj 
@@ -1491,6 +1495,20 @@ objs/src/http/modules/ngx_http_random_index_module.obj:	$(CORE_DEPS) $(HTTP_DEPS
 	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
 		-Foobjs/src/http/modules/ngx_http_random_index_module.obj \
 		src/http/modules/ngx_http_random_index_module.c
+
+
+objs/src/http/modules/ngx_http_mirror_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
+	src/http/modules/ngx_http_mirror_module.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
+		-Foobjs/src/http/modules/ngx_http_mirror_module.obj \
+		src/http/modules/ngx_http_mirror_module.c
+
+
+objs/src/http/modules/ngx_http_try_files_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
+	src/http/modules/ngx_http_try_files_module.c
+	$(CC) -c $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) \
+		-Foobjs/src/http/modules/ngx_http_try_files_module.obj \
+		src/http/modules/ngx_http_try_files_module.c
 
 
 objs/src/http/modules/ngx_http_auth_request_module.obj:	$(CORE_DEPS) $(HTTP_DEPS) \
