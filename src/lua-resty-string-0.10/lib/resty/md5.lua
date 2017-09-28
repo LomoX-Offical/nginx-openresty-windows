@@ -4,7 +4,7 @@
 local ffi = require "ffi"
 local ffi_new = ffi.new
 local ffi_str = ffi.string
-local C = ffi.C
+local C =  (ffi.os=="Windows" and ffi.load'libeay32' or ffi.C)
 local setmetatable = setmetatable
 --local error = error
 
