@@ -2759,10 +2759,10 @@ objs/addon/src/ngx_http_redis2_handler.obj:	$(ADDON_DEPS) \
 		../redis2-nginx-module-0.14/src/ngx_http_redis2_handler.c
 
 
-objs/addon//ngx_http_redis2_reply.obj:	$(ADDON_DEPS) \
+objs/addon/src/ngx_http_redis2_reply.obj:	$(ADDON_DEPS) \
 	../redis2-nginx-module-0.14/src/ngx_http_redis2_reply.c
 	$(CC) -c $(CFLAGS)  $(ALL_INCS) \
-		-Foobjs/addon//ngx_http_redis2_reply.obj \
+		-Foobjs/addon/src/ngx_http_redis2_reply.obj \
 		../redis2-nginx-module-0.14/src/ngx_http_redis2_reply.c
 
 
