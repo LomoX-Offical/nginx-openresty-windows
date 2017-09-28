@@ -2,21 +2,33 @@
 [ 语言: [English](Readme-en.md), [中文](Readme.md)]
 
 ### 最新版本 ###
-版本号:1.13.4.1001
+版本号:1.13.5.1001
 
-32 位下载地址: http://pan.baidu.com/s/1c27yqA0
+32 位下载地址: http://pan.baidu.com/s/1c1JvOli
         
-64 位下载地址: http://pan.baidu.com/s/1pLwS3Wn
+64 位下载地址: http://pan.baidu.com/s/1dFbAAnZ
 
-> 发布时间: 2017-08-16
+> 发布时间: 2017-09-28
 
 > 修改日志:  
+> 模块:
+- 更新 echo-nginx-module 到 0.61
+- 更新 ngx_postgres 到 1.0
+- 更新 ngx_lua_upstream 到 0.07
+- 更新 ngx-lua-module 到 0.10.10
+- 更新 LuaJIT 到 2.1-20170808
+
 > 库:
-- 更新 openssl 到 1.0.2l
-- 更新 pcre 到 8.41
+- 更新 lua-resty-core 到 0.1.12
+- 更新 lua-resty-dns 到 0.19
+- 更新 lua-resty-limit-traffic 到 0.04
+- 更新 lua-resty-lock 到 0.07
+- 更新 lua-resty-mysql 到 0.20
+- 更新 lua-resty-string 到 0.10
+- 更新 lua-resty-upstream-healthcheck 到 0.05
 
 > Nginx 核心:
-- 更新 nginx core 到 1.13.4
+- 更新 nginx core 到 1.13.5
 
 
 
@@ -605,3 +617,21 @@ Version:1.9.7.1001
 
 > Nginx 核心:
 - 更新 nginx core 到 1.13.0
+
+
+版本号:1.13.4.1001
+
+32 位下载地址: http://pan.baidu.com/s/1c27yqA0
+        
+64 位下载地址: http://pan.baidu.com/s/1pLwS3Wn
+
+> 发布时间: 2017-08-16
+
+> 修改日志:  
+> 库:
+- 更新 openssl 到 1.0.2l
+- 更新 pcre 到 8.41
+
+> Nginx 核心:
+- 更新 nginx core 到 1.13.4
+

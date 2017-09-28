@@ -47,6 +47,7 @@ int32_t LJ_FASTCALL lj_str_cmp(GCstr *a, GCstr *b)
   return (int32_t)(a->len - b->len);
 }
 
+#ifndef LUAJIT_USE_VALGRIND
 /* Fast string data comparison. Caveat: unaligned access to 1st string! */
 static LJ_AINLINE int str_fastcmp(const char *a, const char *b, MSize len)
 {
@@ -67,6 +68,7 @@ static LJ_AINLINE int str_fastcmp(const char *a, const char *b, MSize len)
   } while (i < len);
   return 0;
 }
+#endif
 
 /* Find fixed string p inside string s. */
 const char *lj_str_find(const char *s, const char *p, MSize slen, MSize plen)
@@ -128,11 +130,6 @@ void lj_str_resize(lua_State *L, MSize newmask)
   g->strhash = newhash;
 }
 
-#include "x64/src/lj_str_hash_x64.h"
-
-#if defined(LJ_ARCH_STR_HASH)
-#define LJ_STR_HASH LJ_ARCH_STR_HASH
-#else
 static MSize
 lj_str_original_hash(const char *str, size_t lenx) {
   MSize len = (MSize)lenx;
@@ -160,6 +157,17 @@ lj_str_original_hash(const char *str, size_t lenx) {
 
   return h;
 }
+
+MSize
+lj_str_indep_hash(GCstr *str) {
+  return lj_str_original_hash(strdata(str), str->len);
+}
+
+#include "x64/src/lj_str_hash_x64.h"
+
+#if defined(LJ_ARCH_STR_HASH)
+#define LJ_STR_HASH LJ_ARCH_STR_HASH
+#else
 #define LJ_STR_HASH lj_str_original_hash
 #endif
 

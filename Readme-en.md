@@ -2,21 +2,36 @@
 [ languages: [中文](Readme.md), [English](Readme-en.md) ]
 
 ### lastest release ###
-version:1.13.4.1001
+version:1.13.5.1001
 
-32 bit: http://pan.baidu.com/s/1c27yqA0
+32 bit: http://pan.baidu.com/s/1c1JvOli
         
-64 bit: http://pan.baidu.com/s/1pLwS3Wn
+64 bit: http://pan.baidu.com/s/1dFbAAnZ
 
->Publish Time: 2017-08-16
+>Publish Time: 2017-09-28
 
 >Changelog:  
+> Moules:
+- upgrade echo-nginx-module to 0.61
+- upgrade ngx_postgres to 1.0
+- upgrade ngx_lua_upstream to 0.07
+- upgrade ngx-lua-module to 0.10.10
+- upgrade LuaJIT to 2.1-20170808
+
 > Libs:
-- upgrade openssl to 1.0.2l
-- upgrade pcre lib to 8.41
+- upgrade lua-resty-core to 0.1.12
+- upgrade lua-resty-dns to 0.19
+- upgrade lua-resty-limit-traffic to 0.04
+- upgrade lua-resty-lock to 0.07
+- upgrade lua-resty-mysql to 0.20
+- upgrade lua-resty-string to 0.10
+- upgrade lua-resty-upstream-healthcheck to 0.05
+
+- upgrade resty-cli to 0.19
+
 
 > Nginx core:
-- upgrade nginx core to 1.13.4
+- upgrade nginx core to 1.13.5
 
 
 
@@ -605,3 +620,21 @@ version:1.13.0.1001
 
 > Nginx core:
 - upgrade nginx core to 1.13.0
+
+
+
+version:1.13.4.1001
+
+32 bit: http://pan.baidu.com/s/1c27yqA0
+        
+64 bit: http://pan.baidu.com/s/1pLwS3Wn
+
+>Publish Time: 2017-08-16
+
+>Changelog:  
+> Libs:
+- upgrade openssl to 1.0.2l
+- upgrade pcre lib to 8.41
+
+> Nginx core:
+- upgrade nginx core to 1.13.4

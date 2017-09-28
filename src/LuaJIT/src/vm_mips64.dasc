@@ -1980,6 +1980,38 @@ static void build_subroutines(BuildCtx *ctx)
   |1:
   |  jr ra
   |.  move CRET1, r0
+  |
+  |// FP number to int conversion with a check for soft-float.
+  |// Modifies CARG1, CRET1, CRET2, TMP0, AT.
+  |->vm_tointg:
+  |.if JIT
+  |  dsll CRET2, CARG1, 1
+  |  beqz CRET2, >2
+  |.  li TMP0, 1076
+  |  dsrl AT, CRET2, 53
+  |  dsubu TMP0, TMP0, AT
+  |  sltiu AT, TMP0, 54
+  |  beqz AT, >1
+  |.  dextm CRET2, CRET2, 0, 20
+  |  dinsu CRET2, AT, 21, 21
+  |  slt AT, CARG1, r0
+  |  dsrlv CRET1, CRET2, TMP0
+  |  dsubu CARG1, r0, CRET1
+  |  movn CRET1, CARG1, AT
+  |  li CARG1, 64
+  |  subu TMP0, CARG1, TMP0
+  |  dsllv CRET2, CRET2, TMP0	// Integer check.
+  |  sextw AT, CRET1
+  |  xor AT, CRET1, AT		// Range check.
+  |  jr ra
+  |.  movz CRET2, AT, CRET2
+  |1:
+  |  jr ra
+  |.  li CRET2, 1
+  |2:
+  |  jr ra
+  |.  move CRET1, r0
+  |.endif
   |.endif
   |
   |.macro .ffunc_bit, name
@@ -2327,7 +2359,7 @@ static void build_subroutines(BuildCtx *ctx)
   |->vm_profhook:			// Dispatch target for profiler hook.
 #if LJ_HASPROFILE
   |  load_got lj_dispatch_profile
-  |   sd MULTRES, SAVE_MULTRES
+  |   sw MULTRES, SAVE_MULTRES
   |  move CARG2, PC
   |   sd BASE, L->base
   |  call_intern lj_dispatch_profile	// (lua_State *L, const BCIns *pc)
@@ -2423,7 +2455,7 @@ static void build_subroutines(BuildCtx *ctx)
   |    .FPU lui TMP3, 0x59c0		// TOBIT = 2^52 + 2^51 (float).
   |  dsll MULTRES, CRET1, 3
   |  cleartp LFUNC:RB
-  |  sd MULTRES, SAVE_MULTRES
+  |  sw MULTRES, SAVE_MULTRES
   |    li TISNIL, LJ_TNIL
   |     li TISNUM, LJ_TISNUM		// Setup type comparison constants.
   |    .FPU mtc1 TMP3, TOBIT
@@ -2664,6 +2696,23 @@ static void build_subroutines(BuildCtx *ctx)
   |  jr ra
   |.  li CRET1, 0
   |.endif
+  |
+  |.macro sfmin_max, name, intins
+  |->vm_sf .. name:
+  |.if JIT and not FPU
+  |  move TMP2, ra
+  |  bal ->vm_sfcmpolt
+  |.  nop
+  |  move ra, TMP2
+  |  move TMP0, CRET1
+  |  move CRET1, CARG1
+  |  jr ra
+  |.  intins CRET1, CARG2, TMP0
+  |.endif
+  |.endmacro
+  |
+  |  sfmin_max min, movz
+  |  sfmin_max max, movn
   |
   |//-----------------------------------------------------------------------
   |//-- Miscellaneous functions --------------------------------------------
@@ -3660,7 +3709,7 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |   ld CARG2, UPVAL:RB->v
     |  andi TMP3, TMP3, LJ_GC_BLACK	// isblack(uv)
     |  lbu TMP0, UPVAL:RB->closed
-    |   gettp TMP2, RD
+    |   gettp TMP2, CRET1
     |   sd CRET1, 0(CARG2)
     |  li AT, LJ_GC_BLACK|1
     |  or TMP3, TMP3, TMP0
@@ -3672,8 +3721,8 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |2:  // Check if new value is collectable.
     |  sltiu AT, TMP2, LJ_TISGCV - (LJ_TNUMX+1)
     |  beqz AT, <1			// tvisgcv(v)
-    |.  cleartp GCOBJ:TMP1, RB
-    |  lbu TMP3, GCOBJ:TMP1->gch.marked
+    |.  cleartp GCOBJ:CRET1, CRET1
+    |  lbu TMP3, GCOBJ:CRET1->gch.marked
     |  andi TMP3, TMP3, LJ_GC_WHITES	// iswhite(v)
     |  beqz TMP3, <1
     |.  load_got lj_gc_barrieruv

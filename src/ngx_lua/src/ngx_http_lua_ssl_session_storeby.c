@@ -105,7 +105,7 @@ ngx_http_lua_ssl_sess_store_by_lua(ngx_conf_t *cf, ngx_command_t *cmd,
 
     dd("enter");
 
-    /*  must specifiy a content handler */
+    /*  must specify a content handler */
     if (cmd->post == NULL) {
         return NGX_CONF_ERROR;
     }
@@ -351,7 +351,9 @@ ngx_http_lua_ssl_sess_store_by_chunk(lua_State *L, ngx_http_request_t *r)
     if (ctx == NULL) {
         ctx = ngx_http_lua_create_ctx(r);
         if (ctx == NULL) {
-            return NGX_HTTP_INTERNAL_SERVER_ERROR;
+            rc = NGX_ERROR;
+            ngx_http_lua_finalize_request(r, rc);
+            return rc;
         }
 
     } else {
@@ -386,7 +388,7 @@ ngx_http_lua_ssl_sess_store_by_chunk(lua_State *L, ngx_http_request_t *r)
     dd("rc == %d", (int) rc);
 
     if (rc != 0) {
-        /*  error occured when running loaded code */
+        /*  error occurred when running loaded code */
         err_msg = (u_char *) lua_tolstring(L, -1, &len);
 
         if (err_msg == NULL) {
