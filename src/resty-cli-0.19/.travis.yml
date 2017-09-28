@@ -1,0 +1,57 @@
+sudo: required
+dist: trusty
+
+os: linux
+
+language: c
+
+compiler:
+  - gcc
+
+addons:
+  apt:
+    packages:
+    - axel
+    - cpanminus
+    - libtest-base-perl
+    - libtext-diff-perl
+    - liburi-perl
+    - libwww-perl
+    - libtest-longstring-perl
+    - liblist-moreutils-perl
+    - libgd-dev
+    - libipc-run-perl
+
+env:
+  global:
+    - JOBS=3
+    - NGX_BUILD_JOBS=$JOBS
+    - LUAJIT_PREFIX=/opt/luajit21
+    - LUAJIT_LIB=$LUAJIT_PREFIX/lib
+    - LUAJIT_INC=$LUAJIT_PREFIX/include/luajit-2.1
+    - LD_LIBRARY_PATH=$LUAJIT_LIB:$LD_LIBRARY_PATH
+    - TEST_NGINX_SLEEP=0.003
+  matrix:
+    - NGINX_VERSION=1.11.2
+
+before_install:
+  - sudo apt-get install -y cpanminus
+  - sudo cpanm --notest Test::Base
+
+install:
+  - git clone https://github.com/openresty/openresty.git ../openresty
+  - git clone https://github.com/openresty/lua-resty-core.git ../lua-resty-core
+  - git clone https://github.com/openresty/nginx-devel-utils.git
+  - git clone https://github.com/openresty/lua-nginx-module.git ../lua-nginx-module
+  - git clone https://github.com/openresty/no-pool-nginx.git ../no-pool-nginx
+  - git clone -b v2.1-agentzh https://github.com/openresty/luajit2.git
+
+script:
+  - cd luajit2/
+  - make -j$JOBS CCDEBUG=-g Q= PREFIX=$LUAJIT_PREFIX CC=$CC XCFLAGS='-DLUA_USE_APICHECK -DLUA_USE_ASSERT -msse4.2'
+  - sudo make install PREFIX=$LUAJIT_PREFIX
+  - cd ..
+  - export PATH=$PATH:`pwd`/nginx-devel-utils
+  - ngx-build $NGINX_VERSION --with-ipv6 --with-http_realip_module --with-http_ssl_module --add-module=../lua-nginx-module --with-debug
+  - export PATH=$PATH:`pwd`/work/nginx/sbin
+  - prove -r t

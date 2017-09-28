@@ -218,7 +218,8 @@ static void emit_asm_label(BuildCtx *ctx, const char *name, int size, int isfunc
   case BUILD_machasm:
     fprintf(ctx->fp,
       "\n\t.private_extern %s\n"
-      "%s:\n", name, name);
+      "\t.no_dead_strip %s\n"
+      "%s:\n", name, name, name);
     break;
   default:
     break;
@@ -337,7 +338,7 @@ void emit_asm(BuildCtx *ctx)
 #if !(LJ_TARGET_PS3 || LJ_TARGET_PSVITA)
     fprintf(ctx->fp, "\t.section .note.GNU-stack,\"\"," ELFASM_PX "progbits\n");
 #endif
-#if LJ_TARGET_PPC && !LJ_TARGET_PS3
+#if LJ_TARGET_PPC && !LJ_TARGET_PS3 && !LJ_ABI_SOFTFP
     /* Hard-float ABI. */
     fprintf(ctx->fp, "\t.gnu_attribute 4, 1\n");
 #endif

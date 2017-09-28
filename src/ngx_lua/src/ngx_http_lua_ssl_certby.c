@@ -193,6 +193,7 @@ ngx_http_lua_ssl_cert_handler(ngx_ssl_conn_t *ssl_conn, void *data)
     ngx_http_lua_srv_conf_t         *lscf;
     ngx_http_core_loc_conf_t        *clcf;
     ngx_http_lua_ssl_ctx_t          *cctx;
+    ngx_http_core_srv_conf_t        *cscf;
 
     c = ngx_ssl_get_connection(ssl_conn);
 
@@ -297,6 +298,16 @@ ngx_http_lua_ssl_cert_handler(ngx_ssl_conn_t *ssl_conn, void *data)
     L = ngx_http_lua_get_lua_vm(r, NULL);
 
     c->log->action = "loading SSL certificate by lua";
+
+    if (lscf->srv.ssl_cert_handler == NULL) {
+        cscf = ngx_http_get_module_srv_conf(r, ngx_http_core_module);
+
+        ngx_log_error(NGX_LOG_ALERT, c->log, 0,
+                      "no ssl_certificate_by_lua* defined in "
+                      "server %V", &cscf->server_name);
+
+        goto failed;
+    }
 
     rc = lscf->srv.ssl_cert_handler(r, lscf, L);
 
@@ -453,7 +464,9 @@ ngx_http_lua_ssl_cert_by_chunk(lua_State *L, ngx_http_request_t *r)
     if (ctx == NULL) {
         ctx = ngx_http_lua_create_ctx(r);
         if (ctx == NULL) {
-            return NGX_HTTP_INTERNAL_SERVER_ERROR;
+            rc = NGX_ERROR;
+            ngx_http_lua_finalize_request(r, rc);
+            return rc;
         }
 
     } else {
@@ -470,7 +483,9 @@ ngx_http_lua_ssl_cert_by_chunk(lua_State *L, ngx_http_request_t *r)
         ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
                       "lua: failed to create new coroutine to handle request");
 
-        return NGX_HTTP_INTERNAL_SERVER_ERROR;
+        rc = NGX_ERROR;
+        ngx_http_lua_finalize_request(r, rc);
+        return rc;
     }
 
     /*  move code closure to new coroutine */
@@ -494,7 +509,9 @@ ngx_http_lua_ssl_cert_by_chunk(lua_State *L, ngx_http_request_t *r)
     if (ctx->cleanup == NULL) {
         cln = ngx_http_cleanup_add(r, 0);
         if (cln == NULL) {
-            return NGX_HTTP_INTERNAL_SERVER_ERROR;
+            rc = NGX_ERROR;
+            ngx_http_lua_finalize_request(r, rc);
+            return rc;
         }
 
         cln->handler = ngx_http_lua_request_cleanup_handler;
