@@ -4,9 +4,9 @@
 ### lastest release ###
 version:1.13.5.1001
 
-32 bit: http://pan.baidu.com/s/1dFbAAnZ
+32 bit: http://pan.baidu.com/s/1c1JvOli
         
-64 bit: http://pan.baidu.com/s/1c1JvOli
+64 bit: http://pan.baidu.com/s/1dFbAAnZ
 
 >Publish Time: 2017-09-28
 

@@ -4,9 +4,9 @@
 ### 最新版本 ###
 版本号:1.13.5.1001
 
-32 位下载地址: http://pan.baidu.com/s/1dFbAAnZ
+32 位下载地址: http://pan.baidu.com/s/1c1JvOli
         
-64 位下载地址: http://pan.baidu.com/s/1c1JvOli
+64 位下载地址: http://pan.baidu.com/s/1dFbAAnZ
 
 > 发布时间: 2017-09-28
 
